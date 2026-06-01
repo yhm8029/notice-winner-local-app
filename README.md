@@ -105,6 +105,27 @@ python -m venv .venv
 
 - open `http://127.0.0.1:8000/app/` for the built-in frontend console
 
+## Local Conversion Backup Inventory
+
+Before converting the hosted app to local SQLite/storage, create a cloud data inventory.
+
+Create `.env.local-backup` locally. Do not commit it.
+
+```text
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=...
+EC2_SSH_TARGET=ubuntu@your-ec2-host
+EC2_BACKUP_PATHS=/home/ubuntu/notice-winner-pipeline-web/output,/home/ubuntu/notice-winner-pipeline-web/input,/home/ubuntu/notice-winner-pipeline-web/logs
+```
+
+Run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/local_backup_inventory.ps1
+```
+
+Outputs are written under `backups/supabase/<timestamp>/` and `backups/ec2/<timestamp>/`. The Supabase manifest contains table row counts and checksums. The EC2 manifest contains app-owned file paths, sizes, and modified timestamps. `artifact_reconciliation.json` reports whether `run_artifacts.storage_path` rows have matching EC2 files.
+
 ## HTTP Smoke Test
 
 ```powershell

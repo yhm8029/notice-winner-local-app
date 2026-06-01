@@ -756,7 +756,9 @@ def _quick_related_notice_search(
     backend_api_app = _backend_api_app
     source_runs = backend_api_app._project_source_runs(project)
     queries = _build_related_notice_collect_queries(project, source_runs)
-    query = next((str(value or "").strip() for value in queries if str(value or "").strip()), "")
+    query = str(project.get("project_search_name") or "").strip()
+    if not query:
+        query = next((str(value or "").strip() for value in queries if str(value or "").strip()), "")
     if not query:
         query = str(project.get("project_search_name") or project.get("project_name") or "").strip()
     date_ranges = _build_quick_related_notice_date_ranges(project)

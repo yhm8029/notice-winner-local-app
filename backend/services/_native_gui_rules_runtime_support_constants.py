@@ -44,5 +44,8 @@ CONTACT_RESULT_CUE_PAT = re.compile(r"(?:결과공고|당선자|당선작|입상
 CONTACT_GUIDELINE_CUE_PAT = re.compile(r"(?:설계지침서|과업지시서|지침서)", re.I)
 SCHOOL_ORG_CUE_PAT = re.compile(r"(?:학교|교육청|교육지원청|유치원|대학교|대학병원)")
 OWNER_SUBORDINATE_DEPT_CUE_PAT = re.compile(r"(?:과|팀|실|국|처|센터|본부|지원청|추진단|행정실)$")
-CONTACT_OTHER_SENTENCE_FRAGMENT_PAT = re.compile(r"(?:명이\s*변경되었을\s*경우|후속\s*기타\s*공모전\s*진행|등록\s*후\s*통해|공모전을\s*분석하고\s*공정)", re.I)
+CONTACT_OTHER_SENTENCE_FRAGMENT_PAT = re.compile(
+    r"(?:명이\s*변경되었을\s*경우|후속\s*기타\s*공모전\s*진행|등록\s*후\s*통해|(?:공모전|공모안)\s*을?\s*분석하고\s*공정)",
+    re.I,
+)
 MANUAL_FIELD_OVERRIDES: dict[str, dict[str, str]] = {}
