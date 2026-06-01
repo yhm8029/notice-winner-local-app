@@ -18,6 +18,9 @@ if ($ReportsRoot) {
     $env:REPORTS_ROOT = $ReportsRoot
 }
 
+$env:LOCAL_APP_DISABLE_LOGIN = "1"
+$env:PHASE2_AUTH_ENABLED = "0"
+
 $url = "http://$BindHost`:$Port/app/"
 if ($OpenBrowser) {
     Start-Process $url | Out-Null

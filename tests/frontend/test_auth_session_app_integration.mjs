@@ -28,7 +28,7 @@ function loadCreateAuthUiController() {
 function loadCreateAuthController() {
   const source = fs.readFileSync(authControllerPath, "utf8")
     .replace("export function createAuthController", "function createAuthController");
-  const context = vm.createContext({ console, window: {}, globalThis: {} });
+  const context = vm.createContext({ console, window: {}, globalThis: {}, URLSearchParams });
   return vm.runInContext(
     `(function () { ${source}; return createAuthController; })()`,
     context,
@@ -934,6 +934,109 @@ test("createAuthController owns the auth bootstrap and invitation acceptance flo
     ["renderAuthUi"],
     ["renderAuthUi"],
   ]);
+});
+
+test("createAuthController skips session API calls for the local admin session", async () => {
+  const stateRef = {
+    uiMode: "admin",
+    consoleInitialized: true,
+    auth: {
+      localSession: true,
+      enabled: true,
+      checked: true,
+      checking: false,
+      authenticated: true,
+      authorized: true,
+      mode: "sign_in",
+      inviteToken: "",
+      invitationPreview: null,
+      invitationPreviewLoading: false,
+      invitationPreviewError: "",
+      user: {
+        display_name: "Local Admin",
+        email: "local-admin@example.local",
+        organization_name: "Local",
+        role: "platform_admin",
+      },
+      message: "",
+      bootstrapEmail: "",
+    },
+  };
+  const { initializeAuthGate, refreshAuthSessionState, context, apiCalls } = loadAuthController({
+    state: stateRef,
+    api: async (endpoint) => {
+      apiCalls.push([endpoint, {}]);
+      throw new Error(`unexpected endpoint: ${endpoint}`);
+    },
+    syncUiModeChrome: () => true,
+    canUseAdminMode: () => true,
+  });
+
+  assert.equal(await initializeAuthGate(), true);
+  assert.equal(await refreshAuthSessionState({ silent: true, force: true }), null);
+
+  assert.deepEqual(apiCalls, []);
+  assert.equal(context.state.auth.enabled, true);
+  assert.equal(context.state.auth.checked, true);
+  assert.equal(context.state.auth.checking, false);
+  assert.equal(context.state.auth.authenticated, true);
+  assert.equal(context.state.auth.authorized, true);
+  assert.equal(context.state.auth.user.role, "platform_admin");
+});
+
+test("createAuthController ignores Supabase hash imports for the local admin session", async () => {
+  const stateRef = {
+    uiMode: "admin",
+    consoleInitialized: true,
+    auth: {
+      localSession: true,
+      enabled: true,
+      checked: true,
+      checking: false,
+      authenticated: true,
+      authorized: true,
+      mode: "sign_in",
+      inviteToken: "",
+      invitationPreview: null,
+      invitationPreviewLoading: false,
+      invitationPreviewError: "",
+      user: {
+        display_name: "Local Admin",
+        email: "local-admin@example.local",
+        organization_name: "Local",
+        role: "platform_admin",
+      },
+      message: "",
+      bootstrapEmail: "",
+    },
+  };
+  const { importAuthSessionFromLocationHash, context, apiCalls } = loadAuthController({
+    state: stateRef,
+    window: {
+      location: {
+        hash: "#access_token=stale-supabase-token&refresh_token=stale-refresh",
+        pathname: "/app/",
+        search: "",
+      },
+      history: {
+        replaceState: () => {},
+      },
+      setTimeout,
+      clearTimeout,
+    },
+    api: async (endpoint) => {
+      apiCalls.push([endpoint, {}]);
+      throw new Error(`unexpected endpoint: ${endpoint}`);
+    },
+  });
+
+  await importAuthSessionFromLocationHash();
+
+  assert.deepEqual(apiCalls, []);
+  assert.equal(context.state.auth.localSession, true);
+  assert.equal(context.state.auth.authenticated, true);
+  assert.equal(context.state.auth.authorized, true);
+  assert.equal(context.state.auth.user.role, "platform_admin");
 });
 
 test("applyAuthSession triggers a renderAuth=false transition when the ui mode changes", () => {

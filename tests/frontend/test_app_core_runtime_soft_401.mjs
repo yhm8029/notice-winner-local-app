@@ -90,3 +90,32 @@ test("tracker change event 401 does not clear auth state", async () => {
   assert.deepEqual(refreshCalls, []);
   assert.deepEqual(renderCalls, []);
 });
+
+test("local admin session 401 does not clear or refresh auth state", async () => {
+  const { api, state, renderCalls, refreshCalls } = loadCoreApiHelper({
+    fetchImpl: async () => ({
+      ok: false,
+      status: 401,
+      statusText: "Unauthorized",
+      url: "/api/protected",
+      headers: {
+        get: () => "application/json",
+      },
+      json: async () => ({ error: { message: "session expired" } }),
+    }),
+    refreshResult: null,
+  });
+  state.auth.localSession = true;
+
+  await assert.rejects(
+    api("/api/protected"),
+    (error) => error?.name === "ApiRequestError" && error?.status === 401,
+  );
+
+  assert.equal(state.auth.authenticated, true);
+  assert.equal(state.auth.authorized, true);
+  assert.deepEqual(state.auth.user, { id: "user-1" });
+  assert.equal(state.auth.message, "");
+  assert.deepEqual(refreshCalls, []);
+  assert.deepEqual(renderCalls, []);
+});
