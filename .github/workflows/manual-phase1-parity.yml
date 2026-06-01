@@ -1,0 +1,78 @@
+name: Manual Phase1 Parity
+
+on:
+  workflow_dispatch:
+    inputs:
+      gui_source_root:
+        description: "Optional local GUI source root on the self-hosted runner"
+        required: false
+        default: ""
+        type: string
+      seed_csv:
+        description: "Optional seed CSV path on the self-hosted runner"
+        required: false
+        default: ""
+        type: string
+      seed_limit:
+        description: "Artifact diff seed limit"
+        required: true
+        default: "3"
+        type: string
+      start_date:
+        description: "Artifact diff start date (YYYYMMDD)"
+        required: true
+        default: "20250101"
+        type: string
+      end_date:
+        description: "Artifact diff end date (YYYYMMDD)"
+        required: true
+        default: "20250228"
+        type: string
+
+jobs:
+  parity:
+    runs-on:
+      - self-hosted
+      - windows
+
+    steps:
+      - name: Checkout web repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create venv and install dependencies
+        shell: powershell
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --upgrade pip
+          .\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+
+      - name: Run manual parity reports
+        shell: powershell
+        env:
+          GUI_PARITY_SOURCE_ROOT: ${{ inputs.gui_source_root }}
+        run: |
+          $args = @(
+            "-SeedLimit", "${{ inputs.seed_limit }}",
+            "-StartDate", "${{ inputs.start_date }}",
+            "-EndDate", "${{ inputs.end_date }}"
+          )
+          if ("${{ inputs.gui_source_root }}") {
+            $args += @("-GuiSourceRoot", "${{ inputs.gui_source_root }}")
+          }
+          if ("${{ inputs.seed_csv }}") {
+            $args += @("-SeedCsv", "${{ inputs.seed_csv }}")
+          }
+          .\scripts\run_phase1_reports.ps1 @args
+
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-parity-reports
+          path: |
+            output/phase1-equivalence-report.json
+            output/phase1-artifact-diff-report.json

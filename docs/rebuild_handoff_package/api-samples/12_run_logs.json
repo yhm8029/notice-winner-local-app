@@ -1,0 +1,232 @@
+{
+  "method": "GET",
+  "path": "/api/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/logs",
+  "status": 200,
+  "body": {
+    "items": [
+      {
+        "id": 22,
+        "level": "info",
+        "stage": "finalize",
+        "message": "related notices precomputed",
+        "meta": {
+          "project_count": 2,
+          "item_count": 4,
+          "artifact_file_name": "project_tracker_related_notices.json"
+        },
+        "created_at": "2026-04-30T02:32:55.452257Z"
+      },
+      {
+        "id": 21,
+        "level": "info",
+        "stage": "finalize",
+        "message": "related notices precomputed",
+        "meta": {
+          "project_count": 2,
+          "item_count": 4,
+          "artifact_file_name": "project_tracker_related_notices.json"
+        },
+        "created_at": "2026-04-30T02:32:55.452150Z"
+      },
+      {
+        "id": 19,
+        "level": "info",
+        "stage": "finalize",
+        "message": "related notice precompute started",
+        "meta": {
+          "seed_rows": 2
+        },
+        "created_at": "2026-04-30T02:32:55.431665Z"
+      },
+      {
+        "id": 18,
+        "level": "info",
+        "stage": "finalize",
+        "message": "related notice precompute started",
+        "meta": {
+          "seed_rows": 2
+        },
+        "created_at": "2026-04-30T02:32:55.428770Z"
+      },
+      {
+        "id": 17,
+        "level": "info",
+        "stage": "finalize",
+        "message": "related notices precomputed",
+        "meta": {
+          "project_count": 2,
+          "item_count": 4,
+          "artifact_file_name": "project_tracker_related_notices.json"
+        },
+        "created_at": "2026-04-30T02:32:55.427190Z"
+      },
+      {
+        "id": 14,
+        "level": "info",
+        "stage": "finalize",
+        "message": "related notice precompute started",
+        "meta": {
+          "seed_rows": 2
+        },
+        "created_at": "2026-04-30T02:32:55.406906Z"
+      },
+      {
+        "id": 13,
+        "level": "info",
+        "stage": "finalize",
+        "message": "related notice precompute queued",
+        "meta": {
+          "queued": true
+        },
+        "created_at": "2026-04-30T02:32:55.406485Z"
+      },
+      {
+        "id": 12,
+        "level": "info",
+        "stage": "finalize",
+        "message": "auto tracker_export queued",
+        "meta": {
+          "child_run_id": "826a7520-3369-472d-b9fd-30546cb41236",
+          "created": true
+        },
+        "created_at": "2026-04-30T02:32:55.406156Z"
+      },
+      {
+        "id": 11,
+        "level": "info",
+        "stage": "finalize",
+        "message": "project_tracker finished successfully",
+        "meta": {
+          "winner_csv_rows": 2,
+          "export_backend": "synthetic",
+          "runtime_profile": "web_native"
+        },
+        "created_at": "2026-04-30T02:32:55.405713Z"
+      },
+      {
+        "id": 10,
+        "level": "info",
+        "stage": "finalize",
+        "message": "finalize stage completed",
+        "meta": {
+          "progress_current": 5,
+          "progress_total": 5
+        },
+        "created_at": "2026-04-30T02:32:55.393083Z"
+      },
+      {
+        "id": 9,
+        "level": "info",
+        "stage": "export",
+        "message": "export stage completed",
+        "meta": {
+          "progress_current": 4,
+          "progress_total": 5,
+          "export_backend": "synthetic",
+          "winner_csv_rows": 2,
+          "post_collect_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_posts_files_v1_1.csv",
+          "artifact_file_name": "project_tracker_posts_files_v1_1.csv"
+        },
+        "created_at": "2026-04-30T02:32:55.372449Z"
+      },
+      {
+        "id": 8,
+        "level": "info",
+        "stage": "export",
+        "message": "export stage started",
+        "meta": {
+          "progress_current": 4,
+          "progress_total": 5
+        },
+        "created_at": "2026-04-30T02:32:55.350870Z"
+      },
+      {
+        "id": 7,
+        "level": "info",
+        "stage": "rescan",
+        "message": "rescan stage completed",
+        "meta": {
+          "progress_current": 3,
+          "progress_total": 5,
+          "internal_nav_rows": 2,
+          "rescan_backend": "synthetic",
+          "internal_nav_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_internal_search_urls_v1_1.csv"
+        },
+        "created_at": "2026-04-30T02:32:55.310713Z"
+      },
+      {
+        "id": 6,
+        "level": "info",
+        "stage": "rescan",
+        "message": "rescan stage started",
+        "meta": {
+          "progress_current": 3,
+          "progress_total": 5
+        },
+        "created_at": "2026-04-30T02:32:55.307881Z"
+      },
+      {
+        "id": 5,
+        "level": "info",
+        "stage": "filter",
+        "message": "filter stage completed",
+        "meta": {
+          "progress_current": 2,
+          "progress_total": 5,
+          "candidate_rows": 2,
+          "filter_backend": "synthetic",
+          "candidate_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_candidate_collection_v1_1.csv"
+        },
+        "created_at": "2026-04-30T02:32:55.272156Z"
+      },
+      {
+        "id": 4,
+        "level": "info",
+        "stage": "filter",
+        "message": "filter stage started",
+        "meta": {
+          "progress_current": 2,
+          "progress_total": 5
+        },
+        "created_at": "2026-04-30T02:32:55.269113Z"
+      },
+      {
+        "id": 3,
+        "level": "info",
+        "stage": "collect",
+        "message": "collect stage completed",
+        "meta": {
+          "progress_current": 1,
+          "progress_total": 5,
+          "seed_rows": 2,
+          "collect_backend": "synthetic",
+          "quota_fallback_used": false,
+          "seed_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_seed_input.csv"
+        },
+        "created_at": "2026-04-30T02:32:55.231242Z"
+      },
+      {
+        "id": 2,
+        "level": "info",
+        "stage": "collect",
+        "message": "collect stage started",
+        "meta": {
+          "progress_current": 1,
+          "progress_total": 5
+        },
+        "created_at": "2026-04-30T02:32:55.228145Z"
+      },
+      {
+        "id": 1,
+        "level": "info",
+        "stage": "collect",
+        "message": "project_tracker started",
+        "meta": {
+          "stage_total": 5
+        },
+        "created_at": "2026-04-30T02:32:55.228089Z"
+      }
+    ],
+    "next_cursor": null
+  }
+}

@@ -1,0 +1,4 @@
+expected_group_id,bid_no,bid_ord,project_name,note
+group-a,R25BK00000001,000,여수시 본청사 별관증축 건립사업,같은 사업군 샘플 1
+group-a,R25BK00000002,000,여수시 본청사 별관증축 건립사업 기본 및 실시설계,같은 사업군 샘플 2
+group-b,R25BK00000003,000,고군농공단지 청년문화센터 건립사업,다른 사업군 샘플

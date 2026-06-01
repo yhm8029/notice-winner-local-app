@@ -1,0 +1,107 @@
+{
+  "method": "GET",
+  "path": "/api/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/artifacts",
+  "status": 200,
+  "body": {
+    "items": [
+      {
+        "id": "53992aff-946b-48a2-908a-4eea169555fd",
+        "artifact_type": "related_notices_json",
+        "file_name": "project_tracker_related_notices.json",
+        "mime_type": "application/json",
+        "size_bytes": 3964,
+        "checksum": "f6decca2136c6c551e0625a24889939fd97b4fdf16fedb97ddefd8ce697c3f9a",
+        "meta": {
+          "stage": "finalize",
+          "project_count": 2,
+          "item_count": 4,
+          "backend": "precomputed"
+        },
+        "download_url": "http://127.0.0.1:53835/api/artifacts/53992aff-946b-48a2-908a-4eea169555fd/download",
+        "download_url_expires_in": 600,
+        "created_at": "2026-04-30T02:32:55.427104Z"
+      },
+      {
+        "id": "ddd2e0a2-3fed-4fb5-9b00-ff041b70915b",
+        "artifact_type": "execution_manifest",
+        "file_name": "project_tracker_execution_manifest.json",
+        "mime_type": "application/json",
+        "size_bytes": 1175,
+        "checksum": "bd7199bdb475a3bf824ae2d742ace8f1bd04c9b737924c0fd63ae8142aa534f0",
+        "meta": {
+          "stage": "finalize",
+          "runtime_profile": "web_native",
+          "requested_collect_mode": "synthetic"
+        },
+        "download_url": "http://127.0.0.1:53835/api/artifacts/ddd2e0a2-3fed-4fb5-9b00-ff041b70915b/download",
+        "download_url_expires_in": 600,
+        "created_at": "2026-04-30T02:32:55.404965Z"
+      },
+      {
+        "id": "1ae771ba-de4c-403a-83cd-6d0e029af026",
+        "artifact_type": "winner_csv",
+        "file_name": "project_tracker_posts_files_v1_1.csv",
+        "mime_type": "text/csv",
+        "size_bytes": 1446,
+        "checksum": "c49785906c1224c908b874d771adfb7680f9689e157ebf2dbecc808292db5d54",
+        "meta": {
+          "rows": 2,
+          "stage": "export",
+          "backend": "synthetic"
+        },
+        "download_url": "http://127.0.0.1:53835/api/artifacts/1ae771ba-de4c-403a-83cd-6d0e029af026/download",
+        "download_url_expires_in": 600,
+        "created_at": "2026-04-30T02:32:55.372228Z"
+      },
+      {
+        "id": "39e1e95e-b18a-4576-9875-2474315f8463",
+        "artifact_type": "internal_nav_csv",
+        "file_name": "project_tracker_internal_search_urls_v1_1.csv",
+        "mime_type": "text/csv",
+        "size_bytes": 851,
+        "checksum": "d671fa6d0fc5a7e607bf61e13934713cf21c5925361b0b53ad020d816186e3b5",
+        "meta": {
+          "rows": 2,
+          "stage": "rescan",
+          "backend": "synthetic"
+        },
+        "download_url": "http://127.0.0.1:53835/api/artifacts/39e1e95e-b18a-4576-9875-2474315f8463/download",
+        "download_url_expires_in": 600,
+        "created_at": "2026-04-30T02:32:55.330371Z"
+      },
+      {
+        "id": "55918722-9d94-4e2d-83fd-4e1dd6a15d38",
+        "artifact_type": "candidate_csv",
+        "file_name": "project_tracker_candidate_collection_v1_1.csv",
+        "mime_type": "text/csv",
+        "size_bytes": 883,
+        "checksum": "bf93257c39faf992d3faf5b07d7773611ff55adc230c1820ef233b3bc104768e",
+        "meta": {
+          "rows": 2,
+          "stage": "filter",
+          "backend": "synthetic"
+        },
+        "download_url": "http://127.0.0.1:53835/api/artifacts/55918722-9d94-4e2d-83fd-4e1dd6a15d38/download",
+        "download_url_expires_in": 600,
+        "created_at": "2026-04-30T02:32:55.287461Z"
+      },
+      {
+        "id": "4121223e-e736-4f0d-adef-a8aaf3eb2e28",
+        "artifact_type": "seed_csv",
+        "file_name": "project_tracker_seed_input.csv",
+        "mime_type": "text/csv",
+        "size_bytes": 836,
+        "checksum": "a26487c0bfba964f3ebb37c64d3fc0549dc2042fb7b2cbabb4cbf91393306ed2",
+        "meta": {
+          "rows": 2,
+          "stage": "collect",
+          "backend": "synthetic",
+          "quota_fallback_used": false
+        },
+        "download_url": "http://127.0.0.1:53835/api/artifacts/4121223e-e736-4f0d-adef-a8aaf3eb2e28/download",
+        "download_url_expires_in": 600,
+        "created_at": "2026-04-30T02:32:55.248901Z"
+      }
+    ]
+  }
+}

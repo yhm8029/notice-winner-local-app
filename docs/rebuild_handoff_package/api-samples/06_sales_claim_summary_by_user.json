@@ -1,0 +1,8 @@
+{
+  "method": "GET",
+  "path": "/api/sales-claims/summary-by-user",
+  "status": 200,
+  "body": {
+    "items": []
+  }
+}

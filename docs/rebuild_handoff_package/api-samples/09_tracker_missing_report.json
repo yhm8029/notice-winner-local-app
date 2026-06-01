@@ -1,0 +1,15 @@
+{
+  "method": "GET",
+  "path": "/api/tracker-entries/missing-report",
+  "status": 200,
+  "body": {
+    "summary": {
+      "total_entries": 2,
+      "missing_entries": 0,
+      "contact_missing": 0,
+      "architect_missing": 0,
+      "area_missing": 0
+    },
+    "items": []
+  }
+}

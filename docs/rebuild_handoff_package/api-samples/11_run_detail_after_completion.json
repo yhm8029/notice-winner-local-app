@@ -1,0 +1,93 @@
+{
+  "id": "b5e97be0-0687-4dae-a7c7-67a2f6358e5a",
+  "status": "success",
+  "run_type": "project_tracker",
+  "parent_run_id": null,
+  "progress_stage": "finalize",
+  "progress_current": 5,
+  "progress_total": 5,
+  "cancel_requested": false,
+  "params": {
+    "start_date": "20250101",
+    "end_date": "20250131",
+    "contract_date_hint": "",
+    "bid_no": "REBUILD1230AE32",
+    "notice_title": "rebuild handoff 5a725735",
+    "demand_org": "Synthetic Rebuild Org",
+    "rows_per_page": 50,
+    "max_pages": 2,
+    "api_scope": "construction",
+    "_advanced_options": {
+      "collect_mode": "synthetic"
+    }
+  },
+  "summary": {
+    "output": {
+      "runtime_profile": "web_native",
+      "requested_collect_mode": "synthetic",
+      "collect_backend": "synthetic",
+      "seed_rows": 2,
+      "seed_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_seed_input.csv",
+      "quota_fallback_used": false,
+      "native_collect_diagnostics": {},
+      "filter_backend": "synthetic",
+      "candidate_rows": 2,
+      "candidate_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_candidate_collection_v1_1.csv",
+      "rescan_backend": "synthetic",
+      "internal_nav_rows": 2,
+      "internal_nav_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_internal_search_urls_v1_1.csv",
+      "export_backend": "synthetic",
+      "post_collect_rows": 2,
+      "post_collect_csv_path": "output/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/project_tracker_posts_files_v1_1.csv",
+      "winner_csv_rows": 2,
+      "tracker_candidate_rows": 2,
+      "primary_bid_no": "REBUILD1230AE32",
+      "winner_csv_file_name": "project_tracker_posts_files_v1_1.csv",
+      "execution_manifest_file_name": "project_tracker_execution_manifest.json",
+      "related_notice_file_name": "project_tracker_related_notices.json",
+      "related_notice_projects": 2,
+      "related_notice_items": 4,
+      "related_notice_precomputed": true,
+      "related_notice_precompute_enabled": true,
+      "related_notice_precompute_status": "success",
+      "related_notice_precompute_error": "",
+      "related_notice_project_statuses": {
+        "rebuildhandoff5a725735": {
+          "status": "success",
+          "error": "",
+          "updated_at": "2026-04-30T02:32:55.452227+00:00"
+        },
+        "rebuildhandoff": {
+          "status": "success",
+          "error": "",
+          "updated_at": "2026-04-30T02:32:55.452227+00:00"
+        }
+      },
+      "related_notice_snapshot_set_id": "b5e97be0-0687-4dae-a7c7-67a2f6358e5a",
+      "stage_backends": {
+        "collect": "synthetic",
+        "filter": "synthetic",
+        "rescan": "synthetic",
+        "export": "synthetic"
+      },
+      "notice_search_backend": "synthetic",
+      "auto_tracker_export_enabled": true,
+      "auto_tracker_export_run_id": "826a7520-3369-472d-b9fd-30546cb41236",
+      "auto_tracker_export_status": "success",
+      "auto_tracker_export_created": true,
+      "auto_tracker_export_progress_stage": "finalize",
+      "auto_tracker_export_progress_current": 2,
+      "auto_tracker_export_progress_total": 2,
+      "auto_tracker_export_estimated_rows": 2,
+      "auto_tracker_export_tracker_entry_rows": 2,
+      "auto_tracker_export_tracking_excel_generated": true,
+      "auto_tracker_export_tracking_excel_file_name": "project_tracking.xlsx",
+      "auto_tracker_export_backend": "synthetic",
+      "auto_tracker_export_error": ""
+    }
+  },
+  "error": {},
+  "created_at": "2026-04-30T02:32:55.227614Z",
+  "started_at": "2026-04-30T02:32:55.228015Z",
+  "finished_at": "2026-04-30T02:32:55.405682Z"
+}

@@ -1,0 +1,50 @@
+@media (max-width: 1180px) {
+  .tracker-sales-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .runtime-card-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .runtime-card-head > button,
+  .runtime-card-head > .ghost-button,
+  .runtime-card-head > .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .entry-sales-transfer-controls > * {
+    width: 100%;
+  }
+
+  .entry-sales-transfer-select {
+    min-width: 0;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .entry-sales-actions > button {
+    flex: 1 1 140px;
+  }
+}
+
+@media (max-width: 760px) {
+  .org-admin-grid,
+  .tracker-sales-overview-grid,
+  .org-plan-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .org-admin-form,
+  .org-member-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-sales-item {
+    padding: 14px;
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "item_count": 187,
+  "expected_group_count": 141,
+  "predicted_group_count": 141,
+  "pairwise_precision": 1.0,
+  "pairwise_recall": 1.0,
+  "pairwise_f1": 1.0,
+  "expected_pair_count": 48,
+  "predicted_pair_count": 48,
+  "true_positive_pair_count": 48,
+  "overmerged_group_count": 0,
+  "oversplit_group_count": 0,
+  "overmerged_groups": [],
+  "oversplit_groups": [],
+  "golden_csv": ".tmp-project-grouping\\project_grouping_golden_candidates_150groups_final_golden.csv",
+  "tracker_csv": "._tmp_tracker_entry_summaries.csv"
+}

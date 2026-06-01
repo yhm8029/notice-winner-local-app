@@ -1,0 +1,71 @@
+{
+  "api": {
+    "00_health": {
+      "status": 200,
+      "path": "/health"
+    },
+    "01_dashboard_summary": {
+      "status": 200,
+      "path": "/api/dashboard/summary"
+    },
+    "02_home_bootstrap": {
+      "status": 200,
+      "path": "/api/home-bootstrap"
+    },
+    "03_tracker_entries": {
+      "status": 200,
+      "path": "/api/tracker-entries"
+    },
+    "04_sales_claims": {
+      "status": 200,
+      "path": "/api/sales-claims"
+    },
+    "05_sales_claim_overview": {
+      "status": 200,
+      "path": "/api/sales-claims/overview"
+    },
+    "06_sales_claim_summary_by_user": {
+      "status": 200,
+      "path": "/api/sales-claims/summary-by-user"
+    },
+    "07_admin_organization_bootstrap": {
+      "status": 503,
+      "path": "/api/admin/organization-panel-bootstrap"
+    },
+    "08_admin_google_sheets_bootstrap": {
+      "status": 200,
+      "path": "/api/admin/google-sheets/bootstrap"
+    },
+    "09_tracker_missing_report": {
+      "status": 200,
+      "path": "/api/tracker-entries/missing-report"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "docs\\rebuild_handoff_package\\screenshots\\01_user_home.png",
+      "exists": true,
+      "bytes": 616513
+    },
+    {
+      "path": "docs\\rebuild_handoff_package\\screenshots\\02_admin_project_status.png",
+      "exists": true,
+      "bytes": 1281443
+    },
+    {
+      "path": "docs\\rebuild_handoff_package\\screenshots\\03_admin_google_sheets.png",
+      "exists": true,
+      "bytes": 1228918
+    },
+    {
+      "path": "docs\\rebuild_handoff_package\\screenshots\\04_login_invite_preview_shell.png",
+      "exists": true,
+      "bytes": 435898
+    },
+    {
+      "path": "docs\\rebuild_handoff_package\\user-flow\\current_app_flow.webm",
+      "exists": true,
+      "bytes": 1448725
+    }
+  ]
+}

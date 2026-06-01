@@ -1,0 +1,10 @@
+{
+  "source_csv": ".tmp-project-grouping\\project_grouping_golden_candidates_150groups_review_seed.csv",
+  "provisional_csv": ".tmp-project-grouping\\project_grouping_golden_candidates_150groups_provisional_baseline.csv",
+  "output_csv": ".tmp-project-grouping\\project_grouping_golden_candidates_150groups_final_golden.csv",
+  "row_count_total": 202,
+  "row_count_accepted": 187,
+  "excluded_count": 15,
+  "needs_review_count": 0,
+  "accepted_group_count": 141
+}

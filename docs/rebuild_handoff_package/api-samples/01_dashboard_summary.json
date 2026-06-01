@@ -1,0 +1,45 @@
+{
+  "method": "GET",
+  "path": "/api/dashboard/summary",
+  "status": 200,
+  "body": {
+    "run_counts": {
+      "cancelled": 0,
+      "failed": 0,
+      "queued": 0,
+      "running": 0,
+      "success": 0
+    },
+    "tracker_total": 2,
+    "tracker_edited_total": 1,
+    "repository_backends": {
+      "tracker_entries": "in_memory",
+      "runs": "in_memory",
+      "artifacts": "in_memory",
+      "logs": "in_memory"
+    },
+    "artifact_metadata_persistent": false,
+    "synthetic_debug_enabled": true,
+    "recent_failed_runs": [],
+    "latest_reports": {
+      "phase1-equivalence": {
+        "available": true,
+        "summary": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        }
+      },
+      "phase1-artifact-diff": {
+        "available": true,
+        "summary": {
+          "all_match": false,
+          "comparison_count": 5,
+          "matched_count": 4,
+          "mismatched_count": 1
+        }
+      }
+    },
+    "active_report_jobs": []
+  }
+}

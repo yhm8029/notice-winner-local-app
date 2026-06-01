@@ -1,0 +1,78 @@
+@media (max-width: 1180px) {
+  .panel-dashboard,
+  .panel-projects,
+  .panel-form,
+  .panel-status,
+  .panel-runs,
+  .panel-logs,
+  .panel-report,
+  .panel-artifacts,
+  .panel-org-admin,
+  .panel-tracker,
+  .panel-editor {
+    grid-column: span 12;
+  }
+
+  .metric-grid,
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 840px) {
+  .auth-card {
+    width: min(100vw - 18px, 100%);
+    padding: 22px;
+  }
+
+  .page-shell {
+    width: min(100vw - 18px, 100%);
+    padding-top: 18px;
+  }
+
+  .tracker-change-modal-card {
+    width: min(100vw - 18px, 100%);
+    max-height: calc(100vh - 18px);
+    margin: 9px auto;
+    padding: 18px;
+  }
+
+  .hero,
+  .run-summary-strip,
+  .detail-grid,
+  .metric-grid,
+  .dashboard-grid,
+  .run-form,
+  .advanced-grid,
+  .patch-form,
+  .filter-row,
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-meta,
+  .panel-heading,
+  .action-row {
+    justify-content: flex-start;
+  }
+
+  .tracker-change-item-head,
+  .tracker-change-item-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .run-form label.wide,
+  .patch-form label.wide,
+  .filter-row label.wide {
+    grid-column: span 1;
+  }
+
+  .inline-field-row {
+    flex-direction: column;
+  }
+
+  .inline-field-row .ghost-button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "method": "GET",
+  "path": "/api/admin/organization-panel-bootstrap",
+  "status": 503,
+  "body": {
+    "error": {
+      "code": "auth_config_error",
+      "message": "SUPABASE_URL is required"
+    }
+  }
+}

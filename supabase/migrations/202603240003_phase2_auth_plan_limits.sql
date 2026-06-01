@@ -1,0 +1,247 @@
+alter table public.organizations
+  add column if not exists plan_code text default 'A';
+
+alter table public.organizations
+  add column if not exists active_user_limit integer default 5;
+
+alter table public.organizations
+  add column if not exists pending_invite_limit integer default 5;
+
+update public.organizations
+set
+  plan_code = case upper(trim(coalesce(plan_code, '')))
+    when 'B' then 'B'
+    when 'C' then 'C'
+    else 'A'
+  end,
+  active_user_limit = case
+    when coalesce(active_user_limit, 0) > 0 then active_user_limit
+    when upper(trim(coalesce(plan_code, ''))) = 'B' then 10
+    when upper(trim(coalesce(plan_code, ''))) = 'C' then 100
+    else 5
+  end,
+  pending_invite_limit = case
+    when coalesce(pending_invite_limit, -1) >= 0 then pending_invite_limit
+    when upper(trim(coalesce(plan_code, ''))) = 'B' then 10
+    when upper(trim(coalesce(plan_code, ''))) = 'C' then 100
+    else 5
+  end;
+
+alter table public.organizations
+  alter column plan_code set default 'A',
+  alter column plan_code set not null,
+  alter column active_user_limit set default 5,
+  alter column active_user_limit set not null,
+  alter column pending_invite_limit set default 5,
+  alter column pending_invite_limit set not null;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'organizations_plan_code_check'
+  ) then
+    alter table public.organizations
+      add constraint organizations_plan_code_check
+      check (plan_code in ('A', 'B', 'C'));
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'organizations_active_user_limit_check'
+  ) then
+    alter table public.organizations
+      add constraint organizations_active_user_limit_check
+      check (active_user_limit > 0);
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'organizations_pending_invite_limit_check'
+  ) then
+    alter table public.organizations
+      add constraint organizations_pending_invite_limit_check
+      check (pending_invite_limit >= 0);
+  end if;
+end
+$$;
+
+create or replace function public.accept_invitation(
+  p_invite_token text,
+  p_user_profile_id uuid,
+  p_email text,
+  p_display_name text default ''
+)
+returns table (
+  invitation_id uuid,
+  organization_id uuid,
+  organization_name text,
+  membership_id uuid,
+  user_id uuid,
+  role text,
+  membership_status text,
+  team_name text,
+  job_title text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_invitation public.invitations%rowtype;
+  v_membership public.organization_memberships%rowtype;
+  v_org_name text;
+  v_now timestamptz := now();
+  v_user_global_role text := '';
+  v_active_user_limit integer := 5;
+  v_active_user_count integer := 0;
+  v_existing_membership_active boolean := false;
+begin
+  if trim(coalesce(p_invite_token, '')) = '' then
+    raise exception 'invite token is required';
+  end if;
+  if p_user_profile_id is null then
+    raise exception 'user profile id is required';
+  end if;
+  if trim(coalesce(p_email, '')) = '' then
+    raise exception 'email is required';
+  end if;
+
+  select *
+  into v_invitation
+  from public.invitations
+  where invite_token = trim(p_invite_token)
+  for update;
+
+  if not found then
+    raise exception 'invitation not found';
+  end if;
+
+  if lower(v_invitation.email) <> lower(trim(p_email)) then
+    raise exception 'invitation email does not match the signed-in email';
+  end if;
+
+  if v_invitation.status = 'revoked' then
+    raise exception 'invitation has been revoked';
+  end if;
+
+  if v_invitation.status = 'expired' or v_invitation.expires_at < v_now then
+    update public.invitations
+    set status = 'expired',
+        updated_at = v_now
+    where id = v_invitation.id;
+    raise exception 'invitation has expired';
+  end if;
+
+  select coalesce(active_user_limit, 5)
+  into v_active_user_limit
+  from public.organizations
+  where id = v_invitation.organization_id
+  for update;
+
+  if coalesce(v_active_user_limit, 0) <= 0 then
+    v_active_user_limit := 5;
+  end if;
+
+  update public.user_profiles
+  set
+    display_name = case
+      when coalesce(trim(display_name), '') = '' and trim(coalesce(p_display_name, '')) <> '' then trim(p_display_name)
+      else display_name
+    end,
+    updated_at = v_now
+  where id = p_user_profile_id
+    and lower(email) = lower(trim(p_email))
+  returning coalesce(global_role, '') into v_user_global_role;
+
+  if not found then
+    raise exception 'user profile not found for invitation acceptance';
+  end if;
+
+  if lower(trim(coalesce(v_user_global_role, ''))) <> 'platform_admin' then
+    select exists(
+      select 1
+      from public.organization_memberships m
+      join public.user_profiles p on p.id = m.user_profile_id
+      where m.organization_id = v_invitation.organization_id
+        and m.user_profile_id = p_user_profile_id
+        and m.membership_status = 'active'
+        and p.account_status = 'active'
+        and coalesce(p.global_role, '') <> 'platform_admin'
+    )
+    into v_existing_membership_active;
+
+    select count(*)
+    into v_active_user_count
+    from public.organization_memberships m
+    join public.user_profiles p on p.id = m.user_profile_id
+    where m.organization_id = v_invitation.organization_id
+      and m.membership_status = 'active'
+      and p.account_status = 'active'
+      and coalesce(p.global_role, '') <> 'platform_admin';
+
+    if v_active_user_count >= v_active_user_limit and not v_existing_membership_active then
+      raise exception 'active user limit reached for this organization';
+    end if;
+  end if;
+
+  insert into public.organization_memberships (
+    organization_id,
+    user_profile_id,
+    role,
+    membership_status,
+    team_name,
+    job_title
+  )
+  values (
+    v_invitation.organization_id,
+    p_user_profile_id,
+    v_invitation.role,
+    'active',
+    v_invitation.team_name,
+    v_invitation.job_title
+  )
+  on conflict (organization_id, user_profile_id) do update
+  set
+    role = excluded.role,
+    membership_status = 'active',
+    team_name = case
+      when coalesce(public.organization_memberships.team_name, '') = '' then excluded.team_name
+      else public.organization_memberships.team_name
+    end,
+    job_title = case
+      when coalesce(public.organization_memberships.job_title, '') = '' then excluded.job_title
+      else public.organization_memberships.job_title
+    end,
+    updated_at = v_now
+  returning * into v_membership;
+
+  update public.invitations
+  set
+    status = 'accepted',
+    accepted_at = coalesce(accepted_at, v_now),
+    accepted_user_id = p_user_profile_id,
+    updated_at = v_now
+  where id = v_invitation.id;
+
+  select o.name
+  into v_org_name
+  from public.organizations o
+  where o.id = v_invitation.organization_id;
+
+  return query
+  select
+    v_invitation.id,
+    v_invitation.organization_id,
+    coalesce(v_org_name, ''),
+    v_membership.id,
+    p_user_profile_id,
+    v_membership.role,
+    v_membership.membership_status,
+    v_membership.team_name,
+    v_membership.job_title;
+end;
+$$;

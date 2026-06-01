@@ -1,0 +1,12 @@
+{
+  "method": "POST",
+  "path": "/api/runs/b5e97be0-0687-4dae-a7c7-67a2f6358e5a/tracker-export",
+  "status": 202,
+  "body": {
+    "id": "826a7520-3369-472d-b9fd-30546cb41236",
+    "status": "success",
+    "run_type": "tracker_export",
+    "parent_run_id": "b5e97be0-0687-4dae-a7c7-67a2f6358e5a",
+    "created_at": "2026-04-30T02:32:55.405759Z"
+  }
+}

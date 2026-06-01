@@ -1,0 +1,132 @@
+.runtime-projects {
+  margin-top: 18px;
+}
+
+.runtime-project-item {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 252, 248, 0.88);
+}
+
+.runtime-project-item.is-expanded {
+  border-color: rgba(170, 69, 25, 0.28);
+  box-shadow: 0 10px 26px rgba(96, 66, 42, 0.08);
+}
+
+.runtime-project-item p {
+  margin: 8px 0 0;
+}
+
+.runtime-project-head {
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.runtime-project-copy {
+  min-width: 0;
+}
+
+.runtime-project-title-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.runtime-project-title-button:hover {
+  color: var(--brand-strong);
+  text-decoration: underline;
+}
+
+.runtime-project-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.runtime-project-search {
+  color: var(--brand-strong);
+}
+
+.runtime-project-related {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(131, 101, 70, 0.22);
+}
+
+.runtime-project-related-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.runtime-project-related-list {
+  display: grid;
+  gap: 10px;
+}
+
+.runtime-project-related-item {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(131, 101, 70, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 248, 241, 0.88);
+}
+
+.runtime-project-related-item p {
+  margin-top: 6px;
+}
+
+.runtime-project-related-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.runtime-project-related-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.runtime-project-related-view-button {
+  white-space: nowrap;
+}
+
+.runtime-project-related-link {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.runtime-project-related-link:hover {
+  color: var(--brand-strong);
+  text-decoration: underline;
+}
+
+.runtime-project-related-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .runtime-project-related-main {
+    flex-direction: column;
+  }
+}
+
+.runtime-pagination {
+  margin-top: 0;
+}

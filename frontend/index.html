@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPMS</title>
+    <link rel="stylesheet" href="/styles.css?v=20260330ab" />
+    <script defer src="/cache-runtime.js?v=20260330ab"></script>
+    <script defer src="/bootstrap-runtime.js?v=20260429a"></script>
+    <script defer src="/sales-runtime.js?v=20260330ab"></script>
+    <script defer src="/sales-view-runtime.js?v=20260426a"></script>
+    <script defer src="/tracker-change-runtime.js?v=20260330ab"></script>
+    <script defer src="/tracker-diagnostics-runtime.js?v=20260407a"></script>
+    <script defer src="/tracker-board-runtime.js?v=20260330ab"></script>
+    <script defer src="/tracker-render-fallback-entry-runtime.js?v=20260425b"></script>
+    <script defer src="/tracker-render-fallback-board-runtime.js?v=20260425b"></script>
+    <script defer src="/tracker-render-fallback-runtime.js?v=20260425b"></script>
+    <script defer src="/org-admin-runtime.js?v=20260429a"></script>
+    <script defer src="/platform-admin-account-runtime.js?v=20260401a"></script>
+    <script defer src="/tracker-entry-runtime.js?v=20260330ab"></script>
+    <script defer src="/selected-entry-runtime.js?v=20260330ab"></script>
+    <script defer src="/related-notice-runtime.js?v=20260503l"></script>
+    <script defer src="/artifact-runtime.js?v=20260330ab"></script>
+    <script defer src="/project-runtime.js?v=20260330ab"></script>
+    <script defer src="/run-view-runtime.js?v=20260330ab"></script>
+    <script defer src="/report-runtime.js?v=20260330ab"></script>
+    <script defer src="/tracker-missing-report-runtime.js?v=20260330ab"></script>
+    <script defer src="/console-data-runtime.js?v=20260426a"></script>
+    <script defer src="/auth-session-runtime.js?v=20260426i"></script>
+    <script defer src="/admin-google-sheets-cache-runtime.js?v=20260426g"></script>
+    <script defer src="/admin-google-sheets-runtime.js?v=20260426g"></script>
+    <script defer src="/admin-tabs-runtime.js?v=20260503a"></script>
+    <script defer src="/app-shell-runtime.js?v=20260503a"></script>
+    <script defer src="/app-support-admin-runtime.js?v=20260503a"></script>
+    <script defer src="/app-support-tracker-runtime.js?v=20260424a"></script>
+    <script defer src="/app-support-org-runtime.js?v=20260424a"></script>
+    <script defer src="/app-support-startup-runtime.js?v=20260424a"></script>
+    <script defer src="/app-support-auth-runtime.js?v=20260426c"></script>
+    <script defer src="/app-support-view-runtime.js?v=20260424a"></script>
+    <script defer src="/app-support-tracker-deps-runtime.js?v=20260424a"></script>
+    <script defer src="/app-support-ui-runtime.js?v=20260424a"></script>
+    <script defer src="/app-support-runtime.js?v=20260418a"></script>
+    <script defer src="/app-controller-context-runtime.js?v=20260418a"></script>
+    <script defer src="/app-controller-wiring-auth-runtime.js?v=20260425b"></script>
+    <script defer src="/app-controller-wiring-runtime.js?v=20260503r"></script>
+    <script defer src="/ui-mode-controller.js?v=20260503a"></script>
+    <script type="module" src="/app-controller-deps.js?v=20260503r"></script>
+    <script type="module" src="/runtime-enhancements.js?v=20260503c"></script>
+    <script type="module" src="/app-event-bindings.js?v=20260410a"></script>
+    <script type="module" src="/tracker-render-controller.js?v=20260429a"></script>
+    <script type="module" src="/tracker-entry-actions-controller.js?v=20260414a"></script>
+    <script type="module" src="/selected-entry-controller.js?v=20260410a"></script>
+    <script type="module" src="/download-controller.js?v=20260410a"></script>
+    <script type="module" src="/console-panels-controller.js?v=20260410a"></script>
+    <script type="module" src="/tracker-diagnostics-panel-controller.js?v=20260414a"></script>
+    <script type="module" src="/report-panels-controller.js?v=20260414a"></script>
+    <script type="module" src="/sales-panel-controller.js?v=20260503r"></script>
+    <script type="module" src="/org-admin-controller.js?v=20260410a"></script>
+    <script type="module" src="/auth-ui-controller.js?v=20260414a"></script>
+    <script type="module" src="/run-panels-controller.js?v=20260414a"></script>
+    <script defer src="/tracker-controller-diagnostics-runtime.js?v=20260424a"></script>
+    <script defer src="/tracker-controller-runs-runtime.js?v=20260424a"></script>
+    <script defer src="/tracker-controller-entries-runtime.js?v=20260424a"></script>
+    <script defer src="/tracker-controller.js?v=20260409a"></script>
+    <script type="module" src="/admin-google-sheets-controller.js?v=20260427a"></script>
+    <script defer src="/app-admin-google-sheets-state-runtime.js?v=20260426a"></script>
+    <script defer src="/app-admin-google-sheets-runtime.js?v=20260426e"></script>
+    <script type="module" src="/auth-controller.js?v=20260426c"></script>
+    <script type="module" src="/app-auth-bridge.js?v=20260417a"></script>
+    <script type="module" src="/project-related-controller.js?v=20260503l"></script>
+    <script defer src="/app-core-runtime.js?v=20260426i"></script>
+    <script type="module" src="/app-bootstrap-bridge.js?v=20260503b"></script>
+    <script type="module" src="/app-download-bridge.js?v=20260417a"></script>
+    <script type="module" src="/app-console-bridge.js?v=20260417a"></script>
+    <script type="module" src="/app-sales-bridge.js?v=20260417a"></script>
+    <script type="module" src="/app-run-report-bridge.js?v=20260417a"></script>
+    <script type="module" src="/app-org-admin-bridge.js?v=20260417a"></script>
+    <script type="module" src="/app-tracker-bridge.js?v=20260418a"></script>
+    <script type="module" src="/app-project-related-bridge.js?v=20260417a"></script>
+    <script type="module" src="/app-tracker-support-bridge.js?v=20260417a"></script>
+    <script type="module" src="/app-selected-entry-bridge.js?v=20260417a"></script>
+    <script defer src="/app-runtime-registry.js?v=20260418a"></script>
+    <script defer src="/app-controller-call-runtime.js?v=20260418a"></script>
+    <script defer src="/app-ui-glue-runtime.js?v=20260418a"></script>
+    <script defer src="/app-console-deps-runtime.js?v=20260418a"></script>
+    <script defer src="/app-bridge-runtime-helpers.js?v=20260425a"></script>
+    <script defer src="/app-bridge-runtime-auth.js?v=20260425a"></script>
+    <script defer src="/app-bridge-runtime-core.js?v=20260425a"></script>
+    <script defer src="/app-bridge-runtime.js?v=20260425a"></script>
+    <script defer src="/app-startup-bridge-runtime.js?v=20260425a"></script>
+    <script defer src="/app-startup-runtime.js?v=20260418a"></script>
+    <script defer src="/app-view-bindings-runtime.js?v=20260418a"></script>
+    <script defer src="/app-controller-bootstrap-runtime.js?v=20260418a"></script>
+    <script defer src="/app-runtime-bootstrap.js?v=20260418a"></script>
+    <script defer src="/app-entry-runtime.js?v=20260418a"></script>
+    <script defer src="/app-launch-runtime-helpers.js?v=20260425a"></script>
+    <script defer src="/app-launch-runtime-core.js?v=20260425a"></script>
+    <script defer src="/app-launch-runtime.js?v=20260425a"></script>
+    <script defer src="/app-host-bootstrap.js?v=20260418a"></script>
+    <script defer src="/app.js?v=20260503b"></script>
+  </head>
+  <body>
+    <section id="auth-shell" class="auth-shell">
+      <div class="auth-card">
+        <p class="eyebrow">Phase 2 Preview</p>
+        <h1>Sign In</h1>
+        <p id="auth-copy" class="auth-copy">Sign in to open the protected SPMS console.</p>
+        <div id="auth-invite-preview" class="auth-invite-preview hidden"></div>
+        <div class="auth-mode-row">
+          <button id="auth-mode-sign-in" class="ghost-button is-active" type="button">로그인</button>
+          <button id="auth-mode-sign-up" class="ghost-button" type="button">계정 등록</button>
+        </div>
+        <form id="auth-form" class="auth-form" method="post">
+          <label>
+            <span>이메일</span>
+            <input id="auth-email" name="email" type="email" autocomplete="email" required />
+          </label>
+          <label id="auth-display-name-field" class="hidden">
+            <span>표시 이름</span>
+            <input id="auth-display-name" name="display_name" type="text" autocomplete="name" />
+          </label>
+          <label>
+            <span>비밀번호</span>
+            <input id="auth-password" name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button id="auth-submit-button" class="primary-button" type="submit">로그인</button>
+        </form>
+        <p id="auth-hint" class="hint-text">로그인 기능이 활성화되면 기존 콘솔 대신 먼저 이 화면이 보인다.</p>
+        <div class="auth-action-row">
+          <button id="auth-find-id-button" class="ghost-button" type="button">아이디 안내</button>
+          <button id="auth-reset-password-button" class="ghost-button" type="button">비밀번호 재설정</button>
+        </div>
+        <div id="auth-status" class="flash-message hidden" role="status" aria-live="polite"></div>
+        <div id="auth-user-blocked" class="auth-blocked hidden">
+          <strong>접근 권한이 없습니다.</strong>
+          <p id="auth-blocked-message">이 계정은 아직 초대되지 않았습니다.</p>
+          <button id="auth-blocked-logout" class="ghost-button" type="button">로그아웃</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="console-shell" class="page-shell hidden">
+      <header class="hero">
+        <div id="admin-header-bar" class="admin-header-bar hidden">
+          <div id="admin-brand" class="admin-brand">SPMS</div>
+          <section id="admin-top-nav" class="admin-top-nav hidden">
+            <div id="admin-top-nav-list" class="admin-top-nav-list"></div>
+          </section>
+        </div>
+        <div class="hero-copy">
+          <h1>SPMS</h1>
+          <p class="hero-subtitle">Sales Project Map System</p>
+          <p class="hero-subcopy">실시간 영업 현황 조회</p>
+        </div>
+          <div class="hero-meta">
+            <div id="api-meta-card" class="meta-card">
+              <span class="meta-label">API</span>
+              <strong id="api-base-label">동일 출처</strong>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">화면 모드</span>
+              <strong id="ui-mode-label">실사용자 모드</strong>
+              <button id="mode-toggle-button" class="ghost-button hero-mode-button" type="button">운영자 모드</button>
+            </div>
+            <div id="sync-meta-card" class="meta-card">
+              <span class="meta-label">동기화</span>
+              <label class="toggle-line">
+                <input id="auto-refresh-toggle" type="checkbox" checked />
+              <span>자동 새로고침</span>
+            </label>
+            <strong id="last-sync-label">대기 중</strong>
+          </div>
+          <div id="auth-meta-card" class="meta-card hidden">
+            <span class="meta-label">Account</span>
+            <strong id="auth-user-label">-</strong>
+            <span id="auth-role-label" class="hint-text">-</span>
+            <button id="logout-button" class="ghost-button hero-mode-button" type="button">로그아웃</button>
+          </div>
+        </div>
+      </header>
+
+      <div id="auth-session-actions" class="auth-session-actions hidden">
+        <span id="auth-session-user-label" class="mono">-</span>
+        <button id="auth-session-mode-toggle-button" class="ghost-button" type="button">운영자 모드</button>
+        <button id="auth-session-profile-button" class="ghost-button" type="button">회원정보</button>
+        <button id="auth-session-logout-button" class="ghost-button" type="button">로그아웃</button>
+      </div>
+
+      <section id="admin-embed-panel" class="panel panel-admin-embed hidden">
+        <div class="panel-heading">
+          <div>
+            <p class="kicker">Admin</p>
+            <h2 id="admin-embed-title">-</h2>
+          </div>
+          <button id="admin-google-sheets-sync-button" class="ghost-button" type="button" title="Google Sheets sync + refresh">
+            Google Sheets ?숆린??
+          </button>
+        </div>
+        <p id="admin-embed-subtitle" class="hero-subcopy"></p>
+        <div id="admin-google-sheets-sync-feedback" class="hint-text hidden"></div>
+        <div id="admin-google-sheet-status" class="admin-google-sheet-status hidden"></div>
+        <div id="admin-google-sheet-table" class="admin-google-sheet-table-slot hidden"></div>
+        <div id="admin-embed-empty" class="empty-state hidden"></div>
+      </section>
+
+      <main class="layout-grid">
+        <section id="panel-dashboard" class="panel panel-dashboard">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">운영 현황</p>
+              <h2>대시보드</h2>
+            </div>
+            <button id="refresh-dashboard-button" class="ghost-button" type="button">대시보드 새로고침</button>
+          </div>
+          <div id="dashboard-metrics" class="metric-grid">
+            <article class="metric-card">
+              <span class="detail-label">실행 건수</span>
+              <strong>-</strong>
+            </article>
+          </div>
+          <div class="dashboard-grid">
+            <article class="info-card">
+              <div class="panel-heading mini">
+                <div>
+                  <p class="kicker">실패</p>
+                  <h3>최근 실패 실행</h3>
+                </div>
+              </div>
+              <div id="dashboard-failed-runs" class="log-list empty-state">실패한 실행이 없습니다.</div>
+            </article>
+            <article class="info-card">
+              <div class="panel-heading mini">
+                <div>
+                  <p class="kicker">리포트</p>
+                  <h3>실행 중인 리포트 작업</h3>
+                </div>
+              </div>
+              <div id="dashboard-report-jobs" class="log-list empty-state">실행 중인 리포트 작업이 없습니다.</div>
+            </article>
+          </div>
+        </section>
+
+        <section id="panel-form" class="panel panel-form">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">실행 생성</p>
+              <h2>프로젝트 트랙커 실행 생성</h2>
+            </div>
+            <button id="form-reset-button" class="ghost-button" type="button">초기화</button>
+          </div>
+
+          <form id="run-form" class="run-form">
+            <label>
+              <span>시작일</span>
+              <input name="start_date" type="text" inputmode="numeric" maxlength="8" value="20250101" required />
+            </label>
+            <label>
+              <span>종료일</span>
+              <input name="end_date" type="text" inputmode="numeric" maxlength="8" value="20250131" required />
+            </label>
+            <label>
+              <span>계약일 힌트</span>
+              <input name="contract_date_hint" type="text" inputmode="numeric" maxlength="8" placeholder="선택 입력" />
+            </label>
+            <label>
+              <span>공고 번호</span>
+              <input name="bid_no" type="text" placeholder="공고명/수요기관으로 찾을 때는 비워두세요" />
+            </label>
+            <label class="wide">
+              <span>공고명</span>
+              <input name="notice_title" type="text" value="기계설비 개선" />
+            </label>
+            <label class="wide">
+              <span>수요기관</span>
+              <input name="demand_org" type="text" value="도시시설사업부" />
+            </label>
+            <label>
+              <span>페이지당 행 수</span>
+              <input name="rows_per_page" type="number" min="1" value="100" required />
+            </label>
+            <label>
+              <span>최대 페이지 수</span>
+              <input name="max_pages" type="number" min="1" value="3" required />
+            </label>
+            <label>
+              <span>API 범위</span>
+              <select name="api_scope">
+                <option value="construction" selected>공사</option>
+                <option value="service">용역</option>
+                <option value="goods">물품</option>
+                <option value="all">전체</option>
+              </select>
+            </label>
+
+            <details class="advanced-box">
+              <summary>고급 옵션</summary>
+              <div class="advanced-grid">
+                <label>
+                  <span>수집 모드</span>
+                  <select name="collect_mode">
+                    <option value="auto" selected>자동</option>
+                    <option value="gui_seed">GUI 시드</option>
+                  </select>
+                </label>
+                <label>
+                  <span>단계 지연(ms)</span>
+                  <input name="simulate_stage_delay_ms" type="number" min="0" value="20" />
+                </label>
+                <label class="compact">
+                  <span>LLM 보정</span>
+                  <input name="llm_correct" type="checkbox" />
+                </label>
+                <label>
+                  <span>LLM 모델</span>
+                  <input
+                    name="llm_model"
+                    type="text"
+                    value="claude-haiku-4-5-20251001"
+                    placeholder="claude-haiku-4-5-20251001"
+                  />
+                </label>
+                <label>
+                  <span>LLM 최대 건수</span>
+                  <input name="llm_max_rows" type="number" min="0" value="20" />
+                </label>
+                <label>
+                  <span>Export 병렬 워커</span>
+                  <input name="export_row_workers" type="number" min="1" value="8" />
+                </label>
+              </div>
+            </details>
+
+            <div class="form-actions">
+              <button id="submit-run-button" class="primary-button" type="submit">실행 시작</button>
+              <p class="hint-text">공고 번호, 공고명, 수요기관 중 하나 이상은 반드시 입력해야 합니다.</p>
+            </div>
+          </form>
+        </section>
+
+        <section id="panel-status" class="panel panel-status">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">선택된 실행</p>
+              <h2>실행 상세</h2>
+            </div>
+            <div class="action-row">
+              <button id="refresh-run-button" class="ghost-button" type="button">새로고침</button>
+              <button id="cancel-run-button" class="ghost-button" type="button">실행 취소</button>
+              <button id="tracker-export-button" class="primary-button" type="button">수동 트래커 내보내기</button>
+            </div>
+          </div>
+
+          <div id="flash-message" class="flash-message hidden" role="status" aria-live="polite"></div>
+
+          <div id="run-empty-state" class="empty-state">
+            목록에서 실행을 선택하거나 새 실행을 생성하세요.
+          </div>
+
+          <div id="run-detail" class="run-detail hidden">
+            <div class="run-summary-strip">
+              <div>
+                <span class="detail-label">실행 ID</span>
+                <strong id="run-id">-</strong>
+              </div>
+              <div>
+                <span class="detail-label">상태</span>
+                <div id="run-status-badge"></div>
+              </div>
+              <div>
+                <span class="detail-label">진행률</span>
+                <strong id="run-progress">-</strong>
+              </div>
+              <div>
+                <span class="detail-label">유형</span>
+                <strong id="run-type">-</strong>
+              </div>
+            </div>
+
+            <div class="progress-block">
+              <div class="progress-head">
+                <span id="run-progress-stage">진행 단계</span>
+                <span id="run-progress-meta">0 / 0</span>
+              </div>
+              <div class="progress-track">
+                <div id="run-progress-bar" class="progress-bar"></div>
+              </div>
+            </div>
+
+            <div class="detail-grid">
+              <article class="info-card">
+                <h3>요청</h3>
+                <pre id="run-params"></pre>
+              </article>
+              <article class="info-card">
+                <h3>요약</h3>
+                <pre id="run-summary"></pre>
+              </article>
+              <article class="info-card">
+                <h3>오류</h3>
+                <pre id="run-error"></pre>
+              </article>
+              <article class="info-card">
+                <h3>시간 정보</h3>
+                <dl class="timestamp-list">
+                  <div><dt>생성</dt><dd id="run-created-at">-</dd></div>
+                  <div><dt>시작</dt><dd id="run-started-at">-</dd></div>
+                  <div><dt>종료</dt><dd id="run-finished-at">-</dd></div>
+                  <div><dt>상위 실행</dt><dd id="run-parent-id">-</dd></div>
+                </dl>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="panel-runs" class="panel panel-runs">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">이력</p>
+              <h2>최근 실행</h2>
+            </div>
+            <button id="refresh-runs-button" class="ghost-button" type="button">목록 새로고침</button>
+          </div>
+          <form id="run-filter-form" class="filter-row">
+            <label>
+              <span>상태</span>
+              <select id="run-filter-status">
+                <option value="">전체</option>
+                <option value="queued">대기</option>
+                <option value="running">실행 중</option>
+                <option value="success">성공</option>
+                <option value="failed">실패</option>
+                <option value="cancelled">취소됨</option>
+              </select>
+            </label>
+            <label>
+              <span>실행 유형</span>
+              <select id="run-filter-type">
+                <option value="">전체</option>
+                <option value="project_tracker">프로젝트 트랙커</option>
+                <option value="tracker_export">트래커 내보내기</option>
+              </select>
+            </label>
+            <label>
+              <span>시작일</span>
+              <input id="run-filter-from" type="date" />
+            </label>
+            <label>
+              <span>종료일</span>
+              <input id="run-filter-to" type="date" />
+            </label>
+            <label>
+              <span>페이지 크기</span>
+              <select id="run-page-size">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+              </select>
+            </label>
+            <div class="filter-actions">
+              <button class="ghost-button" type="submit">적용</button>
+              <button id="run-filter-reset" class="ghost-button" type="button">초기화</button>
+            </div>
+          </form>
+          <div id="runs-list" class="run-list"></div>
+          <div class="pagination-row">
+            <button id="runs-prev-button" class="ghost-button" type="button">이전</button>
+            <span id="runs-page-meta" class="pagination-meta">1페이지</span>
+            <button id="runs-next-button" class="ghost-button" type="button">다음</button>
+          </div>
+        </section>
+
+        <section id="panel-logs" class="panel panel-logs">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">관측</p>
+              <h2>로그</h2>
+            </div>
+            <button id="refresh-logs-button" class="ghost-button" type="button">로그 새로고침</button>
+          </div>
+          <div id="logs-list" class="log-list empty-state">선택된 실행이 없습니다.</div>
+        </section>
+
+        <section id="panel-report" class="panel panel-report">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">동등성 리포트</p>
+              <h2>최신 리포트</h2>
+            </div>
+            <div class="action-row">
+              <label>
+                <span class="detail-label">리포트</span>
+                <select id="report-select">
+                  <option value="phase1-artifact-diff" selected>산출물 비교</option>
+                  <option value="phase1-equivalence">동등성 검증</option>
+                </select>
+              </label>
+              <label>
+                <span class="detail-label">시드 제한</span>
+                <input id="report-seed-limit" type="number" min="1" value="3" />
+              </label>
+              <button id="run-report-button" class="primary-button" type="button">리포트 실행</button>
+              <button id="refresh-report-button" class="ghost-button" type="button">리포트 새로고침</button>
+            </div>
+          </div>
+          <div id="report-status" class="tracker-context">아직 리포트를 불러오지 않았습니다.</div>
+          <div id="report-job-status" class="tracker-context">아직 시작한 리포트 작업이 없습니다.</div>
+          <article class="info-card">
+            <div class="panel-heading mini">
+              <div>
+                <p class="kicker">이력</p>
+                <h3>최근 리포트 작업</h3>
+              </div>
+            </div>
+            <div id="report-jobs-list" class="log-list empty-state">불러온 리포트 작업이 없습니다.</div>
+          </article>
+          <article class="info-card">
+            <h3>선택한 작업</h3>
+            <pre id="report-job-detail">{}</pre>
+          </article>
+          <article class="info-card">
+            <h3>요약</h3>
+            <pre id="report-summary">{}</pre>
+          </article>
+          <article class="info-card">
+            <h3>원본 JSON</h3>
+            <pre id="report-json">{}</pre>
+          </article>
+        </section>
+
+        <section id="panel-artifacts" class="panel panel-artifacts">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">산출물</p>
+              <h2>아티팩트</h2>
+            </div>
+            <button id="refresh-artifacts-button" class="ghost-button" type="button">아티팩트 새로고침</button>
+          </div>
+          <div id="artifacts-list" class="artifact-list empty-state">선택된 실행이 없습니다.</div>
+        </section>
+
+        <section id="panel-tracker" class="panel panel-tracker">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">프로젝트 작업공간</p>
+              <h2>프로젝트 현황</h2>
+            </div>
+            <div class="action-row">
+              <button id="tracker-template-upload-button" class="ghost-button hidden" type="button">양식 업로드</button>
+              <button id="tracker-template-reset-button" class="ghost-button hidden" type="button">양식 초기화</button>
+              <input id="tracker-template-file-input" class="hidden" type="file" accept=".xlsx" />
+            </div>
+          </div>
+
+          <div id="tracker-template-status" class="tracker-template-status hidden">현재 서버 양식을 확인하는 중입니다.</div>
+
+          <form id="tracker-filter-form" class="filter-row">
+            <label class="wide">
+              <span>검색</span>
+              <div class="inline-field-row">
+                <input id="tracker-query" type="text" placeholder="사업명으로 검색" />
+                <button class="ghost-button" type="submit">검색</button>
+              </div>
+            </label>
+            <div class="wide tracker-region-filter">
+              <span>지역</span>
+              <div id="tracker-region-buttons" class="region-filter-row" role="group" aria-label="지역 필터"></div>
+            </div>
+            <label>
+              <span>페이지 크기</span>
+              <select id="tracker-page-size">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="40">40</option>
+              </select>
+            </label>
+          </form>
+
+          <div id="tracker-context" class="tracker-context">트래커 내보내기 실행을 선택하면 트래커 행을 확인할 수 있습니다.</div>
+          <div id="tracker-entries-list" class="entry-list empty-state">불러온 트래커 행이 없습니다.</div>
+          <div class="pagination-row">
+            <button id="entries-first-button" class="ghost-button" type="button">처음</button>
+            <button id="entries-prev-button" class="ghost-button" type="button">이전</button>
+            <span id="entries-page-meta" class="pagination-meta">1페이지</span>
+            <button id="entries-next-button" class="ghost-button" type="button">다음</button>
+            <button id="entries-last-button" class="ghost-button" type="button">마지막</button>
+          </div>
+        </section>
+
+        <section id="panel-editor" class="panel panel-editor">
+          <div class="panel-heading">
+            <div>
+              <p class="kicker">항목 편집기</p>
+              <h2>프로젝트 현황 수정</h2>
+            </div>
+          </div>
+
+          <div id="entry-empty-state" class="empty-state">프로젝트 현황 항목을 선택하면 필드를 하나씩 수정할 수 있습니다.</div>
+
+          <div id="entry-editor" class="entry-editor hidden">
+            <div class="selected-entry-summary">
+              <strong id="entry-title">-</strong>
+              <p id="entry-meta">-</p>
+            </div>
+
+            <article class="info-card">
+              <div class="panel-heading mini">
+                <div>
+                  <p class="kicker">필드 탐색</p>
+                  <h3>수정 가능한 필드</h3>
+                </div>
+              </div>
+              <div id="entry-field-grid" class="field-grid"></div>
+            </article>
+
+            <article class="info-card">
+              <div class="panel-heading mini">
+                <div>
+                  <p class="kicker">관리자 전용</p>
+                  <h3>추출 진단</h3>
+                </div>
+              </div>
+              <div id="entry-diagnostics-list" class="audit-list empty-state">상세 정보를 불러오면 source와 근거가 표시됩니다.</div>
+            </article>
+
+            <form id="entry-patch-form" class="patch-form">
+              <label>
+                <span>필드</span>
+                <select id="patch-field" required></select>
+              </label>
+              <label class="wide">
+                <span>값</span>
+                <input id="patch-value" type="text" required />
+              </label>
+              <label>
+                <span>수정자 표시명</span>
+                <input id="patch-actor-label" type="text" value="웹 콘솔" required />
+              </label>
+              <div class="field-preview">
+                <span class="detail-label">현재 적용 값</span>
+                <strong id="patch-current-value">-</strong>
+                <span id="patch-override-meta" class="mono">재정의 없음</span>
+              </div>
+              <div class="form-actions">
+                <button id="save-entry-button" class="primary-button" type="submit">재정의 저장</button>
+                <button id="clear-entry-button" class="ghost-button" type="button">재정의 해제</button>
+              </div>
+            </form>
+
+            <article class="info-card">
+              <h3>선택한 항목</h3>
+              <pre id="entry-json"></pre>
+            </article>
+
+            <article class="info-card">
+              <div class="panel-heading mini">
+                <div>
+                  <p class="kicker">감사 로그</p>
+                  <h3>최근 변경</h3>
+                </div>
+                <button id="refresh-audit-button" class="ghost-button" type="button">감사 로그 새로고침</button>
+              </div>
+              <div id="audit-log-list" class="audit-list empty-state">불러온 감사 로그가 없습니다.</div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="entry-drawer" class="drawer-shell hidden" aria-hidden="true">
+      <button id="drawer-backdrop" class="drawer-backdrop" type="button" aria-label="서랍 닫기"></button>
+      <aside class="drawer-panel" aria-label="프로젝트 현황 상세">
+        <div class="drawer-head">
+          <div>
+            <p class="kicker">항목 상세</p>
+            <h2 id="drawer-title">프로젝트 현황</h2>
+            <p id="drawer-meta" class="drawer-meta">-</p>
+          </div>
+          <button id="drawer-close-button" class="ghost-button" type="button">닫기</button>
+        </div>
+        <div class="drawer-grid">
+          <article class="info-card">
+            <h3>개요</h3>
+            <div id="drawer-status-line"></div>
+            <pre id="drawer-json"></pre>
+          </article>
+          <article class="info-card">
+            <h3>수정 가능한 필드</h3>
+            <div id="drawer-field-list" class="drawer-field-list"></div>
+          </article>
+        </div>
+      </aside>
+    </div>
+  </body>
+</html>

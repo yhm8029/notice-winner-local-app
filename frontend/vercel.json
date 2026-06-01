@@ -1,0 +1,74 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://15.164.149.28:8000/api/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/project-status",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/project-status/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/sales-recommendations",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/sales-recommendations/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/design-list",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/design-list/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/planned-orders",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/planned-orders/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/lost",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/lost/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/agency-list",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/agency-list/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app",
+      "destination": "/app/"
+    },
+    {
+      "source": "/app/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/app/:path*",
+      "destination": "/:path*"
+    }
+  ]
+}

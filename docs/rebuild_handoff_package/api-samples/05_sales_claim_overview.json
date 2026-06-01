@@ -1,0 +1,10 @@
+{
+  "method": "GET",
+  "path": "/api/sales-claims/overview",
+  "status": 200,
+  "body": {
+    "my_items": [],
+    "company_items": [],
+    "organization_users": []
+  }
+}
