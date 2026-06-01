@@ -33,6 +33,14 @@ from .sales_claims import SalesClaimRepositoryConfigError
 from .sqlite_artifacts import SqliteArtifactRepository
 from .sqlite_download_audit_logs import SqliteDownloadAuditLogRepository
 from .sqlite_login_audit_logs import SqliteLoginAuditLogRepository
+from .sqlite_local_data import SqliteBackfillConflictRepository
+from .sqlite_local_data import SqliteHomeBootstrapSnapshotRepository
+from .sqlite_local_data import SqliteRelatedNoticeCacheRepository
+from .sqlite_local_data import SqliteRelatedNoticePublicationRepository
+from .sqlite_local_data import SqliteSalesClaimRepository
+from .sqlite_local_data import SqliteTrackerChangeEventRepository
+from .sqlite_local_data import SqliteTrackerEntryRepository
+from .sqlite_local_data import SqliteTrackerEntrySnapshotRepository
 from .sqlite_logs import SqliteRunLogRepository
 from .sqlite_runs import SqliteRunRepository
 from .home_bootstrap_snapshots import HomeBootstrapSnapshotRepository
@@ -122,13 +130,6 @@ def _validate_backend(name: str, *, error_cls: type[Exception], env_label: str) 
     raise error_cls(f"{env_label} must be one of {allowed}")
 
 
-def _raise_sqlite_unsupported(*, error_cls: type[Exception], repository_name: str, env_label: str) -> None:
-    raise error_cls(
-        f"sqlite backend is not implemented for {repository_name}; set {env_label} to in_memory, supabase, "
-        "postgres, or postgrest"
-    )
-
-
 def describe_repository_backends() -> dict[str, str | bool]:
     tracker_backend = _validate_backend(
         _resolve_backend("TRACKER_REPOSITORY_BACKEND"),
@@ -211,6 +212,22 @@ def describe_repository_backends() -> dict[str, str | bool]:
         error_cls=HomeBootstrapSnapshotRepositoryConfigError,
         env_label="HOME_BOOTSTRAP_SNAPSHOT_REPOSITORY_BACKEND",
     )
+    tracker_change_event_backend = _validate_backend(
+        _resolve_backend(
+            "TRACKER_CHANGE_EVENT_REPOSITORY_BACKEND",
+            "TRACKER_REPOSITORY_BACKEND",
+        ),
+        error_cls=TrackerChangeEventRepositoryConfigError,
+        env_label="TRACKER_CHANGE_EVENT_REPOSITORY_BACKEND",
+    )
+    backfill_conflict_backend = _validate_backend(
+        _resolve_backend(
+            "BACKFILL_CONFLICT_REPOSITORY_BACKEND",
+            "TRACKER_REPOSITORY_BACKEND",
+        ),
+        error_cls=BackfillConflictRepositoryConfigError,
+        env_label="BACKFILL_CONFLICT_REPOSITORY_BACKEND",
+    )
     return {
         "tracker_entries": tracker_backend,
         "tracker_entry_snapshots": tracker_snapshot_backend,
@@ -221,6 +238,8 @@ def describe_repository_backends() -> dict[str, str | bool]:
         "related_notice_cache": related_notice_cache_backend,
         "related_notice_publications": related_notice_publication_backend,
         "sales_claims": sales_claim_backend,
+        "tracker_change_events": tracker_change_event_backend,
+        "backfill_conflicts": backfill_conflict_backend,
         "download_audit_logs": download_audit_log_backend,
         "login_audit_logs": login_audit_log_backend,
         "artifact_metadata_persistent": artifact_backend != "in_memory",
@@ -238,11 +257,7 @@ def get_tracker_entry_repository() -> TrackerEntryRepository:
     if backend == "in_memory":
         return InMemoryTrackerEntryRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=TrackerEntryRepositoryConfigError,
-            repository_name="tracker_entries",
-            env_label="TRACKER_REPOSITORY_BACKEND",
-        )
+        return SqliteTrackerEntryRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseTrackerEntryRepository(SupabaseTrackerEntryRepositoryConfig.from_env())
 
@@ -318,11 +333,7 @@ def get_related_notice_cache_repository() -> RelatedNoticeCacheRepository:
     if backend == "in_memory":
         return InMemoryRelatedNoticeCacheRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=RelatedNoticeCacheRepositoryConfigError,
-            repository_name="related_notice_cache",
-            env_label="RELATED_NOTICE_CACHE_REPOSITORY_BACKEND",
-        )
+        return SqliteRelatedNoticeCacheRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseRelatedNoticeCacheRepository(SupabaseRelatedNoticeCacheRepositoryConfig.from_env())
 
@@ -344,11 +355,7 @@ def get_related_notice_publication_repository() -> RelatedNoticePublicationRepos
     if backend == "in_memory":
         return InMemoryRelatedNoticePublicationRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=RelatedNoticePublicationRepositoryConfigError,
-            repository_name="related_notice_publications",
-            env_label="RELATED_NOTICE_PUBLICATION_REPOSITORY_BACKEND",
-        )
+        return SqliteRelatedNoticePublicationRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseRelatedNoticePublicationRepository(SupabaseRelatedNoticePublicationRepositoryConfig.from_env())
 
@@ -370,11 +377,7 @@ def get_sales_claim_repository() -> SalesClaimRepository:
     if backend == "in_memory":
         return InMemorySalesClaimRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=SalesClaimRepositoryConfigError,
-            repository_name="sales_claims",
-            env_label="SALES_CLAIM_REPOSITORY_BACKEND",
-        )
+        return SqliteSalesClaimRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseSalesClaimRepository(SupabaseSalesClaimRepositoryConfig.from_env())
 
@@ -438,11 +441,7 @@ def get_tracker_change_event_repository() -> TrackerChangeEventRepository:
     if backend == "in_memory":
         return InMemoryTrackerChangeEventRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=TrackerChangeEventRepositoryConfigError,
-            repository_name="tracker_change_events",
-            env_label="TRACKER_CHANGE_EVENT_REPOSITORY_BACKEND",
-        )
+        return SqliteTrackerChangeEventRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseTrackerChangeEventRepository(SupabaseTrackerChangeEventRepositoryConfig.from_env())
     raise AssertionError(f"unsupported tracker change event backend: {backend}")
@@ -461,11 +460,7 @@ def get_tracker_entry_snapshot_repository() -> TrackerEntrySnapshotRepository:
     if backend == "in_memory":
         return InMemoryTrackerEntrySnapshotRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=TrackerEntrySnapshotRepositoryConfigError,
-            repository_name="tracker_entry_snapshots",
-            env_label="TRACKER_ENTRY_SNAPSHOT_REPOSITORY_BACKEND",
-        )
+        return SqliteTrackerEntrySnapshotRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseTrackerEntrySnapshotRepository(SupabaseTrackerEntrySnapshotRepositoryConfig.from_env())
     raise AssertionError(f"unsupported tracker entry snapshot backend: {backend}")
@@ -484,11 +479,7 @@ def get_home_bootstrap_snapshot_repository() -> HomeBootstrapSnapshotRepository:
     if backend == "in_memory":
         return InMemoryHomeBootstrapSnapshotRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=HomeBootstrapSnapshotRepositoryConfigError,
-            repository_name="home_bootstrap_snapshots",
-            env_label="HOME_BOOTSTRAP_SNAPSHOT_REPOSITORY_BACKEND",
-        )
+        return SqliteHomeBootstrapSnapshotRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseHomeBootstrapSnapshotRepository(SupabaseHomeBootstrapSnapshotRepositoryConfig.from_env())
     raise AssertionError(f"unsupported home bootstrap snapshot backend: {backend}")
@@ -507,11 +498,7 @@ def get_backfill_conflict_repository() -> BackfillConflictRepository:
     if backend == "in_memory":
         return InMemoryBackfillConflictRepository()
     if backend == "sqlite":
-        _raise_sqlite_unsupported(
-            error_cls=BackfillConflictRepositoryConfigError,
-            repository_name="backfill_conflicts",
-            env_label="BACKFILL_CONFLICT_REPOSITORY_BACKEND",
-        )
+        return SqliteBackfillConflictRepository()
     if backend in {"supabase", "postgres", "postgrest"}:
         return SupabaseBackfillConflictRepository(SupabaseBackfillConflictRepositoryConfig.from_env())
     raise AssertionError(f"unsupported backfill conflict backend: {backend}")

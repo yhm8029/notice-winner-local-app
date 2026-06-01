@@ -11,11 +11,13 @@ Web repo for the project tracker rebuild.
 
 ## Tracker Repository Backend
 
-The tracker APIs support two repository backends.
+The tracker APIs support local SQLite, in-memory, and Supabase/Postgres repository backends.
 
 - `TRACKER_REPOSITORY_BACKEND=in_memory`
   - forces the local in-memory repository
   - uses seeded sample rows for local API scaffolding
+- `TRACKER_REPOSITORY_BACKEND=sqlite`
+  - reads and writes `tracker_entries` and `tracker_entry_audit_logs` in a local SQLite `local_rows` database
 - `TRACKER_REPOSITORY_BACKEND=supabase`
   - reads `tracker_entries_effective`
   - applies edits through `apply_tracker_entry_override(...)`
@@ -57,15 +59,23 @@ Default selection:
 
 Artifact and log repositories follow the same pattern.
 
-SQLite runtime adapters are currently available for:
+SQLite runtime adapters are available for:
 
+- `TRACKER_REPOSITORY_BACKEND=sqlite`
 - `RUN_REPOSITORY_BACKEND=sqlite`
 - `ARTIFACT_REPOSITORY_BACKEND=sqlite`
 - `RUN_LOG_REPOSITORY_BACKEND=sqlite`
+- `RELATED_NOTICE_CACHE_REPOSITORY_BACKEND=sqlite`
+- `RELATED_NOTICE_PUBLICATION_REPOSITORY_BACKEND=sqlite`
+- `SALES_CLAIM_REPOSITORY_BACKEND=sqlite`
+- `TRACKER_CHANGE_EVENT_REPOSITORY_BACKEND=sqlite`
 - `DOWNLOAD_AUDIT_LOG_REPOSITORY_BACKEND=sqlite`
 - `LOGIN_AUDIT_LOG_REPOSITORY_BACKEND=sqlite`
+- `TRACKER_ENTRY_SNAPSHOT_REPOSITORY_BACKEND=sqlite`
+- `HOME_BOOTSTRAP_SNAPSHOT_REPOSITORY_BACKEND=sqlite`
+- `BACKFILL_CONFLICT_REPOSITORY_BACKEND=sqlite`
 
-Set `LOCAL_SQLITE_PATH` to the SQLite file created from the Supabase export. If it is omitted, the app uses `data/local.sqlite3`. Tracker entries, sales claims, related notice caches, snapshots, and backfill conflicts remain on their existing backends until their SQLite adapters are added.
+Set `LOCAL_SQLITE_PATH` to the SQLite file created from the Supabase export. If it is omitted, the app uses `data/local.sqlite3`. The SQLite adapters preserve Supabase-exported JSON rows and keep subsequent local edits in the same database.
 
 ## Artifact Files
 
@@ -229,7 +239,7 @@ Open the local console in one command:
 Start only the API server:
 
 ```powershell
-.\scripts\start_local_api.ps1 -Port 8000
+.\scripts\start_local_api.ps1 -Port 8000 -SQLitePath data\local.sqlite3
 ```
 
 Run both parity reports with the GUI comparison repo path set explicitly:
@@ -238,6 +248,7 @@ Run both parity reports with the GUI comparison repo path set explicitly:
 .\scripts\run_phase1_reports.ps1 -GuiSourceRoot "C:\path\to\gui-repo" -SeedLimit 3
 ```
 
+- `start_local_api.ps1 -SQLitePath ...` disables hosted login, clears Supabase runtime env vars, and switches all supported repositories to SQLite
 - `start_local_console.ps1` starts the API server and opens `http://127.0.0.1:8000/app/`
 - `run_phase1_reports.ps1` runs `phase1_equivalence_runner.py` and `phase1_artifact_diff_runner.py` sequentially
 - parity reports require an explicit `-GuiSourceRoot` or `GUI_PARITY_SOURCE_ROOT`
