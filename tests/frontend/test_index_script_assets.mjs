@@ -32,8 +32,6 @@ test("index.html loads the modular runtime assets before app.js", () => {
   const runtimeScripts = [
     "/app-shell-runtime.js",
     "/app-support-runtime.js",
-    "/admin-google-sheets-cache-runtime.js",
-    "/admin-google-sheets-runtime.js",
     "/admin-tabs-runtime.js",
     "/app-controller-deps.js",
     "/org-admin-controller.js",
@@ -43,9 +41,6 @@ test("index.html loads the modular runtime assets before app.js", () => {
     "/tracker-controller-runs-runtime.js",
     "/tracker-controller-entries-runtime.js",
     "/tracker-controller.js",
-    "/admin-google-sheets-controller.js",
-    "/app-admin-google-sheets-state-runtime.js",
-    "/app-admin-google-sheets-runtime.js",
     "/app-bootstrap-bridge.js",
   ];
 
@@ -105,25 +100,23 @@ test("app runtime body is cache busted for auth submit guard fixes", () => {
   const html = readHtmlSource();
   const appSource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app.js"), "utf8");
 
-  assert.match(html, /\/app\.js\?v=20260429c/);
-  assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260429c/);
+  assert.match(html, /\/app\.js\?v=20260503b/);
+  assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260503b/);
 });
 
-test("index.html keeps the admin google sheets shell mount points", () => {
+test("index.html does not load Google Sheets runtime assets", () => {
   const html = readHtmlSource();
 
-  for (const selector of [
-    'id="admin-header-bar"',
-    'id="admin-top-nav"',
-    'id="admin-top-nav-list"',
-    'id="admin-embed-panel"',
-    'id="admin-embed-title"',
-    'id="admin-embed-subtitle"',
-    'id="admin-google-sheets-sync-feedback"',
-    'id="admin-google-sheet-status"',
-    'id="admin-google-sheet-table"',
-    'id="admin-embed-empty"',
+  for (const removedAsset of [
+    "/admin-google-sheets-cache-runtime.js",
+    "/admin-google-sheets-runtime.js",
+    "/admin-google-sheets-controller.js",
+    "/app-admin-google-sheets-state-runtime.js",
+    "/app-admin-google-sheets-runtime.js",
   ]) {
-    assert.match(html, new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.equal(html.includes(removedAsset), false, `${removedAsset} should not be loaded`);
   }
+
+  assert.equal(html.includes("admin-google"), false);
+  assert.equal(html.includes("Google Sheets"), false);
 });

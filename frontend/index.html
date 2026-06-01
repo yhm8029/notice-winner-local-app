@@ -27,8 +27,6 @@
     <script defer src="/tracker-missing-report-runtime.js?v=20260330ab"></script>
     <script defer src="/console-data-runtime.js?v=20260426a"></script>
     <script defer src="/auth-session-runtime.js?v=20260426i"></script>
-    <script defer src="/admin-google-sheets-cache-runtime.js?v=20260426g"></script>
-    <script defer src="/admin-google-sheets-runtime.js?v=20260426g"></script>
     <script defer src="/admin-tabs-runtime.js?v=20260503a"></script>
     <script defer src="/app-shell-runtime.js?v=20260503a"></script>
     <script defer src="/app-support-admin-runtime.js?v=20260503a"></script>
@@ -62,9 +60,6 @@
     <script defer src="/tracker-controller-runs-runtime.js?v=20260424a"></script>
     <script defer src="/tracker-controller-entries-runtime.js?v=20260424a"></script>
     <script defer src="/tracker-controller.js?v=20260409a"></script>
-    <script type="module" src="/admin-google-sheets-controller.js?v=20260427a"></script>
-    <script defer src="/app-admin-google-sheets-state-runtime.js?v=20260426a"></script>
-    <script defer src="/app-admin-google-sheets-runtime.js?v=20260426e"></script>
     <script type="module" src="/auth-controller.js?v=20260426c"></script>
     <script type="module" src="/app-auth-bridge.js?v=20260417a"></script>
     <script type="module" src="/project-related-controller.js?v=20260503l"></script>
@@ -185,23 +180,6 @@
         <button id="auth-session-profile-button" class="ghost-button" type="button">회원정보</button>
         <button id="auth-session-logout-button" class="ghost-button" type="button">로그아웃</button>
       </div>
-
-      <section id="admin-embed-panel" class="panel panel-admin-embed hidden">
-        <div class="panel-heading">
-          <div>
-            <p class="kicker">Admin</p>
-            <h2 id="admin-embed-title">-</h2>
-          </div>
-          <button id="admin-google-sheets-sync-button" class="ghost-button" type="button" title="Google Sheets sync + refresh">
-            Google Sheets ?숆린??
-          </button>
-        </div>
-        <p id="admin-embed-subtitle" class="hero-subcopy"></p>
-        <div id="admin-google-sheets-sync-feedback" class="hint-text hidden"></div>
-        <div id="admin-google-sheet-status" class="admin-google-sheet-status hidden"></div>
-        <div id="admin-google-sheet-table" class="admin-google-sheet-table-slot hidden"></div>
-        <div id="admin-embed-empty" class="empty-state hidden"></div>
-      </section>
 
       <main class="layout-grid">
         <section id="panel-dashboard" class="panel panel-dashboard">

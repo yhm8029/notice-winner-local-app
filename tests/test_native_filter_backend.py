@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from backend.services import native_filter_backend
+from backend.services import native_filter_search_runtime
 from backend.services.native_filter_backend import SearchResult
 from backend.services.native_filter_backend import build_queries
 from backend.services.native_filter_backend import fetch_candidates_from_queries
@@ -15,6 +16,15 @@ from backend.services.native_filter_backend import run_collect_native
 
 
 class NativeFilterBackendTests(unittest.TestCase):
+    def test_default_query_search_is_disabled_for_local_app(self) -> None:
+        with patch(
+            "requests.sessions.Session.request",
+            side_effect=AssertionError("generic web search must not run in the local app"),
+        ):
+            rows = native_filter_search_runtime.search_results_without_cache("design winner", 8)
+
+        self.assertEqual(rows, [])
+
     def test_build_queries_orders_bid_no_then_base_then_base_org(self) -> None:
         queries = build_queries("부산 설계공모", "부산광역시", "R25BK00000001")
         self.assertEqual(len(queries), 6)
@@ -81,7 +91,7 @@ class NativeFilterBackendTests(unittest.TestCase):
         messages: list[str] = []
         with patch.object(native_filter_backend, "EARLY_STOP_ENABLED", True):
             with patch(
-                "backend.services.native_filter_backend.search_google_html",
+                "backend.services.native_filter_backend.search_results_without_cache",
                 return_value=[
                     SearchResult(
                         query='"R25BK00554120" "당선"',
@@ -150,7 +160,7 @@ class NativeFilterBackendTests(unittest.TestCase):
                 )
 
             with patch(
-                "backend.services.native_filter_backend.search_google_html",
+                "backend.services.native_filter_backend.search_results_without_cache",
                 side_effect=AssertionError("search should not run when direct URL exists"),
             ):
                 run_collect_native(input_csv, output_csv, progress_cb=progress_messages.append)
@@ -220,7 +230,7 @@ class NativeFilterBackendTests(unittest.TestCase):
                 )
 
             with patch(
-                "backend.services.native_filter_backend.search_google_html",
+                "backend.services.native_filter_backend.search_results_without_cache",
                 side_effect=AssertionError("search should not run when direct URL exists"),
             ):
                 run_collect_native(input_csv, output_csv)
@@ -292,7 +302,10 @@ class NativeFilterBackendTests(unittest.TestCase):
                     )
                 ]
 
-            with patch("backend.services.native_filter_backend.search_google_html", side_effect=_fake_search):
+            with patch(
+                "backend.services.native_filter_backend.search_results_without_cache",
+                side_effect=_fake_search,
+            ):
                 run_collect_native(
                     input_csv,
                     output_csv,
@@ -343,7 +356,10 @@ class NativeFilterBackendTests(unittest.TestCase):
                 return []
 
             with patch.object(native_filter_backend, "EARLY_STOP_ENABLED", False):
-                with patch("backend.services.native_filter_backend.search_google_html", side_effect=_fake_search):
+                with patch(
+                    "backend.services.native_filter_backend.search_results_without_cache",
+                    side_effect=_fake_search,
+                ):
                     run_collect_native(
                         input_csv,
                         output_csv,
@@ -395,7 +411,7 @@ class NativeFilterBackendTests(unittest.TestCase):
                     )
 
             with patch(
-                "backend.services.native_filter_backend.search_google_html",
+                "backend.services.native_filter_backend.search_results_without_cache",
                 return_value=[
                     SearchResult(
                         query='"design contest" result',
