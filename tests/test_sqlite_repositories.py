@@ -24,7 +24,6 @@ from backend.repositories.factory import reset_login_audit_log_repository
 from backend.repositories.factory import reset_run_log_repository
 from backend.repositories.factory import reset_run_repository
 from backend.repositories.factory import reset_tracker_entry_repository
-from backend.repositories.tracker_entries import TrackerEntryRepositoryConfigError
 
 
 SCHEMA_SQL = """
@@ -95,14 +94,15 @@ class SqliteRepositoryTests(unittest.TestCase):
         self.assertEqual(summary["related_notice_cache"], "in_memory")
         self.assertEqual(summary["sales_claims"], "in_memory")
 
-    def test_unimplemented_sqlite_repository_getter_raises_config_error(self) -> None:
+    def test_sqlite_tracker_repository_getter_is_supported(self) -> None:
         env = self._env()
         env["TRACKER_REPOSITORY_BACKEND"] = "sqlite"
         env["RUN_REPOSITORY_BACKEND"] = "in_memory"
         with patch.dict(os.environ, env, clear=False):
             reset_tracker_entry_repository()
-            with self.assertRaisesRegex(TrackerEntryRepositoryConfigError, "not implemented for tracker_entries"):
-                get_tracker_entry_repository()
+            repository = get_tracker_entry_repository()
+
+        self.assertIsNotNone(repository)
 
     def test_sqlite_run_repository_persists_and_filters_runs(self) -> None:
         with patch.dict(os.environ, self._env(), clear=False):
