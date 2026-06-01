@@ -454,7 +454,52 @@ class AuthRuntimeTests(unittest.TestCase):
             os.environ,
             {
                 "PHASE2_AUTH_ENABLED": "",
+                "LOCAL_APP_DISABLE_LOGIN": "",
                 "BOOTSTRAP_PLATFORM_ADMIN_EMAIL": "",
+                "SUPABASE_URL": "",
+                "SUPABASE_SECRET_KEY": "",
+                "SUPABASE_SERVICE_ROLE_KEY": "",
+                "SUPABASE_SECRET": "",
+            },
+            clear=False,
+        ):
+            self.assertFalse(auth_runtime.auth_is_enabled())
+
+    def test_local_app_disable_login_overrides_supabase_auth_configuration(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {
+                "LOCAL_APP_DISABLE_LOGIN": "1",
+                "PHASE2_AUTH_ENABLED": "1",
+                "BOOTSTRAP_PLATFORM_ADMIN_EMAIL": "admin@example.com",
+                "SUPABASE_URL": "https://example.supabase.co",
+                "SUPABASE_SECRET_KEY": "phase2-secret",
+            },
+            clear=False,
+        ):
+            self.assertFalse(auth_runtime.auth_is_enabled())
+
+    def test_explicit_phase2_auth_disabled_overrides_bootstrap_email(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {
+                "LOCAL_APP_DISABLE_LOGIN": "",
+                "PHASE2_AUTH_ENABLED": "0",
+                "BOOTSTRAP_PLATFORM_ADMIN_EMAIL": "admin@example.com",
+                "SUPABASE_URL": "https://example.supabase.co",
+                "SUPABASE_SECRET_KEY": "phase2-secret",
+            },
+            clear=False,
+        ):
+            self.assertFalse(auth_runtime.auth_is_enabled())
+
+    def test_explicit_phase2_auth_enabled_still_requires_supabase_configuration(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {
+                "LOCAL_APP_DISABLE_LOGIN": "",
+                "PHASE2_AUTH_ENABLED": "1",
+                "BOOTSTRAP_PLATFORM_ADMIN_EMAIL": "admin@example.com",
                 "SUPABASE_URL": "",
                 "SUPABASE_SECRET_KEY": "",
                 "SUPABASE_SERVICE_ROLE_KEY": "",

@@ -227,6 +227,7 @@
         if (
           response.status === 401
           && state.auth.enabled
+          && !state.auth.localSession
           && !softProtected401
           && !options.__skipAuthRetry
           && !String(path || "").startsWith("/api/auth/")
@@ -236,7 +237,7 @@
             return api(path, { ...options, __skipAuthRetry: true });
           }
         }
-        if (response.status === 401 && state.auth.enabled && !softProtected401) {
+        if (response.status === 401 && state.auth.enabled && !state.auth.localSession && !softProtected401) {
           state.auth.authenticated = false;
           state.auth.authorized = false;
           state.auth.user = null;

@@ -327,3 +327,37 @@ test("normalizeAuthSession does not keep a platform admin account creation flag"
 
   assert.equal("platformAdminAccountCreationEnabled" in session, false);
 });
+
+test("buildAuthUiViewModel hides login and session chrome for local admin sessions", () => {
+  const runtime = loadRuntime();
+
+  const view = runtime.buildAuthUiViewModel(
+    {
+      localSession: true,
+      enabled: true,
+      checked: true,
+      checking: false,
+      authenticated: true,
+      authorized: true,
+      mode: "sign_in",
+      user: {
+        display_name: "Local Admin",
+        email: "local-admin@example.local",
+        organization_name: "Local",
+        role: "platform_admin",
+      },
+      message: "",
+    },
+    {
+      shouldShowSignUpMode: () => true,
+      formatOrgRoleLabel: (value) => `role:${value}`,
+    },
+  );
+
+  assert.equal(view.authEnabled, true);
+  assert.equal(view.authorized, true);
+  assert.equal(view.authShellHidden, true);
+  assert.equal(view.consoleShellHidden, false);
+  assert.equal(view.authMetaHidden, true);
+  assert.equal(view.authSessionActionsHidden, true);
+});

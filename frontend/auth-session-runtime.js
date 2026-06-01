@@ -157,6 +157,7 @@
     const authEnabled = Boolean(auth.enabled);
     const authorized = Boolean(auth.authenticated && auth.authorized);
     const checking = Boolean(auth.checking);
+    const localSession = Boolean(auth.localSession);
     const signUpAllowed = Boolean(shouldShowSignUpMode());
     const isSignUp = signUpAllowed && auth.mode === "sign_up";
     const previewStatus = String(auth?.invitationPreview?.status || "");
@@ -201,8 +202,8 @@
       authShellHidden: !checking && (!authEnabled || authorized),
       consoleShellHidden: checking || (authEnabled && !authorized),
       authShellActive: checking || (authEnabled && !authorized),
-      authMetaHidden: !authorized,
-      authSessionActionsHidden: !authorized,
+      authMetaHidden: !authorized || localSession,
+      authSessionActionsHidden: !authorized || localSession,
     };
   }
 

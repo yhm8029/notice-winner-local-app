@@ -1635,6 +1635,40 @@ class Phase1ApiTests(unittest.TestCase):
         self.assertEqual([item["user_agent"] for item in payload["items"]], ["ua-4", "ua-3"])
         self.assertEqual({item["organization_id"] for item in payload["items"]}, {str(DEFAULT_PHASE1_ORGANIZATION_ID)})
 
+    def test_login_audit_logs_remain_available_without_login_when_phase2_auth_is_disabled(self) -> None:
+        from backend.api import app as app_module
+
+        repository = InMemoryLoginAuditLogRepository()
+        repository.create_log(
+            organization_id=DEFAULT_PHASE1_ORGANIZATION_ID,
+            user_id=DEFAULT_PHASE1_INTERNAL_USER_ID,
+            user_email="admin@example.com",
+            user_role="platform_admin",
+            ip_address="203.0.113.9",
+            user_agent="ua-local",
+        )
+
+        with (
+            patch.dict(
+                os.environ,
+                {
+                    "LOCAL_APP_DISABLE_LOGIN": "",
+                    "PHASE2_AUTH_ENABLED": "0",
+                    "BOOTSTRAP_PLATFORM_ADMIN_EMAIL": "admin@example.com",
+                    "SUPABASE_URL": "https://example.supabase.co",
+                    "SUPABASE_SECRET_KEY": "phase2-secret",
+                },
+                clear=False,
+            ),
+            patch.object(app_module, "_get_login_audit_log_repository", return_value=repository, create=True),
+            TestClient(app_module.app) as client,
+        ):
+            response = client.get("/api/admin/login-audit-logs?limit=5")
+
+        self.assertEqual(response.status_code, 200, response.text)
+        payload = response.json()
+        self.assertEqual([item["user_agent"] for item in payload["items"]], ["ua-local"])
+
     def test_admin_google_sheets_bootstrap_returns_tabs_with_row_and_column_counts(self) -> None:
         from backend.api import app as app_module
 

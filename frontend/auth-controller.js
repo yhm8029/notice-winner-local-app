@@ -202,6 +202,19 @@ export function createAuthController(deps = {}) {
 
   async function initializeAuthGate(options = {}) {
     void options;
+    if (deps.state.auth.localSession) {
+      deps.state.auth.enabled = true;
+      deps.state.auth.checked = true;
+      deps.state.auth.checking = false;
+      deps.state.auth.authenticated = true;
+      deps.state.auth.authorized = true;
+      renderAuthUi();
+      if (typeof deps.syncUiModeFromLocation === "function") {
+        deps.syncUiModeFromLocation();
+      }
+      requireFunction("syncUiModeChrome")();
+      return true;
+    }
     deps.state.auth.checking = true;
     renderAuthUi();
     try {
@@ -323,6 +336,9 @@ export function createAuthController(deps = {}) {
   }
 
   async function importAuthSessionFromLocationHash() {
+    if (deps.state.auth.localSession) {
+      return;
+    }
     const currentWindow = getWindow();
     const rawHash = String(currentWindow.location.hash || "").replace(/^#/, "").trim();
     if (!rawHash) {
@@ -410,6 +426,15 @@ export function createAuthController(deps = {}) {
   }
 
   async function refreshAuthSessionState({ silent = false } = {}) {
+    if (deps.state.auth.localSession) {
+      deps.state.auth.enabled = true;
+      deps.state.auth.checked = true;
+      deps.state.auth.checking = false;
+      deps.state.auth.authenticated = true;
+      deps.state.auth.authorized = true;
+      renderAuthUi();
+      return null;
+    }
     if (!deps.state.auth.enabled) {
       return null;
     }

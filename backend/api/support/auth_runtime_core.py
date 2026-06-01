@@ -199,13 +199,17 @@ class AuthContext:
     access_expires_at: int
 
 def auth_is_enabled() -> bool:
+    if _normalize_truthy(os.getenv("LOCAL_APP_DISABLE_LOGIN", "")):
+        return False
     if not _supabase_url():
         return False
     if not _service_api_key():
         return False
-    explicit = _normalize_truthy(os.getenv("PHASE2_AUTH_ENABLED", ""))
+    explicit_raw = os.getenv("PHASE2_AUTH_ENABLED", "").strip()
+    if explicit_raw:
+        return _normalize_truthy(explicit_raw)
     bootstrap_email = bootstrap_platform_admin_email()
-    return explicit or bool(bootstrap_email)
+    return bool(bootstrap_email)
 
 def bootstrap_platform_admin_email() -> str:
     return os.getenv("BOOTSTRAP_PLATFORM_ADMIN_EMAIL", "").strip().lower()
