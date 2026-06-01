@@ -1,12 +1,42 @@
 ﻿from __future__ import annotations
 
+import json
 from pathlib import Path
+from uuid import uuid4
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_letter
 
 from backend.services import artifact_files
+
+
+def test_write_json_artifact_preserves_existing_file_when_serialization_fails(monkeypatch, tmp_path):
+    artifacts_root = tmp_path / "artifacts"
+    monkeypatch.setenv("ARTIFACTS_ROOT", str(artifacts_root))
+    run_id = uuid4()
+    written = artifact_files.write_json_artifact(
+        run_id=run_id,
+        file_name="related_notices.json",
+        payload={"status": "previous"},
+    )
+
+    class Unserializable:
+        pass
+
+    try:
+        artifact_files.write_json_artifact(
+            run_id=run_id,
+            file_name="related_notices.json",
+            payload={"status": Unserializable()},
+        )
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("write_json_artifact should raise serialization errors")
+
+    assert json.loads(written.absolute_path.read_text(encoding="utf-8")) == {"status": "previous"}
+    assert not list(written.absolute_path.parent.glob(".related_notices.json.*.tmp"))
 
 
 def _write_template(path: Path, *, site_headers: tuple[str, str] | None = None) -> None:
