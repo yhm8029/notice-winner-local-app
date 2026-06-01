@@ -192,17 +192,6 @@ def _capture_screenshots_with_playwright(chrome_path: str, base_url: str) -> lis
         page.screenshot(path=str(admin_path), full_page=True)
         results.append({"path": str(admin_path.relative_to(ROOT)), "exists": admin_path.exists(), "bytes": admin_path.stat().st_size})
 
-        page.goto(f"{base_url}/?mode=admin&admin_tab=sheet-1", wait_until="domcontentloaded")
-        page.wait_for_timeout(3500)
-        if "실사용자 모드" in (page.locator("#ui-mode-label").text_content(timeout=1000) or ""):
-            try:
-                page.click("#mode-toggle-button", timeout=3000)
-                page.wait_for_timeout(1500)
-            except Exception:
-                pass
-        sheets_path = screenshot_dir / "03_admin_google_sheets.png"
-        page.screenshot(path=str(sheets_path), full_page=True)
-        results.append({"path": str(sheets_path.relative_to(ROOT)), "exists": sheets_path.exists(), "bytes": sheets_path.stat().st_size})
 
         page.close()
         context.close()
@@ -246,7 +235,6 @@ def _api_samples(base_url: str) -> dict[str, Any]:
         ("05_sales_claim_overview", "GET", "/api/sales-claims/overview", None),
         ("06_sales_claim_summary_by_user", "GET", "/api/sales-claims/summary-by-user", None),
         ("07_admin_organization_bootstrap", "GET", "/api/admin/organization-panel-bootstrap", None),
-        ("08_admin_google_sheets_bootstrap", "GET", "/api/admin/google-sheets/bootstrap", None),
         ("09_tracker_missing_report", "GET", "/api/tracker-entries/missing-report", None),
     ]
     for name, method, path, payload in endpoints:
@@ -358,13 +346,13 @@ def _write_checklist() -> None:
 - [ ] 종료는 `close_won`, `close_lost`로 구분된다.
 - [ ] 종료된 건은 진행 중 목록에서 빠지고 archive/종료 정리에서 보인다.
 
-## 5. 관리자/Google Sheets/감사
+## 5. 관리자/local admin/감사
 
 - [ ] 관리자 모드 상단 탭이 표시된다.
 - [ ] 사용자/초대/소속 상태 관리가 동작한다.
 - [ ] platform admin 계정 생성/비밀번호 초기화 도구가 권한 제한된다.
-- [ ] Google Sheets 관리자 화면에서 tab 목록, table, 컬럼 필터, sync 상태가 표시된다.
-- [ ] 로그인, 초대, 사용자 변경, sales action, 다운로드, Google Sheets sync가 감사 로그에 남는다.
+- [ ] local admin 관리자 화면에서 tab 목록, table, 컬럼 필터, sync 상태가 표시된다.
+- [ ] 로그인, 초대, 사용자 변경, sales action, 다운로드, local admin sync가 감사 로그에 남는다.
 
 ## 6. 클린룸/IP
 
@@ -427,7 +415,7 @@ def _write_flow_script() -> None:
 2. 사용자/초대 관리 화면을 보여준다.
 3. 초대 생성 form, 초대 링크 fallback, 사용자 목록을 보여준다.
 4. 감사 로그를 조회한다.
-5. Google Sheets 관리자 탭을 열고 sheet 목록, table, 컬럼 필터, sync 버튼을 보여준다.
+5. local admin 관리자 탭을 열고 sheet 목록, table, 컬럼 필터, sync 버튼을 보여준다.
 
 ## 6. 마무리
 
@@ -536,7 +524,6 @@ def export_assets() -> None:
                 screenshot_targets = [
                     ("01_user_home.png", f"{base_url}/?mode=user"),
                     ("02_admin_project_status.png", f"{base_url}/?mode=admin"),
-                    ("03_admin_google_sheets.png", f"{base_url}/?mode=admin&admin_tab=sheet-1"),
                     ("04_login_invite_preview.png", f"{base_url}/?invite_token=synthetic-preview-token"),
                 ]
                 for file_name, url in screenshot_targets:

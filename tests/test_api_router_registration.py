@@ -115,17 +115,9 @@ class ApiRouterRegistrationTests(unittest.TestCase):
 
         self.assertIn("/api/admin/accounts", admin_paths)
         self.assertIn("/api/admin/accounts/{user_id}/password-reset", admin_paths)
-        self.assertIn("/api/admin/google-sheets/bootstrap", admin_paths)
-        self.assertIn("/api/admin/google-sheets/sheets/{sheet_key}", admin_paths)
-        self.assertIn("/api/admin/google-sheets/sync", admin_paths)
-        self._assert_route_is_owned_by_module(app.routes, "GET", "/api/admin/google-sheets/bootstrap", "backend.api.routers.admin")
-        self._assert_route_is_owned_by_module(
-            app.routes,
-            "GET",
-            "/api/admin/google-sheets/sheets/{sheet_key}",
-            "backend.api.routers.admin",
-        )
-        self._assert_route_is_owned_by_module(app.routes, "POST", "/api/admin/google-sheets/sync", "backend.api.routers.admin")
+        self.assertNotIn("/api/admin/google-sheets/bootstrap", admin_paths)
+        self.assertNotIn("/api/admin/google-sheets/sheets/{sheet_key}", admin_paths)
+        self.assertNotIn("/api/admin/google-sheets/sync", admin_paths)
 
     def test_backfill_conflicts_router_owns_backfill_conflict_paths(self) -> None:
         from backend.api.app import app

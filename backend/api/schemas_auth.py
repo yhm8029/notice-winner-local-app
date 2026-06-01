@@ -269,51 +269,6 @@ class OrganizationAdminBootstrapResponse(BaseModel):
     generated_at: datetime
 
 
-class AdminGoogleSheetTabItem(BaseModel):
-    key: str
-    sheet_id: int | None = None
-    raw_title: str = ""
-    display_title: str = ""
-    sheet_order: int = 0
-    row_count: int = 0
-    column_count: int = 0
-
-
-class AdminGoogleSheetsBootstrapResponse(BaseModel):
-    enabled: bool = False
-    source_title: str = ""
-    source_url: str = ""
-    sync_status: str = "not_configured"
-    last_successful_sync_at: datetime | None = None
-    last_failed_sync_at: datetime | None = None
-    last_error: str = ""
-    tabs: list[AdminGoogleSheetTabItem] = Field(default_factory=list)
-
-
-class AdminGoogleSheetCellItem(BaseModel):
-    text: str = ""
-    href: str = ""
-
-
-class AdminGoogleSheetPayloadResponse(BaseModel):
-    key: str
-    synced_at: datetime | None = None
-    sheet_id: int | None = None
-    raw_title: str = ""
-    display_title: str = ""
-    headers: list[str] = Field(default_factory=list)
-    header_cells: list[AdminGoogleSheetCellItem] = Field(default_factory=list)
-    rows: list[list[Any]] = Field(default_factory=list)
-    row_cells: list[list[AdminGoogleSheetCellItem]] = Field(default_factory=list)
-    row_count: int = 0
-    column_count: int = 0
-
-
-class AdminGoogleSheetsSyncResponse(BaseModel):
-    started: bool = False
-    sync_status: str = "not_configured"
-
-
 class AuthInvitationPreviewResponse(BaseModel):
     organization_id: UUID | None = None
     organization_name: str = ""
@@ -329,11 +284,6 @@ class AuthInvitationPreviewResponse(BaseModel):
 
 
 __all__ = [
-    "AdminGoogleSheetCellItem",
-    "AdminGoogleSheetPayloadResponse",
-    "AdminGoogleSheetTabItem",
-    "AdminGoogleSheetsBootstrapResponse",
-    "AdminGoogleSheetsSyncResponse",
     "AuthAdminAccountCreateRequest",
     "AuthAdminAccountItem",
     "AuthAdminAccountPasswordResetRequest",

@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Callable
 from backend.services import native_filter_search_runtime
 from backend.services.native_gui_rules import is_auxiliary_service_project
-from backend.services.native_filter_search_runtime import SearchResult
 from backend.services.native_filter_search_runtime import build_early_stop_log
 from backend.services.native_filter_search_runtime import is_official_domain
 from backend.services.native_filter_search_runtime import merge_candidate_lists
@@ -29,16 +28,15 @@ STAGE_1_QUERY_COUNT = 3
 EARLY_STOP_ENABLED = True
 
 
-def search_google_html(query: str, num: int = 10, sleep_sec: float = 0.2) -> list[SearchResult]:
-    return native_filter_search_runtime.search_google_html(query, num=num, sleep_sec=sleep_sec)
+SearchResult = native_filter_search_runtime.SearchResult
 
 
-def _search_results_without_cache(query: str, num: int) -> list[SearchResult]:
-    return native_filter_search_runtime.search_results_without_cache(query, num, search_fn=search_google_html)
+def search_results_without_cache(query: str, num: int) -> list[SearchResult]:
+    return native_filter_search_runtime.search_results_without_cache(query, num)
 
 
 def _make_query_cache_search_provider() -> tuple[Callable[[str, int], list[SearchResult]], dict[str, int]]:
-    return native_filter_search_runtime.make_query_cache_search_provider(search_fn=search_google_html)
+    return native_filter_search_runtime.make_query_cache_search_provider(search_fn=search_results_without_cache)
 
 
 def _attachment_fields(prefix: str) -> list[str]:
@@ -551,7 +549,7 @@ def fetch_candidates_from_queries(
     query_start_index: int = 1,
 ) -> list[dict[str, object]]:
     aggregated: dict[str, dict[str, object]] = {}
-    provider = search_provider or _search_results_without_cache
+    provider = search_provider or search_results_without_cache
     for offset, query in enumerate(queries):
         if should_stop is not None and should_stop():
             raise InterruptedError("Stopped by user.")

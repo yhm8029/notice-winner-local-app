@@ -43,13 +43,12 @@
 - [ ] 종료는 `close_won`, `close_lost`로 구분된다.
 - [ ] 종료된 건은 진행 중 목록에서 빠지고 archive/종료 정리에서 보인다.
 
-## 5. 관리자/Google Sheets/감사
+## 5. 관리자/감사
 
 - [ ] 관리자 모드 상단 탭이 표시된다.
 - [ ] 사용자/초대/소속 상태 관리가 동작한다.
 - [ ] platform admin 계정 생성/비밀번호 초기화 도구가 권한 제한된다.
-- [ ] Google Sheets 관리자 화면에서 tab 목록, table, 컬럼 필터, sync 상태가 표시된다.
-- [ ] 로그인, 초대, 사용자 변경, sales action, 다운로드, Google Sheets sync가 감사 로그에 남는다.
+- [ ] 로그인, 초대, 사용자 변경, sales action, 다운로드가 감사 로그에 남는다.
 
 ## 6. 클린룸/IP
 

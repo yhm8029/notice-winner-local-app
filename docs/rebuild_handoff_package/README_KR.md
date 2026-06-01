@@ -49,10 +49,6 @@
     "status": 503,
     "path": "/api/admin/organization-panel-bootstrap"
   },
-  "08_admin_google_sheets_bootstrap": {
-    "status": 200,
-    "path": "/api/admin/google-sheets/bootstrap"
-  },
   "09_tracker_missing_report": {
     "status": 200,
     "path": "/api/tracker-entries/missing-report"
@@ -73,11 +69,6 @@
     "path": "docs\\rebuild_handoff_package\\screenshots\\02_admin_project_status.png",
     "exists": true,
     "bytes": 1281443
-  },
-  {
-    "path": "docs\\rebuild_handoff_package\\screenshots\\03_admin_google_sheets.png",
-    "exists": true,
-    "bytes": 1228918
   },
   {
     "path": "docs\\rebuild_handoff_package\\screenshots\\04_login_invite_preview_shell.png",
