@@ -129,6 +129,16 @@ Add `-DownloadEc2Files` to archive and extract the EC2 paths under the EC2 backu
 
 Outputs are written under `backups/supabase/<timestamp>/` and `backups/ec2/<timestamp>/`. The Supabase manifest contains table row counts and checksums. The EC2 manifest contains app-owned file paths, sizes, and modified timestamps. `artifact_reconciliation.json` reports whether `run_artifacts.storage_path` rows have matching EC2 files.
 
+To create a local SQLite staging database from exported Supabase table JSONL files:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\create_local_sqlite_db.py `
+  --tables-dir backups\supabase\<timestamp>\tables `
+  --output data\local.sqlite3
+```
+
+This staging database preserves each Supabase row as JSON in `local_rows`; repository-specific SQLite tables/adapters are added in the next migration step. The command validates `manifest.json` when present. Add `--allow-partial` only when intentionally importing a backup with known failed or missing table exports, and add `--replace` only when intentionally overwriting an existing local SQLite file.
+
 ## HTTP Smoke Test
 
 ```powershell
