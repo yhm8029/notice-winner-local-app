@@ -30,16 +30,32 @@ def normalize_path_for_match(value: str) -> str:
     return normalized
 
 
+def artifact_match_candidates(value: str) -> set[str]:
+    normalized = normalize_path_for_match(value)
+    candidates = {normalized} if normalized else set()
+    marker = "output/artifacts/"
+    if marker in normalized:
+        candidates.add(normalized.replace(marker, "output/runs/", 1))
+    return candidates
+
+
 def reconcile_artifacts(artifacts: list[dict[str, Any]], ec2_files: list[dict[str, Any]]) -> dict[str, Any]:
     file_paths = [(item, normalize_path_for_match(str(item.get("path") or ""))) for item in ec2_files]
     matched: list[dict[str, Any]] = []
     missing: list[dict[str, Any]] = []
     for artifact in artifacts:
-        storage_path = normalize_path_for_match(str(artifact.get("storage_path") or ""))
-        if not storage_path:
+        storage_paths = artifact_match_candidates(str(artifact.get("storage_path") or ""))
+        if not storage_paths:
             missing.append({**artifact, "missing_reason": "empty storage_path"})
             continue
-        match = next((item for item, path in file_paths if path.endswith(storage_path) or storage_path.endswith(path)), None)
+        match = next(
+            (
+                item
+                for item, path in file_paths
+                if any(path.endswith(storage_path) or storage_path.endswith(path) for storage_path in storage_paths)
+            ),
+            None,
+        )
         if match is None:
             missing.append({**artifact, "missing_reason": "no matching EC2 file path"})
         else:

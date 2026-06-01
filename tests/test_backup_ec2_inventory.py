@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 
 from scripts.backup_ec2_inventory import build_find_command
+from scripts.backup_ec2_inventory import build_ssh_args
+from scripts.backup_ec2_inventory import build_tar_command
 from scripts.backup_ec2_inventory import parse_find_output
 from scripts.backup_ec2_inventory import write_ec2_inventory
 
@@ -14,6 +16,27 @@ def test_build_find_command_quotes_paths_for_remote_shell():
     assert "'/home/ubuntu/app/output'" in command
     assert "'/home/ubuntu/app/logs'" in command
     assert "%p\\t%s\\t%TY-%Tm-%TdT%TH:%TM:%TS%Tz\\n" in command
+
+
+def test_build_find_command_tolerates_missing_paths():
+    command = build_find_command(["/home/ubuntu/app/missing"])
+
+    assert command.endswith(" || true")
+
+
+def test_build_ssh_args_includes_identity_file_when_present():
+    args = build_ssh_args("ubuntu@example", "printf ok", identity_file="C:/Users/user/.ssh/main-key.pem")
+
+    assert args == ["ssh", "-i", "C:/Users/user/.ssh/main-key.pem", "ubuntu@example", "printf ok"]
+
+
+def test_build_tar_command_archives_paths_relative_to_root():
+    command = build_tar_command(["/home/ubuntu/app/output", "/home/ubuntu/app/logs"])
+
+    assert "tar -C /" in command
+    assert "'home/ubuntu/app/output'" in command
+    assert "'home/ubuntu/app/logs'" in command
+    assert "/home/ubuntu/app/output" not in command
 
 
 def test_parse_find_output_returns_file_records():
@@ -37,8 +60,10 @@ def test_write_ec2_inventory_writes_manifest(tmp_path):
         paths=["/app/output"],
         files=[{"path": "/app/output/a.xlsx", "size_bytes": 123, "modified_at": "2026"}],
         timestamp="20260601_120000",
+        archive_path=tmp_path / "ec2-files.tar.gz",
     )
 
     assert manifest["ssh_target"] == "ubuntu@example"
     assert manifest["file_count"] == 1
+    assert manifest["archive_path"].endswith("ec2-files.tar.gz")
     assert json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))["file_count"] == 1

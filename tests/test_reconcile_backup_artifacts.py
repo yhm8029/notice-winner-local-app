@@ -29,6 +29,18 @@ def test_reconcile_artifacts_matches_suffix_paths():
     assert report["missing"][0]["id"] == "a2"
 
 
+def test_reconcile_artifacts_matches_legacy_runs_artifact_paths():
+    artifacts = [{"id": "a1", "storage_path": "output/artifacts/run-1/project_tracking.xlsx"}]
+    ec2_files = [
+        {"path": "/srv/notice-winner-pipeline-web/output/runs/run-1/project_tracking.xlsx", "size_bytes": 12}
+    ]
+
+    report = reconcile_artifacts(artifacts, ec2_files)
+
+    assert report["matched_count"] == 1
+    assert report["missing_count"] == 0
+
+
 def test_write_reconciliation_report_writes_json(tmp_path):
     report = {"artifact_count": 1, "matched_count": 1, "missing_count": 0, "matched": [], "missing": []}
 
