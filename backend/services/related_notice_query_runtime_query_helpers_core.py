@@ -547,11 +547,11 @@ def _build_related_notice_query_variants(project_name: str) -> list[str]:
 
     stripped = _strip_project_notice_noise(base) or _clean_project_query_text(base)
     stem = _project_stem(stripped or base)
-    _add(stem)
-    _add(_project_stem_head_query(stem or stripped or base))
     _add(_project_discipline_bridge_query(base))
     for value in _project_discipline_branch_queries(base):
         _add(value)
+    _add(stem)
+    _add(_project_stem_head_query(stem or stripped or base))
 
     tokens = [token for token in re.split(r"\s+", stripped) if token]
     content_tokens = [token for token in tokens if _norm_text(token) not in PROJECT_TOKEN_STOPWORDS]

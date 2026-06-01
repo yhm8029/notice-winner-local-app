@@ -67,9 +67,9 @@ def build_related_notice_collect_queries(
         filter(
             None,
             (
-                str(project.get("project_search_name") or "").strip(),
                 str(project.get("project_name") or "").strip(),
                 str(project.get("latest_notice_title") or "").strip(),
+                str(project.get("project_search_name") or "").strip(),
             ),
         )
     )

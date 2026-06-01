@@ -234,7 +234,10 @@ def extract_contact_resolution_from_notice_text(text: str, org_name: str) -> Con
 def extract_contact_from_notice_text(text: str, org_name: str) -> str:
     observations = extract_contact_observations_from_notice_text(text, org_name)
     if observations:
-        return str(observations[0].contact or "")
+        top = observations[0]
+        if top.role_hint != "owner_contact":
+            return ""
+        return str(top.contact or "")
 
     dept = light_clean_contact_dept(_extract_labeled_value(text, ["담당부서", "주관부서", "문의부서"]))
     person = re.sub(r"\s+", " ", _extract_labeled_value(text, ["담당자", "문의처", "문의"])).strip()

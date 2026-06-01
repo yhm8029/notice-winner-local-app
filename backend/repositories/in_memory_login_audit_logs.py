@@ -12,6 +12,8 @@ from .login_audit_logs import LoginAuditLogRow
 class InMemoryLoginAuditLogRepository(LoginAuditLogRepository):
     def __init__(self) -> None:
         self._rows_by_id: dict[UUID, LoginAuditLogRow] = {}
+        self._row_order_by_id: dict[UUID, int] = {}
+        self._next_row_order = 0
 
     def create_log(
         self,
@@ -36,6 +38,8 @@ class InMemoryLoginAuditLogRepository(LoginAuditLogRepository):
             "created_at": created_at,
         }
         self._rows_by_id[row_id] = row
+        self._row_order_by_id[row_id] = self._next_row_order
+        self._next_row_order += 1
         return dict(row)
 
     def list_logs(
@@ -49,5 +53,5 @@ class InMemoryLoginAuditLogRepository(LoginAuditLogRepository):
             for row in self._rows_by_id.values()
             if row["organization_id"] == organization_id
         ]
-        rows.sort(key=lambda item: (item["created_at"], str(item["id"])), reverse=True)
+        rows.sort(key=lambda item: (item["created_at"], self._row_order_by_id.get(item["id"], -1)), reverse=True)
         return rows[:limit]
