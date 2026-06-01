@@ -2,6 +2,7 @@ param(
   [string]$EnvFile = ".env.local-backup",
   [string]$BackupRoot = "backups",
   [string]$Timestamp = "",
+  [switch]$DownloadEc2Files,
   [switch]$DryRunEc2
 )
 
@@ -41,6 +42,9 @@ $ec2Args = @(
 )
 if ($DryRunEc2) {
   $ec2Args += "--dry-run"
+}
+if ($DownloadEc2Files) {
+  $ec2Args += "--download"
 }
 Invoke-CheckedPython $ec2Args
 

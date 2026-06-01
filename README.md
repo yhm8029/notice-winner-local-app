@@ -115,6 +115,7 @@ Create `.env.local-backup` locally. Do not commit it.
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=...
 EC2_SSH_TARGET=ubuntu@your-ec2-host
+EC2_SSH_KEY_PATH=C:\Users\user\.ssh\main-key.pem
 EC2_BACKUP_PATHS=/home/ubuntu/notice-winner-pipeline-web/output,/home/ubuntu/notice-winner-pipeline-web/input,/home/ubuntu/notice-winner-pipeline-web/logs
 ```
 
@@ -123,6 +124,8 @@ Run:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/local_backup_inventory.ps1
 ```
+
+Add `-DownloadEc2Files` to archive and extract the EC2 paths under the EC2 backup directory.
 
 Outputs are written under `backups/supabase/<timestamp>/` and `backups/ec2/<timestamp>/`. The Supabase manifest contains table row counts and checksums. The EC2 manifest contains app-owned file paths, sizes, and modified timestamps. `artifact_reconciliation.json` reports whether `run_artifacts.storage_path` rows have matching EC2 files.
 
