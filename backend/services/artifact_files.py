@@ -13,6 +13,7 @@ from datetime import timezone
 from pathlib import Path
 from typing import Any
 from uuid import UUID
+from uuid import uuid4
 
 from openpyxl import load_workbook
 from openpyxl.styles import Border
@@ -175,8 +176,16 @@ def write_json_artifact(
 ) -> WrittenArtifact:
     artifact_dir = ensure_run_artifact_dir(run_id)
     absolute_path = artifact_dir / file_name
-    with absolute_path.open("w", encoding="utf-8") as fp:
-        json.dump(payload, fp, ensure_ascii=False, indent=2)
+    temp_path = artifact_dir / f".{file_name}.{uuid4().hex}.tmp"
+    try:
+        with temp_path.open("w", encoding="utf-8") as fp:
+            json.dump(payload, fp, ensure_ascii=False, indent=2)
+            fp.flush()
+            os.fsync(fp.fileno())
+        os.replace(temp_path, absolute_path)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
     return build_written_artifact(
         absolute_path=absolute_path,
         mime_type=JSON_MIME_TYPE,

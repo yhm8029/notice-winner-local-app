@@ -43,6 +43,8 @@ The run APIs use the same backend split.
 
 - `RUN_REPOSITORY_BACKEND=in_memory`
   - forces the local in-memory run store
+- `RUN_REPOSITORY_BACKEND=sqlite`
+  - persists `pipeline_runs` in a local SQLite `local_rows` database
 - `RUN_REPOSITORY_BACKEND=supabase`
   - persists `pipeline_runs` in Supabase/Postgres
 - `RUN_REPOSITORY_BACKEND=auto`
@@ -54,6 +56,16 @@ Default selection:
 - if neither is set, it auto-selects `supabase` when Supabase env is present, otherwise `in_memory`
 
 Artifact and log repositories follow the same pattern.
+
+SQLite runtime adapters are currently available for:
+
+- `RUN_REPOSITORY_BACKEND=sqlite`
+- `ARTIFACT_REPOSITORY_BACKEND=sqlite`
+- `RUN_LOG_REPOSITORY_BACKEND=sqlite`
+- `DOWNLOAD_AUDIT_LOG_REPOSITORY_BACKEND=sqlite`
+- `LOGIN_AUDIT_LOG_REPOSITORY_BACKEND=sqlite`
+
+Set `LOCAL_SQLITE_PATH` to the SQLite file created from the Supabase export. If it is omitted, the app uses `data/local.sqlite3`. Tracker entries, sales claims, related notice caches, snapshots, and backfill conflicts remain on their existing backends until their SQLite adapters are added.
 
 ## Artifact Files
 
@@ -137,7 +149,7 @@ To create a local SQLite staging database from exported Supabase table JSONL fil
   --output data\local.sqlite3
 ```
 
-This staging database preserves each Supabase row as JSON in `local_rows`; repository-specific SQLite tables/adapters are added in the next migration step. The command validates `manifest.json` when present. Add `--allow-partial` only when intentionally importing a backup with known failed or missing table exports, and add `--replace` only when intentionally overwriting an existing local SQLite file.
+This staging database preserves each Supabase row as JSON in `local_rows`. The command validates `manifest.json` when present. Add `--allow-partial` only when intentionally importing a backup with known failed or missing table exports, and add `--replace` only when intentionally overwriting an existing local SQLite file.
 
 ## HTTP Smoke Test
 
