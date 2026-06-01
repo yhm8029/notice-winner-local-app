@@ -4,11 +4,14 @@ __pycache__/
 .venv/
 venv/
 .env
+.env.local-backup
+.env.local-backup.*
 
 frontend/node_modules/
 frontend/.next/
 .worktrees/
 
+backups/
 output/
 .tmp-test-runs/
 .tmp-auth-server/
