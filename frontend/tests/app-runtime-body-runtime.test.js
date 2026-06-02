@@ -16,13 +16,22 @@ function loadRuntime() {
 test("runtime body helper exposes constants and pure helpers", () => {
   const runtime = loadRuntime();
 
-  assert.equal(runtime.APP_ROOT_PATH, "/app/");
+  assert.equal(runtime.APP_ROOT_PATH, "/");
   assert.equal(runtime.DEFAULT_ADMIN_TAB, "project-status");
   assert.deepEqual([...runtime.EDITABLE_FIELDS.slice(0, 3)], ["project_name", "gross_area_scale", "construction_cost"]);
   assert.equal(runtime.normalizePlatformAdminAccountDraft({ email: "a", role: "  ", password: 1 }).role, "org_member");
   assert.equal(runtime.formatContractAmountInput("1a234"), "1,234");
   assert.equal(runtime.formatContractAmountDisplay("  ", "fallback"), "fallback");
-  assert.equal(runtime.runTypeLabel("winner_pipeline", runtime.RUN_TYPE_LABELS, null), "프로젝트 트랙커");
+  assert.equal(runtime.runTypeLabel("winner_pipeline", runtime.RUN_TYPE_LABELS, null), "공고 추적");
   assert.equal(runtime.isProjectTrackerRun("project_tracker"), true);
   assert.equal(runtime.useGlobalTrackerEntriesScope(), true);
+});
+
+test("runtime body exposes only the local notice tracking admin tab", () => {
+  const runtime = loadRuntime();
+
+  assert.equal(
+    JSON.stringify(runtime.ADMIN_TABS.map((tab) => ({ key: tab.key, label: tab.label }))),
+    JSON.stringify([{ key: "project-status", label: "공고 추적" }]),
+  );
 });

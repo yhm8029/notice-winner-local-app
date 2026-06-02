@@ -5,7 +5,7 @@ function loadAppRuntimeBodyRuntime() {
   if (window.SPMSAppRuntimeBodyRuntime) return window.SPMSAppRuntimeBodyRuntime;
   if (typeof XMLHttpRequest === "function" && typeof document !== "undefined") {
     const request = new XMLHttpRequest();
-    request.open("GET", "/app/app-runtime-body-runtime.js?v=20260503a", false);
+    request.open("GET", "/app/app-runtime-body-runtime.js?v=20260602b", false);
     request.send(null);
     if ((request.status >= 200 && request.status < 300) || request.status === 0) (0, eval)(request.responseText);
   }

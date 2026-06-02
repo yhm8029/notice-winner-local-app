@@ -113,7 +113,7 @@
 
   global.SPMSAppRuntimeBodyRuntime = {
     EDITABLE_FIELDS: ["project_name", "gross_area_scale", "construction_cost", "demand_org_name", "demand_contact", "client_location", "site_location_1", "site_location_2", "architect_office", "construction_start_date", "last_checked_date", "progress_note", "notice_date", "manager_name", "building_automation_estimated_amount"],
-    RUN_TYPE_LABELS: { project_tracker: "프로젝트 트랙커", winner_pipeline: "프로젝트 트랙커", tracker_export: "트래커 내보내기" },
+    RUN_TYPE_LABELS: { project_tracker: "공고 추적", winner_pipeline: "공고 추적", tracker_export: "트래커 내보내기" },
     TRACKER_REGION_OPTIONS: [{ value: "", label: "전체" }, { value: "서울", label: "서울" }, { value: "부산", label: "부산" }, { value: "대구", label: "대구" }, { value: "인천", label: "인천" }, { value: "광주", label: "광주" }, { value: "대전", label: "대전" }, { value: "울산", label: "울산" }, { value: "세종", label: "세종" }, { value: "경기", label: "경기" }, { value: "강원", label: "강원" }, { value: "충북", label: "충북" }, { value: "충남", label: "충남" }, { value: "전북", label: "전북" }, { value: "전남", label: "전남" }, { value: "경북", label: "경북" }, { value: "경남", label: "경남" }, { value: "제주", label: "제주" }],
     TRACKER_BOARD_COLUMNS: [{ key: "display_no", label: "NO.", editable: false }, { key: "project_name", label: "프로젝트명", editable: true }, { key: "gross_area_scale", label: "연면적/규모", editable: true }, { key: "construction_cost", label: "공사비", editable: true }, { key: "demand_org_name", label: "수요기관명", editable: true }, { key: "demand_contact", label: "부서/담당자", editable: true }, { key: "client_location", label: "발주처 위치", editable: true }, { key: "site_location_1", label: "현장 위치", editable: true }, { key: "architect_office", label: "설계사무소", editable: true }, { key: "construction_start_date", label: "착공일", editable: true }, { key: "last_checked_date", label: "최종점검일자", editable: true }, { key: "progress_note", label: "주요진행사항", editable: true }, { key: "notice_date", label: "공고일", editable: true }, { key: "building_automation_estimated_amount", label: "빌딩자동제어 추정 금액", editable: true }],
     TRACKER_BOARD_BLANK_PRIORITY_FIELDS: new Set(["demand_contact", "architect_office", "construction_start_date"]),
@@ -140,8 +140,7 @@
     APP_ROOT_PATH: "/",
     DEFAULT_ADMIN_TAB: "project-status",
     ADMIN_TABS: [
-      { key: "project-status", label: "프로젝트 현황", routePath: "/", type: "existing", subtitle: "현재 SPMS 운영자 프로젝트 현황 화면" },
-      { key: "sales-recommendations", label: "영업 추천 리스트", routePath: "/app/sales-recommendations", type: "existing", subtitle: "지금 확인할 프로젝트와 권장 액션" },
+      { key: "project-status", label: "공고 추적", routePath: "/", type: "existing", subtitle: "공고 추적 실행과 결과 화면" },
     ],
     LEGACY_ADMIN_ROUTE_ALIASES: Object.freeze({ "/app/design-list": { legacyRoutePath: "/app/design-list", labelHint: "설계리스트" }, "/app/planned-orders": { legacyRoutePath: "/app/planned-orders", labelHint: "발주예정" }, "/app/lost": { legacyRoutePath: "/app/lost", labelHint: "LOST" }, "/app/agency-list": { legacyRoutePath: "/app/agency-list", labelHint: "대리점 리스트" } }),
     getTrackerRenderFallbackRuntime,
