@@ -83,11 +83,11 @@
       }
       if (deps.dom?.modeToggleButton) {
         deps.dom.modeToggleButton.textContent = adminMode ? "사용자 모드" : "운영자 모드";
-        deps.dom.modeToggleButton.classList.toggle("hidden", !shouldShowAdminModeToggle());
+        deps.dom.modeToggleButton.classList.add("hidden");
       }
       if (deps.dom?.authSessionModeToggleButton) {
         deps.dom.authSessionModeToggleButton.textContent = adminMode ? "사용자 모드" : "운영자 모드";
-        deps.dom.authSessionModeToggleButton.classList.toggle("hidden", !shouldShowAdminModeToggle());
+        deps.dom.authSessionModeToggleButton.classList.add("hidden");
       }
       deps.syncTrackerChangeBellVisibility?.(adminMode);
       if (adminMode) {
@@ -137,9 +137,13 @@
       deps.dom?.panelEditor?.classList.add("hidden");
       deps.dom?.panelMissingReport?.classList.add("hidden");
       deps.dom?.trackerInlineEditor?.classList.add("hidden");
-      deps.dom?.trackerEntriesList?.classList.toggle("hidden", showProjectStatusAdminPanels || showingSalesRecommendations);
-      deps.dom?.entriesPrevButton?.closest(".pagination-row")?.classList.toggle("hidden", showProjectStatusAdminPanels || showingSalesRecommendations);
-      deps.dom?.trackerBoard?.closest(".tracker-board")?.classList.toggle("hidden", !showProjectStatusAdminPanels);
+      deps.dom?.trackerEntriesList?.classList.toggle("hidden", showingSalesRecommendations);
+      deps.dom?.entriesPrevButton?.closest(".pagination-row")?.classList.toggle("hidden", showingSalesRecommendations);
+      deps.dom?.trackerBoard?.closest(".tracker-board")?.classList.toggle("hidden", true);
+      deps.dom?.trackerSalesOverviewGrid?.classList.toggle("hidden", showingSalesRecommendations);
+      deps.dom?.trackerUserSalesSection?.classList.toggle("hidden", showingSalesRecommendations);
+      deps.dom?.trackerCompanySalesSection?.classList.toggle("hidden", showingSalesRecommendations);
+      deps.dom?.trackerEntriesSectionTitle?.classList.toggle("hidden", showingSalesRecommendations);
       deps.dom?.trackerTemplateUploadButton?.classList.toggle("hidden", !showProjectStatusAdminPanels);
       deps.dom?.trackerTemplateResetButton?.classList.toggle("hidden", !showProjectStatusAdminPanels);
       deps.dom?.trackerTemplateStatus?.classList.toggle("hidden", !showProjectStatusAdminPanels);

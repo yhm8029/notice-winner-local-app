@@ -100,7 +100,7 @@ test("app runtime body is cache busted for auth submit guard fixes", () => {
   const html = readHtmlSource();
   const appSource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app.js"), "utf8");
 
-  assert.match(html, /\/app\.js\?v=20260602b/);
+  assert.match(html, /\/app\.js\?v=20260602c/);
   assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260602b/);
 });
 
@@ -108,9 +108,20 @@ test("index.html cache busts local console chrome runtimes", () => {
   const html = readHtmlSource();
   const appRuntimeBodySource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app-runtime-body.js"), "utf8");
 
-  assert.match(html, /\/app-shell-runtime\.js\?v=20260602b/);
-  assert.match(html, /\/ui-mode-controller\.js\?v=20260602b/);
+  assert.match(html, /\/app-shell-runtime\.js\?v=20260602c/);
+  assert.match(html, /\/ui-mode-controller\.js\?v=20260602c/);
+  assert.match(html, /\/runtime-enhancements\.js\?v=20260602c/);
+  assert.match(html, /\/sales-panel-controller\.js\?v=20260602c/);
+  assert.match(html, /\/auth-controller\.js\?v=20260602c/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-runtime\.js\?v=20260602b/);
+});
+
+test("index.html hides local mode and sync status controls from the project workspace", () => {
+  const html = readHtmlSource();
+
+  assert.match(html, /<div class="hero-meta hidden" aria-hidden="true">/);
+  assert.match(html, /id="mode-toggle-button" class="ghost-button hero-mode-button hidden"/);
+  assert.match(html, /id="auth-session-mode-toggle-button" class="ghost-button hidden"/);
 });
 
 test("index.html does not load Google Sheets runtime assets", () => {

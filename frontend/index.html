@@ -28,7 +28,7 @@
     <script defer src="/console-data-runtime.js?v=20260426a"></script>
     <script defer src="/auth-session-runtime.js?v=20260426i"></script>
     <script defer src="/admin-tabs-runtime.js?v=20260503a"></script>
-    <script defer src="/app-shell-runtime.js?v=20260602b"></script>
+    <script defer src="/app-shell-runtime.js?v=20260602c"></script>
     <script defer src="/app-support-admin-runtime.js?v=20260503a"></script>
     <script defer src="/app-support-tracker-runtime.js?v=20260424a"></script>
     <script defer src="/app-support-org-runtime.js?v=20260424a"></script>
@@ -41,9 +41,9 @@
     <script defer src="/app-controller-context-runtime.js?v=20260418a"></script>
     <script defer src="/app-controller-wiring-auth-runtime.js?v=20260425b"></script>
     <script defer src="/app-controller-wiring-runtime.js?v=20260503r"></script>
-    <script defer src="/ui-mode-controller.js?v=20260602b"></script>
+    <script defer src="/ui-mode-controller.js?v=20260602c"></script>
     <script type="module" src="/app-controller-deps.js?v=20260503r"></script>
-    <script type="module" src="/runtime-enhancements.js?v=20260503c"></script>
+    <script type="module" src="/runtime-enhancements.js?v=20260602c"></script>
     <script type="module" src="/app-event-bindings.js?v=20260410a"></script>
     <script type="module" src="/tracker-render-controller.js?v=20260429a"></script>
     <script type="module" src="/tracker-entry-actions-controller.js?v=20260414a"></script>
@@ -52,7 +52,7 @@
     <script type="module" src="/console-panels-controller.js?v=20260410a"></script>
     <script type="module" src="/tracker-diagnostics-panel-controller.js?v=20260414a"></script>
     <script type="module" src="/report-panels-controller.js?v=20260414a"></script>
-    <script type="module" src="/sales-panel-controller.js?v=20260503r"></script>
+    <script type="module" src="/sales-panel-controller.js?v=20260602c"></script>
     <script type="module" src="/org-admin-controller.js?v=20260410a"></script>
     <script type="module" src="/auth-ui-controller.js?v=20260414a"></script>
     <script type="module" src="/run-panels-controller.js?v=20260414a"></script>
@@ -60,7 +60,7 @@
     <script defer src="/tracker-controller-runs-runtime.js?v=20260424a"></script>
     <script defer src="/tracker-controller-entries-runtime.js?v=20260424a"></script>
     <script defer src="/tracker-controller.js?v=20260409a"></script>
-    <script type="module" src="/auth-controller.js?v=20260426c"></script>
+    <script type="module" src="/auth-controller.js?v=20260602c"></script>
     <script type="module" src="/app-auth-bridge.js?v=20260417a"></script>
     <script type="module" src="/project-related-controller.js?v=20260503l"></script>
     <script defer src="/app-core-runtime.js?v=20260426i"></script>
@@ -92,7 +92,7 @@
     <script defer src="/app-launch-runtime-core.js?v=20260425a"></script>
     <script defer src="/app-launch-runtime.js?v=20260425a"></script>
     <script defer src="/app-host-bootstrap.js?v=20260418a"></script>
-    <script defer src="/app.js?v=20260602b"></script>
+    <script defer src="/app.js?v=20260602c"></script>
   </head>
   <body>
     <section id="auth-shell" class="auth-shell hidden">
@@ -147,7 +147,7 @@
           <p class="hero-subtitle">Sales Project Map System</p>
           <p class="hero-subcopy">실시간 영업 현황 조회</p>
         </div>
-          <div class="hero-meta">
+          <div class="hero-meta hidden" aria-hidden="true">
             <div id="api-meta-card" class="meta-card">
               <span class="meta-label">API</span>
               <strong id="api-base-label">동일 출처</strong>
@@ -155,7 +155,7 @@
             <div class="meta-card">
               <span class="meta-label">화면 모드</span>
               <strong id="ui-mode-label">실사용자 모드</strong>
-              <button id="mode-toggle-button" class="ghost-button hero-mode-button" type="button">운영자 모드</button>
+              <button id="mode-toggle-button" class="ghost-button hero-mode-button hidden" type="button">운영자 모드</button>
             </div>
             <div id="sync-meta-card" class="meta-card">
               <span class="meta-label">동기화</span>
@@ -176,7 +176,7 @@
 
       <div id="auth-session-actions" class="auth-session-actions hidden">
         <span id="auth-session-user-label" class="mono">-</span>
-        <button id="auth-session-mode-toggle-button" class="ghost-button" type="button">운영자 모드</button>
+        <button id="auth-session-mode-toggle-button" class="ghost-button hidden" type="button">운영자 모드</button>
         <button id="auth-session-profile-button" class="ghost-button" type="button">회원정보</button>
         <button id="auth-session-logout-button" class="ghost-button" type="button">로그아웃</button>
       </div>

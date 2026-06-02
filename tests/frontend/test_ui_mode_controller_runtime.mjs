@@ -41,6 +41,14 @@ function makeNode(calls, name) {
   };
 }
 
+function makeClosestNode(calls, name) {
+  return {
+    closest() {
+      return { classList: makeClassList(calls, name) };
+    },
+  };
+}
+
 test("ui mode controller preserves chrome updates and transition loading behavior", () => {
   const runtime = loadRuntime();
   const calls = [];
@@ -82,6 +90,12 @@ test("ui mode controller preserves chrome updates and transition loading behavio
       panelMissingReport: makeNode(calls, "panelMissingReport"),
       trackerInlineEditor: makeNode(calls, "trackerInlineEditor"),
       trackerEntriesList: makeNode(calls, "trackerEntriesList"),
+      trackerSalesOverviewGrid: makeNode(calls, "trackerSalesOverviewGrid"),
+      trackerUserSalesSection: makeNode(calls, "trackerUserSalesSection"),
+      trackerCompanySalesSection: makeNode(calls, "trackerCompanySalesSection"),
+      trackerEntriesSectionTitle: makeNode(calls, "trackerEntriesSectionTitle"),
+      entriesPrevButton: makeClosestNode(calls, "pagination-row"),
+      trackerBoard: makeClosestNode(calls, "tracker-board"),
       trackerTemplateUploadButton: makeNode(calls, "trackerTemplateUploadButton"),
       trackerTemplateResetButton: makeNode(calls, "trackerTemplateResetButton"),
       trackerTemplateStatus: makeNode(calls, "trackerTemplateStatus"),
@@ -240,6 +254,23 @@ test("ui mode controller preserves chrome updates and transition loading behavio
       ["add", hiddenPanelName, "hidden"],
     );
   }
+  for (const visibleWorkspaceName of [
+    "trackerEntriesList",
+    "pagination-row",
+    "trackerSalesOverviewGrid",
+    "trackerUserSalesSection",
+    "trackerCompanySalesSection",
+    "trackerEntriesSectionTitle",
+  ]) {
+    assert.deepEqual(
+      calls.find((call) => call[0] === "toggle" && call[1] === visibleWorkspaceName && call[2] === "hidden"),
+      ["toggle", visibleWorkspaceName, "hidden", false],
+    );
+  }
+  assert.deepEqual(
+    calls.find((call) => call[0] === "toggle" && call[1] === "tracker-board" && call[2] === "hidden"),
+    ["toggle", "tracker-board", "hidden", true],
+  );
 
   calls.length = 0;
   state.uiMode = "user";

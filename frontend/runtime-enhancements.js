@@ -32,7 +32,7 @@ export function createRuntimeEnhancements(deps = {}) {
       actionBar.className = "auth-session-actions hidden";
       actionBar.innerHTML = `
         <span id="auth-session-user-label" class="mono">-</span>
-        <button id="auth-session-mode-toggle-button" class="ghost-button" type="button">운영자 모드</button>
+        <button id="auth-session-mode-toggle-button" class="ghost-button hidden" type="button">운영자 모드</button>
         <button id="auth-session-profile-button" class="ghost-button" type="button">회원정보</button>
         <button id="auth-session-logout-button" class="ghost-button" type="button">로그아웃</button>
       `;
@@ -370,7 +370,7 @@ export function createRuntimeEnhancements(deps = {}) {
 
     if (dom.trackerEntriesList && !dom.trackerBoard) {
       const trackerBoard = document.createElement("section");
-      trackerBoard.className = "runtime-card tracker-board";
+      trackerBoard.className = "runtime-card tracker-board hidden";
       trackerBoard.innerHTML = `
         <div class="runtime-card-head">
           <div>
