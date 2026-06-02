@@ -34,7 +34,7 @@ test("buildTrackerEntriesEmptyStateView returns admin and user empty copy", () =
   assert.match(userView.html, /tracker entry/i);
 });
 
-test("buildTrackerEntryCardView returns selected state, override text, and metrics", () => {
+test("buildTrackerEntryCardView returns selected state and metrics without override text", () => {
   const runtime = loadRuntime();
   assert.equal(typeof runtime.buildTrackerEntryCardView, "function");
 
@@ -67,7 +67,8 @@ test("buildTrackerEntryCardView returns selected state, override text, and metri
   assert.equal(view.selectedClass, " is-selected");
   assert.equal(view.displayNoText, "7");
   assert.ok(view.relatedButtonLabel.length > 0);
-  assert.match(view.overrideMetaText, /override/i);
+  assert.equal(view.overrideMetaText, "");
+  assert.equal(view.overrideMetaHtml, "");
   assert.equal(view.openingScheduledDateText, "open:2027-01-01");
   assert.equal(view.estimateValueText, "estimate:3 million won");
   assert.equal(view.siteLocationText, "Seoul Jung-gu");
@@ -116,7 +117,7 @@ test("buildTrackerEntryCardView hides empty override copy", () => {
   assert.equal(view.overrideMetaHtml, "");
 });
 
-test("buildTrackerEntryCardMarkup injects slot html", () => {
+test("buildTrackerEntryCardMarkup injects related slot without sales or override chrome", () => {
   const runtime = loadRuntime();
   assert.equal(typeof runtime.buildTrackerEntryCardMarkup, "function");
 
@@ -144,8 +145,9 @@ test("buildTrackerEntryCardMarkup injects slot html", () => {
     { escapeHtml: (value) => String(value) },
   );
 
-  assert.match(html, /<section>sales<\/section>/);
   assert.match(html, /<section>related<\/section>/);
+  assert.doesNotMatch(html, /<section>sales<\/section>/);
+  assert.doesNotMatch(html, /override project_name/);
   assert.match(html, /entry-item is-selected/);
   assert.match(html, /entry-metrics entry-metrics-single/);
   assert.match(html, /<strong>발주처<\/strong> Client Org/);

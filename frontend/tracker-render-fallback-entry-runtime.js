@@ -5,8 +5,6 @@
       displayNo = "",
       isSelected = false,
       relatedButtonLabel = "open related notices",
-      overrideMarkup = "",
-      salesMarkup = "",
       relatedMarkup = "",
     } = payload;
     const {
@@ -64,8 +62,6 @@
               <span><strong>demand contact</strong> ${fallbackEscapeHtml(entry.demand_contact || "-")}</span>
               <span><strong>site location</strong> ${fallbackEscapeHtml(siteLocationText)}</span>
             </p>
-            ${salesMarkup}
-            ${overrideMarkup}
             ${relatedMarkup}
           </div>
         </div>

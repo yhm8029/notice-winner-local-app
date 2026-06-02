@@ -332,13 +332,6 @@
 
     const currentEntry = entry && typeof entry === "object" ? entry : {};
     const entryId = String(currentEntry.id || "");
-    const overriddenFields = Array.isArray(currentEntry.overridden_fields)
-      ? currentEntry.overridden_fields
-      : [];
-    const overrideMetaText = overriddenFields.length
-      ? `override ${overriddenFields.join(", ")}`
-      : "";
-
     return {
       id: entryId,
       selectedClass: entryId === String(selectedEntryId || "") ? " is-selected" : "",
@@ -363,9 +356,9 @@
         ? String(relatedButtonCloseLabel)
         : String(relatedButtonOpenLabel),
       noticeViewButtonLabel: String(noticeViewButtonLabel),
-      overrideMetaText,
-      overrideMetaHtml: uiMode === "admin" && overrideMetaText ? `<p>${overrideMetaText}</p>` : "",
-      salesSectionHtml: String(salesSectionHtml || ""),
+      overrideMetaText: "",
+      overrideMetaHtml: "",
+      salesSectionHtml: "",
       relatedNoticeHtml: String(relatedNoticeHtml || ""),
       grossAreaLabel: String(grossAreaLabel),
       constructionCostLabel: String(constructionCostLabel),
@@ -464,9 +457,6 @@
   function buildTrackerEntryCardMarkup(payload = {}, helpers = {}) {
     const { escapeHtml = (value) => String(value ?? "") } = helpers;
     const view = normalizeTrackerEntryCardView(payload, helpers);
-    const overrideMetaHtml = view.overrideMetaHtml
-      || (view.overrideMetaText ? `<p>${escapeHtml(view.overrideMetaText)}</p>` : "");
-
     return `
       <article class="entry-item${view.selectedClass}" data-entry-id="${escapeHtml(view.id)}">
         <div class="entry-shell">
@@ -509,8 +499,6 @@
               <span><strong>${escapeHtml(view.demandContactLabel)}</strong> ${escapeHtml(view.demandContactText)}</span>
               <span><strong>${escapeHtml(view.siteLocationLabel)}</strong> ${escapeHtml(view.siteLocationText)}</span>
             </p>
-            ${view.salesSectionHtml}
-            ${overrideMetaHtml}
             ${view.relatedNoticeHtml}
           </div>
         </div>
