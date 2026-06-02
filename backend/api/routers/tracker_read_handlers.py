@@ -131,15 +131,16 @@ def view_tracker_entry_notice_file(entry_id: UUID):
         support._not_found(f"tracker_entry not found: {entry_id}")
 
     source_row = support._select_tracker_entry_source_notice_row(entry)
-    attachment = notice_view_helpers["select_primary_notice_attachment"](source_row)
+    notice_source_row = _build_tracker_entry_notice_source_row(source_row=source_row, entry=entry)
+    attachment = notice_view_helpers["select_primary_notice_attachment"](notice_source_row)
     attachment_url = str(attachment.get("url") or "").strip()
     file_name = str(attachment.get("file_name") or "").strip()
     title = str(entry.get("project_name") or file_name or "공고문").strip() or "공고문"
-    bid_no = str((source_row or {}).get("bid_no") or entry.get("source_bid_no") or "").strip().upper()
-    bid_ord = str((source_row or {}).get("bid_ord") or entry.get("source_bid_ord") or "000").strip() or "000"
+    bid_no = str((notice_source_row or {}).get("bid_no") or entry.get("source_bid_no") or "").strip().upper()
+    bid_ord = str((notice_source_row or {}).get("bid_ord") or entry.get("source_bid_ord") or "000").strip() or "000"
     unty_atch_file_no = str(
-        (source_row or {}).get("item_pbanc_unty_atch_file_no")
-        or (source_row or {}).get("itemPbancUntyAtchFileNo")
+        (notice_source_row or {}).get("item_pbanc_unty_atch_file_no")
+        or (notice_source_row or {}).get("itemPbancUntyAtchFileNo")
         or ""
     ).strip()
     if not attachment_url:
@@ -206,6 +207,35 @@ def view_tracker_entry_notice_file(entry_id: UUID):
         ),
         status_code=status.HTTP_200_OK,
     )
+
+
+def _build_tracker_entry_notice_source_row(
+    *,
+    source_row: dict[str, Any] | None,
+    entry: dict[str, Any],
+) -> dict[str, Any] | None:
+    row = dict(source_row or {})
+    bid_no = str(row.get("bid_no") or entry.get("source_bid_no") or "").strip().upper()
+    if not bid_no:
+        return row or None
+    bid_ord = str(row.get("bid_ord") or entry.get("source_bid_ord") or "000").strip() or "000"
+    row["bid_no"] = bid_no
+    row["bid_ord"] = bid_ord
+    if not _tracker_notice_source_row_has_url(row):
+        fallback_url = (
+            "https://www.g2b.go.kr/link/PNPE027_01/single/"
+            f"?bidPbancNo={quote(bid_no, safe='')}&bidPbancOrd={quote(bid_ord, safe='')}"
+        )
+        row["notice_url"] = fallback_url
+        row["bid_ntce_dtl_url"] = fallback_url
+    return row
+
+
+def _tracker_notice_source_row_has_url(row: dict[str, Any]) -> bool:
+    for key in ("notice_url", "bid_ntce_dtl_url", "bid_ntce_url", "base_url"):
+        if str(row.get(key) or "").strip():
+            return True
+    return False
 
 
 def list_tracker_entry_audit_logs(*, entry_id: UUID, cursor: int | None, limit: int) -> Any:
