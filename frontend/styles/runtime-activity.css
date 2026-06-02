@@ -413,6 +413,14 @@ pre {
   gap: 10px;
 }
 
+.tracker-year-page-size-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
 .tracker-year-filter,
 .tracker-page-size-field {
   width: 100%;

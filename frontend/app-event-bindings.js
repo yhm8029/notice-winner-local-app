@@ -229,14 +229,16 @@ export function createAppEventBindings(deps = {}) {
     dom.trackerPageSize.addEventListener("change", () => {
       readTrackerFiltersFromControls();
       state.trackerFilters.page = 1;
+      state.homeBootstrapTrackerSnapshotActive = false;
       syncUrlState();
-      loadTrackerEntries();
+      loadTrackerEntries({ forceRefresh: true });
     });
     dom.trackerNoticeYear?.addEventListener("change", () => {
       readTrackerFiltersFromControls();
       state.trackerFilters.page = 1;
+      state.homeBootstrapTrackerSnapshotActive = false;
       syncUrlState();
-      loadTrackerEntries();
+      loadTrackerEntries({ forceRefresh: true });
     });
     if (dom.trackerEntriesDownloadButton) {
       dom.trackerEntriesDownloadButton.addEventListener("click", () => {
