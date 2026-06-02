@@ -7,7 +7,7 @@ import time
 from typing import Any
 from uuid import UUID
 
-TRACKER_EXPORT_WORKBOOK_LAYOUT_VERSION = 2
+TRACKER_EXPORT_WORKBOOK_LAYOUT_VERSION = 3
 
 
 def list_tracker_entries_for_export(
