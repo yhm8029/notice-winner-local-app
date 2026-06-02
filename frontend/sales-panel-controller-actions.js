@@ -510,19 +510,19 @@ export function createSalesPanelControllerActions(deps = {}) {
       return;
     }
     bindSalesListSelectionGuard();
-    const isUserMode = state.uiMode === "user";
     const isProjectStatusTab = state.adminTab !== "sales-recommendations";
+    const showProjectWorkspace = isProjectStatusTab;
     const canShowRecommendations = salesActionRecommendations.canShowSalesActionRecommendations();
-    dom.trackerSalesOverviewGrid.classList.toggle("hidden", !isUserMode || !isProjectStatusTab);
-    dom.trackerUserSalesSection.classList.toggle("hidden", !isUserMode || !isProjectStatusTab);
-    dom.trackerCompanySalesSection.classList.toggle("hidden", !isUserMode || !isProjectStatusTab);
-    dom.trackerEntriesSectionTitle.classList.toggle("hidden", !isUserMode || !isProjectStatusTab);
+    dom.trackerSalesOverviewGrid.classList.toggle("hidden", !showProjectWorkspace);
+    dom.trackerUserSalesSection.classList.toggle("hidden", !showProjectWorkspace);
+    dom.trackerCompanySalesSection.classList.toggle("hidden", !showProjectWorkspace);
+    dom.trackerEntriesSectionTitle.classList.toggle("hidden", !showProjectWorkspace);
     if (canShowRecommendations) {
       void salesActionRecommendations.loadSalesActionRecommendations({ silent: true });
     } else {
       salesActionRecommendations.renderSalesActionRecommendationsPanel();
     }
-    if (!isUserMode) {
+    if (!showProjectWorkspace) {
       return;
     }
     if (state.mySalesClaimsLoading) {

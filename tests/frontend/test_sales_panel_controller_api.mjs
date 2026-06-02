@@ -806,6 +806,24 @@ test("renderMySalesClaimsPanel renders the user lists and binds sales section in
   assert.equal(calls.apiCalls[4].options.method, "POST");
 });
 
+test("renderMySalesClaimsPanel keeps project workspace sections visible without user mode", async () => {
+  const { controller, dom } = await createSalesControllerHarness({
+    state: {
+      uiMode: "admin",
+      adminTab: "project-status",
+    },
+  });
+
+  controller.renderMySalesClaimsPanel();
+
+  assert.deepEqual(dom.trackerSalesOverviewGrid.classList.operations[0], ["toggle", "hidden", false]);
+  assert.deepEqual(dom.trackerUserSalesSection.classList.operations[0], ["toggle", "hidden", false]);
+  assert.deepEqual(dom.trackerCompanySalesSection.classList.operations[0], ["toggle", "hidden", false]);
+  assert.deepEqual(dom.trackerEntriesSectionTitle.classList.operations[0], ["toggle", "hidden", false]);
+  assert.match(dom.trackerUserSalesList.innerHTML, /empty-state/);
+  assert.match(dom.trackerCompanySalesList.innerHTML, /empty-state/);
+});
+
 test("renderMySalesClaimsPanel preserves sales list DOM when rendered markup is unchanged", async () => {
   const { controller, dom } = await createSalesControllerHarness({
     state: {

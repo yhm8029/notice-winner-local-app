@@ -1,5 +1,5 @@
 import { normalizeSalesClaimCardViewModel as normalizeSalesClaimCardViewModelFromDeps } from "./app-controller-deps.js";
-import { createSalesPanelControllerActions } from "./sales-panel-controller-actions.js?v=20260503r";
+import { createSalesPanelControllerActions } from "./sales-panel-controller-actions.js?v=20260602c";
 import { createSalesPanelControllerHelpers } from "./sales-panel-controller-helpers.js";
 import { createSalesPanelControllerMarkup } from "./sales-panel-controller-markup.js";
 import { createSalesPanelControllerViewModelHelpers } from "./sales-panel-controller-view-model.js";

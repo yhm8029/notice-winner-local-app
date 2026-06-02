@@ -111,11 +111,11 @@ export function createAuthController(deps = {}) {
     }
     if (deps.dom?.modeToggleButton) {
       deps.dom.modeToggleButton.textContent = adminMode ? "사용자 모드" : "운영자 모드";
-      deps.dom.modeToggleButton.classList.toggle("hidden", !canUseAdminMode());
+      deps.dom.modeToggleButton.classList.add("hidden");
     }
     if (deps.dom?.authSessionModeToggleButton) {
       deps.dom.authSessionModeToggleButton.textContent = adminMode ? "사용자 모드" : "운영자 모드";
-      deps.dom.authSessionModeToggleButton.classList.toggle("hidden", !canUseAdminMode());
+      deps.dom.authSessionModeToggleButton.classList.add("hidden");
     }
     deps.dom?.apiMetaCard?.classList.toggle("hidden", !adminMode);
     deps.dom?.syncMetaCard?.classList.toggle("hidden", !adminMode);
@@ -141,10 +141,10 @@ export function createAuthController(deps = {}) {
 
     deps.dom?.panelEditor?.classList.add("hidden");
     deps.dom?.panelMissingReport?.classList.toggle("hidden", !adminMode);
-    deps.dom?.trackerInlineEditor?.classList.toggle("hidden", !adminMode);
-    deps.dom?.trackerEntriesList?.classList.toggle("hidden", adminMode);
-    deps.dom?.entriesPrevButton?.closest(".pagination-row")?.classList.toggle("hidden", adminMode);
-    deps.dom?.trackerBoard?.closest(".tracker-board")?.classList.toggle("hidden", !adminMode);
+    deps.dom?.trackerInlineEditor?.classList.add("hidden");
+    deps.dom?.trackerEntriesList?.classList.remove("hidden");
+    deps.dom?.entriesPrevButton?.closest(".pagination-row")?.classList.remove("hidden");
+    deps.dom?.trackerBoard?.closest(".tracker-board")?.classList.add("hidden");
     deps.dom?.trackerTemplateUploadButton?.classList.toggle("hidden", !adminMode);
     deps.dom?.trackerTemplateResetButton?.classList.toggle("hidden", !adminMode);
     deps.dom?.trackerTemplateStatus?.classList.toggle("hidden", !adminMode);
