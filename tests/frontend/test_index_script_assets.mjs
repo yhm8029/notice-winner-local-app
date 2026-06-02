@@ -96,6 +96,13 @@ test("tracker render controller is cache busted for selection guard fixes", () =
   assert.match(html, /\/tracker-render-controller\.js\?v=20260429a/);
 });
 
+test("tracker entry card runtimes are cache busted for hidden sales chrome", () => {
+  const html = readHtmlSource();
+
+  assert.match(html, /\/tracker-entry-runtime\.js\?v=20260602d/);
+  assert.match(html, /\/tracker-render-fallback-entry-runtime\.js\?v=20260602d/);
+});
+
 test("app runtime body is cache busted for auth submit guard fixes", () => {
   const html = readHtmlSource();
   const appSource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app.js"), "utf8");

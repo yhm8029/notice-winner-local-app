@@ -95,6 +95,8 @@ test("buildTrackerEntryCardMarkupFallback preserves the entry card selectors", (
   assert.match(html, /data-entry-notice-view="entry-1"/);
   assert.match(html, /entry-metrics entry-metrics-single/);
   assert.match(html, /estimate:3000/);
+  assert.doesNotMatch(html, /data-test="sales"/);
+  assert.doesNotMatch(html, /data-test="override"/);
   assert.match(html, /서울 강남/);
 });
 
