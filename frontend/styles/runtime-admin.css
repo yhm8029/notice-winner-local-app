@@ -56,16 +56,16 @@
 
 .org-member-summary {
   padding: 14px 16px;
-  border: 1px solid rgba(131, 101, 70, 0.14);
-  border-radius: 18px;
-  background: rgba(255, 252, 248, 0.88);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
 }
 
 .org-plan-summary {
   padding: 14px 16px;
-  border: 1px solid rgba(131, 101, 70, 0.14);
-  border-radius: 18px;
-  background: rgba(255, 252, 248, 0.88);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
 }
 
 .org-plan-summary-card {
@@ -74,7 +74,7 @@
 }
 
 .org-plan-summary-card.is-upgrade-required {
-  border-left: 4px solid rgba(174, 79, 67, 0.78);
+  border-left: 4px solid rgba(37, 99, 235, 0.72);
   padding-left: 14px;
 }
 
@@ -88,9 +88,9 @@
   display: grid;
   gap: 4px;
   padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(131, 101, 70, 0.12);
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #ffffff;
 }
 
 .org-plan-summary-metric span {
@@ -100,7 +100,7 @@
 
 .org-plan-summary-upgrade {
   margin: 0;
-  color: #a33a2e;
+  color: var(--brand-strong);
   font-weight: 600;
   line-height: 1.5;
 }
@@ -129,17 +129,17 @@
   min-height: 46px;
   padding: 10px 12px;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 251, 247, 0.92);
+  border-radius: var(--radius);
+  background: #ffffff;
   color: var(--text);
   font: inherit;
 }
 
 .org-admin-list-item {
   padding: 14px 16px;
-  border: 1px solid rgba(131, 101, 70, 0.16);
-  border-radius: 18px;
-  background: rgba(255, 252, 248, 0.92);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
   display: grid;
   gap: 10px;
 }
@@ -332,7 +332,7 @@
 .sales-close-dialog-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(53, 34, 20, 0.36);
+  background: rgba(15, 23, 42, 0.36);
   backdrop-filter: blur(4px);
 }
 
@@ -340,10 +340,10 @@
   position: relative;
   width: min(100% - 32px, 460px);
   padding: 20px;
-  border: 1px solid rgba(131, 101, 70, 0.18);
-  border-radius: 22px;
-  background: rgba(255, 251, 246, 0.98);
-  box-shadow: 0 18px 40px rgba(75, 50, 30, 0.18);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
   display: grid;
   gap: 14px;
 }
@@ -359,9 +359,9 @@
   width: 100%;
   min-height: 52px;
   padding: 0 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(131, 101, 70, 0.22);
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #ffffff;
   font: inherit;
   font-size: 1rem;
 }
@@ -394,9 +394,9 @@
 
 .user-sales-item {
   padding: 16px 18px;
-  border: 1px solid rgba(131, 101, 70, 0.16);
-  border-radius: 18px;
-  background: rgba(255, 252, 248, 0.92);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
   display: grid;
   gap: 8px;
   height: 100%;

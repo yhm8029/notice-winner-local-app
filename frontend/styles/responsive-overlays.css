@@ -14,7 +14,7 @@
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(35, 23, 15, 0.42);
+  background: rgba(15, 23, 42, 0.42);
 }
 
 .tracker-change-modal-card {
@@ -25,9 +25,9 @@
   padding: 22px;
   overflow-y: auto;
   border: 1px solid var(--line);
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 248, 241, 0.99), rgba(250, 242, 233, 0.99));
-  box-shadow: 0 24px 80px rgba(54, 31, 18, 0.28);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
 }
 
 .tracker-change-modal-head {
@@ -50,7 +50,7 @@
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(35, 23, 15, 0.34);
+  background: rgba(15, 23, 42, 0.34);
 }
 
 .drawer-panel {
@@ -62,8 +62,8 @@
   padding: 22px;
   overflow-y: auto;
   border-left: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(255, 248, 241, 0.98), rgba(250, 242, 233, 0.98));
-  box-shadow: -20px 0 60px rgba(54, 31, 18, 0.22);
+  background: var(--panel);
+  box-shadow: -20px 0 60px rgba(15, 23, 42, 0.16);
 }
 
 .drawer-head {
@@ -96,8 +96,8 @@
 .drawer-field-item {
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 251, 247, 0.84);
+  border-radius: var(--radius);
+  background: #f8fafc;
 }
 
 .drawer-field-item strong,
@@ -127,7 +127,7 @@
   height: 18px;
   padding: 0 6px;
   border-radius: 999px;
-  background: #b44d19;
+  background: var(--brand);
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
@@ -139,10 +139,10 @@
   right: 0;
   width: min(460px, calc(100vw - 32px));
   padding: 14px;
-  border: 1px solid rgba(153, 91, 56, 0.16);
-  border-radius: 22px;
-  background: rgba(255, 250, 245, 0.98);
-  box-shadow: 0 24px 60px rgba(97, 66, 46, 0.16);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
   z-index: 14;
 }
 
@@ -163,9 +163,9 @@
   display: grid;
   gap: 8px;
   padding: 13px 14px;
-  border: 1px solid rgba(153, 91, 56, 0.12);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
 }
 
 .tracker-change-bell-popover-item.is-read {
@@ -204,8 +204,8 @@
 
 .tracker-change-panel.is-focused {
   box-shadow:
-    0 0 0 3px rgba(180, 77, 25, 0.22),
-    0 24px 60px rgba(97, 66, 46, 0.16);
+    0 0 0 3px rgba(37, 99, 235, 0.18),
+    0 24px 60px rgba(15, 23, 42, 0.14);
   transition: box-shadow 160ms ease;
 }
 
@@ -219,8 +219,8 @@
   gap: 8px;
   padding: 14px 16px;
   border: 1px solid var(--line);
-  border-radius: 16px;
-  background: rgba(255, 251, 247, 0.9);
+  border-radius: var(--radius);
+  background: #ffffff;
 }
 
 .tracker-change-item.is-read {

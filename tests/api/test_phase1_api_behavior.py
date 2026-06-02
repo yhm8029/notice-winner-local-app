@@ -651,6 +651,18 @@ class Phase1ApiTests(unittest.TestCase):
             self.assertIn(b'id="run-form"', body)
             self.assertIn(b'id="runs-list"', body)
 
+    def test_frontend_console_serves_root_static_assets(self) -> None:
+        with ApiServer() as server:
+            for asset_path, expected_content_type in (
+                ("/styles.css", "text/css"),
+                ("/app.js", "javascript"),
+            ):
+                with self.subTest(asset_path=asset_path):
+                    status_code, body, headers = server.request_bytes("GET", asset_path)
+                    self.assertEqual(status_code, 200)
+                    self.assertIn(expected_content_type, headers.get("content-type", ""))
+                    self.assertGreater(len(body), 100)
+
     def test_phase_report_endpoint_returns_json_file(self) -> None:
         reports_root = _build_test_tmp_path("reports", token=uuid4().hex)
         try:
