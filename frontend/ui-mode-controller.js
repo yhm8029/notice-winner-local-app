@@ -140,9 +140,9 @@
       deps.dom?.trackerEntriesList?.classList.toggle("hidden", showingSalesRecommendations);
       deps.dom?.entriesPrevButton?.closest(".pagination-row")?.classList.toggle("hidden", showingSalesRecommendations);
       deps.dom?.trackerBoard?.closest(".tracker-board")?.classList.toggle("hidden", true);
-      deps.dom?.trackerSalesOverviewGrid?.classList.toggle("hidden", showingSalesRecommendations);
-      deps.dom?.trackerUserSalesSection?.classList.toggle("hidden", showingSalesRecommendations);
-      deps.dom?.trackerCompanySalesSection?.classList.toggle("hidden", showingSalesRecommendations);
+      deps.dom?.trackerSalesOverviewGrid?.classList.toggle("hidden", true);
+      deps.dom?.trackerUserSalesSection?.classList.toggle("hidden", true);
+      deps.dom?.trackerCompanySalesSection?.classList.toggle("hidden", true);
       deps.dom?.trackerEntriesSectionTitle?.classList.toggle("hidden", showingSalesRecommendations);
       deps.dom?.trackerTemplateUploadButton?.classList.toggle("hidden", !showProjectStatusAdminPanels);
       deps.dom?.trackerTemplateResetButton?.classList.toggle("hidden", !showProjectStatusAdminPanels);

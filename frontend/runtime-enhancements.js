@@ -405,49 +405,7 @@ export function createRuntimeEnhancements(deps = {}) {
       dom.trackerSalesRecommendationRefreshButton = recommendationSection.querySelector("#tracker-sales-recommendation-refresh-button");
     }
 
-    if (dom.panelTracker && dom.trackerEntriesList && !dom.trackerUserSalesSection) {
-      const salesOverviewGrid = document.createElement("div");
-      salesOverviewGrid.id = "tracker-sales-overview-grid";
-      salesOverviewGrid.className = "tracker-sales-overview-grid hidden";
-
-      const mySalesSection = document.createElement("section");
-      mySalesSection.id = "tracker-user-sales-section";
-      mySalesSection.className = "runtime-card tracker-user-sales-section hidden";
-      mySalesSection.innerHTML = `
-        <div class="runtime-card-head">
-          <div>
-            <strong>내가 진행 중인 영업</strong>
-            <p class="kicker">현재 로그인한 영업사원이 맡고 있는 프로젝트</p>
-          </div>
-          <button id="tracker-user-sales-download-button" class="ghost-button" type="button">엑셀 다운로드</button>
-        </div>
-        <div id="tracker-user-sales-list" class="runtime-list empty-state">내 영업 정보를 불러오는 중입니다.</div>
-      `;
-      salesOverviewGrid.appendChild(mySalesSection);
-      dom.trackerUserSalesSection = mySalesSection;
-      dom.trackerUserSalesList = mySalesSection.querySelector("#tracker-user-sales-list");
-      dom.trackerUserSalesDownloadButton = mySalesSection.querySelector("#tracker-user-sales-download-button");
-
-      const companySalesSection = document.createElement("section");
-      companySalesSection.id = "tracker-company-sales-section";
-      companySalesSection.className = "runtime-card tracker-user-sales-section hidden";
-      companySalesSection.innerHTML = `
-        <div class="runtime-card-head">
-          <div>
-            <strong>회사 전체 진행 중인 영업</strong>
-            <p class="kicker">현재 우리 회사 전체가 맡고 있는 진행 중 영업 프로젝트</p>
-          </div>
-          <button id="tracker-company-sales-download-button" class="ghost-button" type="button">엑셀 다운로드</button>
-        </div>
-        <div id="tracker-company-sales-list" class="runtime-list empty-state">회사 진행 영업 정보를 불러오는 중입니다.</div>
-      `;
-      salesOverviewGrid.appendChild(companySalesSection);
-      dom.panelTracker.insertBefore(salesOverviewGrid, dom.trackerEntriesList);
-      dom.trackerSalesOverviewGrid = salesOverviewGrid;
-      dom.trackerCompanySalesSection = companySalesSection;
-      dom.trackerCompanySalesList = companySalesSection.querySelector("#tracker-company-sales-list");
-      dom.trackerCompanySalesDownloadButton = companySalesSection.querySelector("#tracker-company-sales-download-button");
-
+    if (dom.panelTracker && dom.trackerEntriesList && !dom.trackerEntriesSectionTitle) {
       const entriesTitle = document.createElement("div");
       entriesTitle.className = "tracker-user-section-title hidden";
       entriesTitle.id = "tracker-entries-section-title";
