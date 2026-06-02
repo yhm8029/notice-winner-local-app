@@ -411,29 +411,28 @@ pre {
 .tracker-region-filter {
   display: grid;
   gap: 10px;
-  flex: 0 1 50%;
   min-width: 0;
 }
 
 .tracker-filter-controls-row {
   grid-column: 1 / -1;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: flex-end;
   gap: 12px;
   width: 100%;
 }
 
 .tracker-year-page-size-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: flex-end;
   gap: 12px;
-  flex: 0 1 50%;
   min-width: 0;
 }
 
 .tracker-year-filter,
 .tracker-page-size-field {
-  flex: 1 1 0;
   min-width: 0;
   width: 100%;
 }
