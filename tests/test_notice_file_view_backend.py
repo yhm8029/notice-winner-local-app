@@ -7,12 +7,21 @@ from uuid import uuid4
 
 from backend.api.app import _select_project_source_notice_row
 from backend.api.app import _select_tracker_entry_source_notice_row
+from backend.api.routers.tracker_read_handlers import view_tracker_entry_notice_file
 from backend.services.notice_file_view_backend import load_notice_seed_row_by_bid
 
 
 class _EmptyArtifactRepository:
     def list_artifacts(self, *, run_id):  # type: ignore[no-untyped-def]
         return []
+
+
+class _SingleEntryRepository:
+    def __init__(self, entry: dict[str, object]) -> None:
+        self._entry = dict(entry)
+
+    def get_entry(self, _entry_id):  # type: ignore[no-untyped-def]
+        return dict(self._entry)
 
 
 class NoticeFileViewBackendTests(unittest.TestCase):
@@ -84,6 +93,63 @@ class NoticeFileViewBackendTests(unittest.TestCase):
 
         self.assertEqual(row, {"bid_no": "R26BK01311027", "bid_ord": "000"})
         load_notice_seed_row_by_bid_mock.assert_called_once_with(bid_no="R26BK01311027", bid_ord="000")
+
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row", return_value=None)
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_view_tracker_entry_notice_file_rebuilds_g2b_source_from_entry_bid_for_synap(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        _select_tracker_entry_source_notice_row,
+    ) -> None:
+        entry_id = uuid4()
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Synap notice fallback",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+        seen_rows: list[dict[str, object] | None] = []
+
+        def _select_primary_notice_attachment(row):  # type: ignore[no-untyped-def]
+            seen_rows.append(row)
+            if row and row.get("bid_no") == "R26BK01434430" and "g2b.go.kr" in str(row.get("notice_url") or ""):
+                return {
+                    "url": (
+                        "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                        "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                    ),
+                    "file_name": "notice.hwp",
+                }
+            return {}
+
+        def _resolve_notice_viewer_url(**kwargs):  # type: ignore[no-untyped-def]
+            self.assertEqual(kwargs["bid_no"], "R26BK01434430")
+            self.assertEqual(kwargs["bid_ord"], "000")
+            self.assertIn("fileSeq=1", kwargs["attachment_url"])
+            return "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=synap-key"
+
+        load_notice_view_helpers.return_value = {
+            "build_notice_file_fallback_html": lambda **_kwargs: "<html>fallback</html>",
+            "download_notice_attachment": lambda **_kwargs: (b"", ""),
+            "infer_notice_attachment_suffix": lambda **_kwargs: "",
+            "render_hwp_notice_html": lambda **_kwargs: None,
+            "resolve_notice_viewer_url": _resolve_notice_viewer_url,
+            "select_primary_notice_attachment": _select_primary_notice_attachment,
+        }
+
+        response = view_tracker_entry_notice_file(entry_id)
+
+        self.assertEqual(response.status_code, 307)
+        self.assertEqual(
+            response.headers["location"],
+            "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=synap-key",
+        )
+        self.assertEqual(seen_rows[0]["bid_no"], "R26BK01434430")
+        self.assertIn("bidPbancNo=R26BK01434430", seen_rows[0]["notice_url"])
 
 
 if __name__ == "__main__":
