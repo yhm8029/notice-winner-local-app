@@ -257,14 +257,21 @@ test("ui mode controller preserves chrome updates and transition loading behavio
   for (const visibleWorkspaceName of [
     "trackerEntriesList",
     "pagination-row",
-    "trackerSalesOverviewGrid",
-    "trackerUserSalesSection",
-    "trackerCompanySalesSection",
     "trackerEntriesSectionTitle",
   ]) {
     assert.deepEqual(
       calls.find((call) => call[0] === "toggle" && call[1] === visibleWorkspaceName && call[2] === "hidden"),
       ["toggle", visibleWorkspaceName, "hidden", false],
+    );
+  }
+  for (const hiddenSalesSummaryName of [
+    "trackerSalesOverviewGrid",
+    "trackerUserSalesSection",
+    "trackerCompanySalesSection",
+  ]) {
+    assert.deepEqual(
+      calls.find((call) => call[0] === "toggle" && call[1] === hiddenSalesSummaryName && call[2] === "hidden"),
+      ["toggle", hiddenSalesSummaryName, "hidden", true],
     );
   }
   assert.deepEqual(

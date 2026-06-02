@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const htmlPath = path.resolve(__dirname, "../../frontend/index.html");
 const salesPanelControllerPath = path.resolve(__dirname, "../../frontend/sales-panel-controller.js");
+const runtimeEnhancementsPath = path.resolve(__dirname, "../../frontend/runtime-enhancements.js");
 const bootstrapRuntimePath = path.resolve(__dirname, "../../frontend/bootstrap-runtime.js");
 const orgAdminRuntimePath = path.resolve(__dirname, "../../frontend/org-admin-runtime.js");
 
@@ -17,6 +18,10 @@ function readHtmlSource() {
 
 function readSalesPanelControllerSource() {
   return fs.readFileSync(salesPanelControllerPath, "utf8");
+}
+
+function readRuntimeEnhancementsSource() {
+  return fs.readFileSync(runtimeEnhancementsPath, "utf8");
 }
 
 function readBootstrapRuntimeSource() {
@@ -117,10 +122,19 @@ test("index.html cache busts local console chrome runtimes", () => {
 
   assert.match(html, /\/app-shell-runtime\.js\?v=20260602c/);
   assert.match(html, /\/ui-mode-controller\.js\?v=20260602c/);
-  assert.match(html, /\/runtime-enhancements\.js\?v=20260602c/);
+  assert.match(html, /\/runtime-enhancements\.js\?v=20260602e/);
   assert.match(html, /\/sales-panel-controller\.js\?v=20260602c/);
   assert.match(html, /\/auth-controller\.js\?v=20260602c/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-runtime\.js\?v=20260602b/);
+});
+
+test("runtime enhancements do not create local sales summary cards", () => {
+  const source = readRuntimeEnhancementsSource();
+
+  assert.doesNotMatch(source, /tracker-user-sales-section/);
+  assert.doesNotMatch(source, /tracker-company-sales-section/);
+  assert.doesNotMatch(source, /tracker-sales-overview-grid/);
+  assert.match(source, /tracker-entries-section-title/);
 });
 
 test("index.html hides local mode and sync status controls from the project workspace", () => {
