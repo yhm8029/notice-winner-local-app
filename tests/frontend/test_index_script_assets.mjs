@@ -120,3 +120,10 @@ test("index.html does not load Google Sheets runtime assets", () => {
   assert.equal(html.includes("admin-google"), false);
   assert.equal(html.includes("Google Sheets"), false);
 });
+
+test("index.html starts directly in the local console instead of the login shell", () => {
+  const html = readHtmlSource();
+
+  assert.match(html, /<section id="auth-shell" class="auth-shell hidden">/);
+  assert.match(html, /<div id="console-shell" class="page-shell">/);
+});
