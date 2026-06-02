@@ -12,6 +12,7 @@ const runtimeEnhancementsPath = path.resolve(__dirname, "../../frontend/runtime-
 const trackerDiagnosticsRuntimePath = path.resolve(__dirname, "../../frontend/tracker-controller-diagnostics-runtime.js");
 const trackerControllerPath = path.resolve(__dirname, "../../frontend/tracker-controller.js");
 const trackerControllerEntriesRuntimePath = path.resolve(__dirname, "../../frontend/tracker-controller-entries-runtime.js");
+const appEventBindingsPath = path.resolve(__dirname, "../../frontend/app-event-bindings.js");
 const bootstrapRuntimePath = path.resolve(__dirname, "../../frontend/bootstrap-runtime.js");
 const orgAdminRuntimePath = path.resolve(__dirname, "../../frontend/org-admin-runtime.js");
 const runtimeActivityCssPath = path.resolve(__dirname, "../../frontend/styles/runtime-activity.css");
@@ -40,6 +41,10 @@ function readTrackerControllerSource() {
 
 function readTrackerControllerEntriesRuntimeSource() {
   return fs.readFileSync(trackerControllerEntriesRuntimePath, "utf8");
+}
+
+function readAppEventBindingsSource() {
+  return fs.readFileSync(appEventBindingsPath, "utf8");
 }
 
 function readBootstrapRuntimeSource() {
@@ -152,7 +157,7 @@ test("index.html cache busts local console chrome runtimes", () => {
   const appRuntimeBodySource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app-runtime-body.js"), "utf8");
 
   assert.match(html, /\/app-shell-runtime\.js\?v=20260602g/);
-  assert.match(html, /\/app-event-bindings\.js\?v=20260602g/);
+  assert.match(html, /\/app-event-bindings\.js\?v=20260602i/);
   assert.match(html, /\/download-controller\.js\?v=20260602g/);
   assert.match(html, /\/tracker-controller-entries-runtime\.js\?v=20260602g/);
   assert.match(html, /\/tracker-controller\.js\?v=20260602g/);
@@ -196,15 +201,21 @@ test("tracker workspace exposes a notice year filter and sends it to the tracker
   const html = readHtmlSource();
   const controllerSource = readTrackerControllerSource();
   const entriesRuntimeSource = readTrackerControllerEntriesRuntimeSource();
+  const appEventBindingsSource = readAppEventBindingsSource();
   const runtimeActivityCss = readRuntimeActivityCssSource();
 
   assert.match(html, /id="tracker-notice-year"/);
   assert.match(html, /<option value="2023">2023<\/option>/);
+  assert.match(html, /<option value="2045">2045<\/option>/);
   assert.match(html, /id="tracker-region-buttons"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
+  assert.match(html, /class="compact-row tracker-year-page-size-row"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
   assert.match(html, /class="compact tracker-page-size-field"/);
   assert.match(runtimeActivityCss, /\.tracker-page-size-field[\s\S]*max-width:\s*112px/);
+  assert.match(runtimeActivityCss, /\.tracker-year-page-size-row[\s\S]*grid-column:\s*1\s*\/\s*-1/);
   assert.match(controllerSource, /trackerFilters\.noticeYear/);
   assert.match(entriesRuntimeSource, /notice_year/);
+  assert.match(appEventBindingsSource, /homeBootstrapTrackerSnapshotActive\s*=\s*false/);
+  assert.match(appEventBindingsSource, /loadTrackerEntries\(\{\s*forceRefresh:\s*true\s*}\)/);
 });
 
 test("project tracker create form hides fixed crawler parameters", () => {
