@@ -226,6 +226,7 @@
   trackerFilters: {
     q: "",
     region: "",
+    noticeYear: "",
     editedOnly: false,
     page: 1,
     pageSize: 20,
@@ -544,6 +545,7 @@
   trackerFilterForm: query("#tracker-filter-form"),
   trackerQuery: query("#tracker-query"),
   trackerRegionButtons: query("#tracker-region-buttons"),
+  trackerNoticeYear: query("#tracker-notice-year"),
   trackerPageSize: query("#tracker-page-size"),
   entriesFirstButton: query("#entries-first-button"),
   entriesPrevButton: query("#entries-prev-button"),

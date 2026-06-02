@@ -104,6 +104,7 @@
       && Boolean(input?.snapshotActive)
       && !String(input?.query || "").trim()
       && !String(input?.region || "").trim()
+      && !String(input?.noticeYear || "").trim()
       && !Boolean(input?.editedOnly)
       && Number(input?.page || 1) === 1
     );

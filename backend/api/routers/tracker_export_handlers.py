@@ -22,6 +22,8 @@ from backend.api.schemas import TrackerDownloadJobCreateRequest
 from backend.api.schemas import TrackerDownloadJobItem
 from backend.api.schemas import TrackerEntryListResponse
 from backend.api.schemas import TrackerEntrySummaryListResponse
+from backend.repositories.tracker_entries import normalize_tracker_notice_year
+from backend.repositories.tracker_entries import tracker_entry_matches_notice_year
 
 PROJECT_STATUS_FILE_TIMEZONE = ZoneInfo("Asia/Seoul")
 
@@ -31,10 +33,18 @@ def _project_status_file_timestamp(*, include_microseconds: bool = False) -> str
     return datetime.now(PROJECT_STATUS_FILE_TIMEZONE).strftime(fmt)
 
 
+def _filter_rows_by_notice_year(rows: list[dict[str, object]], notice_year: str) -> list[dict[str, object]]:
+    normalized_notice_year = normalize_tracker_notice_year(notice_year)
+    if not normalized_notice_year:
+        return rows
+    return [row for row in rows if tracker_entry_matches_notice_year(row, normalized_notice_year)]
+
+
 def list_tracker_entry_summaries(
     request: Request,
     q: str = "",
     region: str = "",
+    notice_year: str = "",
     exclude_auxiliary_titles: bool = False,
     edited_only: bool = False,
     source_run_id: UUID | None = None,
@@ -67,6 +77,7 @@ def list_tracker_entry_summaries(
             exclude_auxiliary_titles=exclude_auxiliary_titles,
             edited_only=edited_only,
         )
+        filtered = _filter_rows_by_notice_year(filtered, notice_year)
         total = len(filtered)
         start = (page - 1) * page_size
         items = filtered[start:start + page_size]
@@ -78,6 +89,7 @@ def list_tracker_entry_summaries(
                 page_size=page_size,
                 q=q,
                 region=region,
+                notice_year=notice_year,
                 exclude_auxiliary_titles=exclude_auxiliary_titles,
                 edited_only=edited_only,
                 source_run_id=source_run_id,
@@ -119,8 +131,9 @@ def _list_tracker_entries_for_export(
     source_tracker_run_id: UUID | None,
     sheet_name: str,
     section_name: str,
+    notice_year: str = "",
 ) -> list[dict[str, object]]:
-    return support._list_tracker_entries_for_export_impl(
+    rows = support._list_tracker_entries_for_export(
         q=q,
         region=region,
         exclude_auxiliary_titles=exclude_auxiliary_titles,
@@ -129,12 +142,8 @@ def _list_tracker_entries_for_export(
         source_tracker_run_id=source_tracker_run_id,
         sheet_name=sheet_name,
         section_name=section_name,
-        is_global_tracker_scope_fn=support._is_global_tracker_scope,
-        filter_tracker_rows_for_global_scope_fn=support._filter_tracker_rows_for_global_scope,
-        load_global_tracker_rows_fn=support._load_global_tracker_rows,
-        normalize_tracker_rows_for_presentation_fn=support._normalize_tracker_rows_for_presentation,
-        load_all_tracker_entries_for_export_fn=support._load_all_tracker_entries_for_export,
     )
+    return _filter_rows_by_notice_year(rows, notice_year)
 
 
 def _get_or_build_cached_tracker_export_workbook_bytes(
@@ -185,7 +194,10 @@ def _warm_tracker_export_workbook_for_request(
     source_tracker_run_id: UUID | None,
     sheet_name: str,
     section_name: str,
+    notice_year: str = "",
 ) -> None:
+    if normalize_tracker_notice_year(notice_year):
+        return
     if not support._can_cache_tracker_export_workbook(
         format="xlsx",
         q=q,
@@ -224,6 +236,7 @@ def _run_tracker_download_job(job_id: UUID) -> None:
     try:
         q = str(row.get("q") or "")
         region = str(row.get("region") or "")
+        notice_year = str(row.get("notice_year") or "")
         exclude_auxiliary_titles = bool(row.get("exclude_auxiliary_titles"))
         edited_only = bool(row.get("edited_only"))
         blank_progress_note = bool(row.get("blank_progress_note"))
@@ -234,7 +247,7 @@ def _run_tracker_download_job(job_id: UUID) -> None:
         sheet_name = str(row.get("sheet_name") or "")
         section_name = str(row.get("section_name") or "")
 
-        if support._can_cache_tracker_export_workbook(
+        if not normalize_tracker_notice_year(notice_year) and support._can_cache_tracker_export_workbook(
             format="xlsx",
             q=q,
             region=region,
@@ -257,9 +270,10 @@ def _run_tracker_download_job(job_id: UUID) -> None:
             )
             row_count = 0
         else:
-            rows = support._list_tracker_entries_for_export(
+            rows = _list_tracker_entries_for_export(
                 q=q,
                 region=region,
+                notice_year=notice_year,
                 exclude_auxiliary_titles=exclude_auxiliary_titles,
                 edited_only=edited_only,
                 source_run_id=source_run_id,
@@ -298,6 +312,7 @@ def list_tracker_entries(
     request: Request,
     q: str = "",
     region: str = "",
+    notice_year: str = "",
     exclude_auxiliary_titles: bool = False,
     edited_only: bool = False,
     source_run_id: UUID | None = None,
@@ -315,6 +330,7 @@ def list_tracker_entries(
             page_size=page_size,
             q=q,
             region=region,
+            notice_year=notice_year,
             exclude_auxiliary_titles=exclude_auxiliary_titles,
             edited_only=edited_only,
             source_run_id=source_run_id,
@@ -351,6 +367,7 @@ def download_tracker_entry_summaries(
     format: str = Query(default="xlsx"),
     q: str = "",
     region: str = "",
+    notice_year: str = "",
     exclude_auxiliary_titles: bool = False,
     edited_only: bool = False,
     blank_progress_note: bool = False,
@@ -367,9 +384,10 @@ def download_tracker_entry_summaries(
     timestamp = _project_status_file_timestamp()
 
     if normalized_format == "csv":
-        rows = support._list_tracker_entries_for_export(
+        rows = _list_tracker_entries_for_export(
             q=q,
             region=region,
+            notice_year=notice_year,
             exclude_auxiliary_titles=exclude_auxiliary_titles,
             edited_only=edited_only,
             source_run_id=source_run_id,
@@ -402,7 +420,7 @@ def download_tracker_entry_summaries(
         headers = {"Content-Disposition": f'attachment; filename="{file_name}"'}
         return StreamingResponse(payload, media_type="text/csv; charset=utf-8", headers=headers)
 
-    if support._can_cache_tracker_export_workbook(
+    if not normalize_tracker_notice_year(notice_year) and support._can_cache_tracker_export_workbook(
         format=normalized_format,
         q=q,
         region=region,
@@ -424,9 +442,10 @@ def download_tracker_entry_summaries(
             section_name=section_name,
         )
     else:
-        rows = support._list_tracker_entries_for_export(
+        rows = _list_tracker_entries_for_export(
             q=q,
             region=region,
+            notice_year=notice_year,
             exclude_auxiliary_titles=exclude_auxiliary_titles,
             edited_only=edited_only,
             source_run_id=source_run_id,
@@ -464,6 +483,7 @@ def create_tracker_entry_summary_download_job(
     cache_key = support._build_tracker_download_job_cache_key(
         q=payload.q,
         region=payload.region,
+        notice_year=payload.notice_year,
         exclude_auxiliary_titles=payload.exclude_auxiliary_titles,
         edited_only=payload.edited_only,
         blank_progress_note=payload.blank_progress_note,
@@ -488,6 +508,7 @@ def create_tracker_entry_summary_download_job(
             "cache_key": cache_key,
             "q": payload.q,
             "region": payload.region,
+            "notice_year": payload.notice_year,
             "exclude_auxiliary_titles": payload.exclude_auxiliary_titles,
             "edited_only": payload.edited_only,
             "blank_progress_note": payload.blank_progress_note,
@@ -553,6 +574,7 @@ def warm_tracker_entry_summaries_download(
     format: str = Query(default="xlsx"),
     q: str = "",
     region: str = "",
+    notice_year: str = "",
     exclude_auxiliary_titles: bool = False,
     edited_only: bool = False,
     blank_progress_note: bool = False,
@@ -564,7 +586,7 @@ def warm_tracker_entry_summaries_download(
     normalized_format = str(format or "xlsx").strip().lower()
     if normalized_format != "xlsx":
         return MessageResponse(message="xlsx만 사전 준비합니다.")
-    if not support._can_cache_tracker_export_workbook(
+    if normalize_tracker_notice_year(notice_year) or not support._can_cache_tracker_export_workbook(
         format=normalized_format,
         q=q,
         region=region,
@@ -576,7 +598,7 @@ def warm_tracker_entry_summaries_download(
     ):
         return MessageResponse(message="현재 조건은 즉시 캐시 대상이 아닙니다.")
     support._dispatch_background(
-        support._warm_tracker_export_workbook_for_request,
+        _warm_tracker_export_workbook_for_request,
         q=q,
         region=region,
         edited_only=edited_only,
@@ -586,5 +608,6 @@ def warm_tracker_entry_summaries_download(
         source_tracker_run_id=source_tracker_run_id,
         sheet_name=sheet_name,
         section_name=section_name,
+        notice_year=notice_year,
     )
     return MessageResponse(message="엑셀 다운로드를 백그라운드에서 준비하고 있습니다.")

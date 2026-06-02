@@ -15,6 +15,7 @@ from .tracker_entries import TrackerEntryRepository
 from .tracker_entries import TrackerEntryRow
 from .tracker_entries import coerce_tracker_override_value
 from .tracker_entries import tracker_entry_matches_region
+from .tracker_entries import tracker_entry_matches_notice_year
 from .tracker_entries import tracker_entry_matches_title_visibility
 
 
@@ -38,6 +39,7 @@ class InMemoryTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]:
         rows, total = self.list_entries(
             page=page,
@@ -50,6 +52,7 @@ class InMemoryTrackerEntryRepository(TrackerEntryRepository):
             source_tracker_run_id=source_tracker_run_id,
             sheet_name=sheet_name,
             section_name=section_name,
+            notice_year=notice_year,
         )
         return [self._to_summary_entry(row) for row in rows], total
 
@@ -66,6 +69,7 @@ class InMemoryTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]:
         query = q.strip().lower()
         sheet_filter = sheet_name.strip().lower()
@@ -86,6 +90,8 @@ class InMemoryTrackerEntryRepository(TrackerEntryRepository):
             if edited_only and not effective["overridden_fields"]:
                 continue
             if query and not self._matches_query(effective, query):
+                continue
+            if not tracker_entry_matches_notice_year(effective, notice_year):
                 continue
             if not tracker_entry_matches_region(effective, region):
                 continue
@@ -115,6 +121,7 @@ class InMemoryTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]:
         return self.list_entries(
             page=page,
@@ -127,6 +134,7 @@ class InMemoryTrackerEntryRepository(TrackerEntryRepository):
             source_tracker_run_id=source_tracker_run_id,
             sheet_name=sheet_name,
             section_name=section_name,
+            notice_year=notice_year,
         )
 
     def get_entries_data_version(self) -> str:

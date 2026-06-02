@@ -53,7 +53,7 @@ function loadAppRuntimeBodyShellRuntime() {
   if (window.SPMSAppRuntimeBodyShellRuntime) return window.SPMSAppRuntimeBodyShellRuntime;
   if (typeof XMLHttpRequest === "function" && typeof document !== "undefined") {
     const request = new XMLHttpRequest();
-    request.open("GET", "/app/app-runtime-body-shell-runtime.js?v=20260503b", false);
+    request.open("GET", "/app/app-runtime-body-shell-runtime.js?v=20260602g", false);
     request.send(null);
     if ((request.status >= 200 && request.status < 300) || request.status === 0) (0, eval)(request.responseText);
   }
@@ -119,6 +119,7 @@ function loadAppRuntimeBodyShellRuntime() {
       if (state.selectedTrackerRunId) params.set("tracker_run_id", state.selectedTrackerRunId);
       if (state.trackerFilters.q) params.set("tracker_q", state.trackerFilters.q);
       if (state.trackerFilters.region) params.set("tracker_region", state.trackerFilters.region);
+      if (state.trackerFilters.noticeYear) params.set("tracker_notice_year", state.trackerFilters.noticeYear);
       if (state.trackerFilters.editedOnly) params.set("tracker_edited", "1");
       if (state.trackerFilters.page !== 1) params.set("tracker_page", String(state.trackerFilters.page));
       if (state.trackerFilters.pageSize !== 20) params.set("tracker_page_size", String(state.trackerFilters.pageSize));
@@ -762,6 +763,7 @@ function buildUrlForState({ pathname = null, uiMode = state.uiMode, adminTab = s
   if (state.selectedTrackerRunId) params.set("tracker_run_id", state.selectedTrackerRunId);
   if (state.trackerFilters.q) params.set("tracker_q", state.trackerFilters.q);
   if (state.trackerFilters.region) params.set("tracker_region", state.trackerFilters.region);
+  if (state.trackerFilters.noticeYear) params.set("tracker_notice_year", state.trackerFilters.noticeYear);
   if (state.trackerFilters.editedOnly) params.set("tracker_edited", "1");
   if (state.trackerFilters.page !== 1) params.set("tracker_page", String(state.trackerFilters.page));
   if (state.trackerFilters.pageSize !== 20) params.set("tracker_page_size", String(state.trackerFilters.pageSize));

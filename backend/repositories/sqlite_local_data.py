@@ -60,6 +60,7 @@ from .tracker_entries import TrackerEntryRepositoryConfigError
 from .tracker_entries import TrackerEntryRow
 from .tracker_entries import coerce_tracker_override_value
 from .tracker_entries import tracker_entry_matches_region
+from .tracker_entries import tracker_entry_matches_notice_year
 from .tracker_entries import tracker_entry_matches_title_visibility
 from .tracker_entry_snapshots import TrackerEntrySnapshotRepository
 from .tracker_entry_snapshots import TrackerEntrySnapshotRepositoryConfigError
@@ -142,6 +143,7 @@ class SqliteTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]:
         query = q.strip().lower()
         sheet_filter = sheet_name.strip().lower()
@@ -162,6 +164,8 @@ class SqliteTrackerEntryRepository(TrackerEntryRepository):
             if edited_only and not effective["overridden_fields"]:
                 continue
             if query and not self._matches_query(effective, query):
+                continue
+            if not tracker_entry_matches_notice_year(effective, notice_year):
                 continue
             if not tracker_entry_matches_region(effective, region):
                 continue

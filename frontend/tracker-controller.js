@@ -51,6 +51,11 @@
       return parseTrackerRegionFilterImpl(region).join(",");
     }
 
+    function normalizeTrackerNoticeYearFilterImpl(noticeYear) {
+      const text = String(noticeYear || "").trim();
+      return /^\d{4}$/.test(text) ? text : "";
+    }
+
     function renderTrackerRegionButtonsImpl() {
       if (!deps.dom?.trackerRegionButtons) {
         return;
@@ -76,6 +81,7 @@
     function readTrackerFiltersFromControlsImpl() {
       deps.state.trackerFilters.q = deps.dom.trackerQuery.value.trim();
       deps.state.trackerFilters.region = normalizeTrackerRegionFilterImpl(deps.state.trackerFilters.region);
+      deps.state.trackerFilters.noticeYear = normalizeTrackerNoticeYearFilterImpl(deps.dom.trackerNoticeYear?.value);
       if (deps.dom.trackerEditedOnly) {
         deps.state.trackerFilters.editedOnly = deps.dom.trackerEditedOnly.checked;
       }
@@ -91,6 +97,9 @@
       renderTrackerRegionButtonsImpl();
       if (deps.dom.trackerEditedOnly) {
         deps.dom.trackerEditedOnly.checked = deps.state.trackerFilters.editedOnly;
+      }
+      if (deps.dom.trackerNoticeYear) {
+        deps.dom.trackerNoticeYear.value = normalizeTrackerNoticeYearFilterImpl(deps.state.trackerFilters.noticeYear);
       }
       deps.dom.trackerPageSize.value = String(deps.state.trackerFilters.pageSize);
     };

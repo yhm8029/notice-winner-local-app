@@ -77,6 +77,9 @@
       if (deps.state.trackerFilters.region) {
         params.set("region", deps.state.trackerFilters.region);
       }
+      if (deps.state.trackerFilters.noticeYear) {
+        params.set("notice_year", deps.state.trackerFilters.noticeYear);
+      }
       if (globalScope) {
         params.set("exclude_auxiliary_titles", "true");
       }

@@ -34,6 +34,7 @@ class TrackerDownloadJobCreateRequest(BaseModel):
     format: str = "xlsx"
     q: str = ""
     region: str = ""
+    notice_year: str = ""
     exclude_auxiliary_titles: bool = False
     edited_only: bool = False
     blank_progress_note: bool = False

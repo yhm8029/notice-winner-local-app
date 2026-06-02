@@ -78,6 +78,7 @@
     if (state.selectedTrackerRunId) params.set("tracker_run_id", state.selectedTrackerRunId);
     if (state.trackerFilters.q) params.set("tracker_q", state.trackerFilters.q);
     if (state.trackerFilters.region) params.set("tracker_region", state.trackerFilters.region);
+    if (state.trackerFilters.noticeYear) params.set("tracker_notice_year", state.trackerFilters.noticeYear);
     if (state.trackerFilters.editedOnly) params.set("tracker_edited", "1");
     if (state.trackerFilters.page !== 1) params.set("tracker_page", String(state.trackerFilters.page));
     if (state.trackerFilters.pageSize !== 20) params.set("tracker_page_size", String(state.trackerFilters.pageSize));

@@ -16,6 +16,7 @@ from .tracker_entries import TrackerEntryRepositoryConfigError
 from .tracker_entries import TrackerEntryRepositoryError
 from .tracker_entries import TrackerEntryRow
 from .tracker_entries import coerce_tracker_override_value
+from .tracker_entries import normalize_tracker_notice_year
 from .supabase_http import request_json
 
 TRACKER_ENTRY_SELECT = tracker_runtime.TRACKER_ENTRY_SELECT
@@ -91,6 +92,7 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]:
         return self._list_entries_with_select(
             select_clause=TRACKER_ENTRY_SUMMARY_SELECT,
@@ -105,6 +107,7 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
             source_tracker_run_id=source_tracker_run_id,
             sheet_name=sheet_name,
             section_name=section_name,
+            notice_year=notice_year,
         )
 
     def list_entries(
@@ -120,6 +123,7 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
         ) -> tuple[list[TrackerEntryRow], int]:
         return self._list_entries_with_select(
             select_clause=TRACKER_ENTRY_SELECT,
@@ -134,6 +138,7 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
             source_tracker_run_id=source_tracker_run_id,
             sheet_name=sheet_name,
             section_name=section_name,
+            notice_year=notice_year,
         )
 
     def list_entries_for_export(
@@ -149,6 +154,7 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
         ) -> tuple[list[TrackerEntryRow], int]:
         return self._list_entries_with_select(
             select_clause=TRACKER_ENTRY_EXPORT_SELECT,
@@ -163,6 +169,7 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
             source_tracker_run_id=source_tracker_run_id,
             sheet_name=sheet_name,
             section_name=section_name,
+            notice_year=notice_year,
         )
 
     def get_entries_data_version(self) -> str:
@@ -235,6 +242,7 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]:
         is_global_scope = (
             source_run_id is None
@@ -275,6 +283,9 @@ class SupabaseTrackerEntryRepository(TrackerEntryRepository):
                         f"ilike.*{search_term}*",
                     )
                 )
+        normalized_notice_year = normalize_tracker_notice_year(notice_year)
+        if normalized_notice_year:
+            query.append(("notice_date", f"like.{normalized_notice_year}*"))
         region_clause = self._build_region_or_clause(region)
         if region_clause:
             query.append(("or", region_clause))

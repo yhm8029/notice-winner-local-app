@@ -82,6 +82,28 @@ class TrackerEntrySearchTests(unittest.TestCase):
         self.assertNotIn("서울식물원 식재설계 공모전 운영 대행용역", titles)
         self.assertIn("Smart Building Upgrade", titles)
 
+    def test_search_filters_by_notice_year_across_supported_date_formats(self) -> None:
+        first_id, second_id = list(self.repository._entries.keys())
+        self.repository._entries[first_id]["notice_date_source"] = "2023-01-15"
+        self.repository._entries[second_id]["notice_date_source"] = "20240116"
+
+        rows, total = self.repository.list_entries(
+            page=1,
+            page_size=20,
+            q="",
+            region="",
+            notice_year="2023",
+            exclude_auxiliary_titles=False,
+            edited_only=False,
+            source_run_id=None,
+            source_tracker_run_id=None,
+            sheet_name="",
+            section_name="",
+        )
+
+        self.assertEqual(total, 1)
+        self.assertEqual(rows[0]["notice_date"], "2023-01-15")
+
 
     def test_list_entries_preserves_organization_id(self) -> None:
         rows, total = self.repository.list_entries(
