@@ -266,17 +266,21 @@ def _build_tracking_workbook(*, rows: list[dict[str, Any]], split_region_sheets:
     template_path = resolve_tracker_template_path()
     wb = load_workbook(template_path)
     base_ws = wb[wb.sheetnames[0]]
-    _populate_tracking_sheet(base_ws, rows=rows)
     if not split_region_sheets:
+        _populate_tracking_sheet(base_ws, rows=rows)
         apply_standard_download_workbook_formatting(wb)
         _apply_tracking_workbook_filters(wb)
         _apply_tracking_workbook_borders(wb)
         return wb
 
+    download_template_ws = wb.copy_worksheet(base_ws)
+    download_template_ws.title = "__download_template__"
+    _populate_tracking_sheet(base_ws, rows=rows)
     used_titles: set[str] = set()
     base_ws.title = _make_tracking_sheet_title("전체", used_titles)
     ordinary_grouped, education_grouped = _group_tracking_rows_for_download_sheets(rows)
     if not ordinary_grouped and not education_grouped:
+        wb.remove(download_template_ws)
         _apply_tracking_download_sheet_layout(base_ws)
         apply_standard_download_workbook_formatting(wb)
         _apply_tracking_workbook_filters(wb)
@@ -284,13 +288,14 @@ def _build_tracking_workbook(*, rows: list[dict[str, Any]], split_region_sheets:
         return wb
 
     for region_name, region_rows in ordinary_grouped.items():
-        ws = wb.copy_worksheet(base_ws)
+        ws = wb.copy_worksheet(download_template_ws)
         ws.title = _make_tracking_sheet_title(_short_tracking_region_name(region_name), used_titles)
         _populate_tracking_sheet(ws, rows=region_rows)
     for sheet_name, sheet_rows in education_grouped.items():
-        ws = wb.copy_worksheet(base_ws)
+        ws = wb.copy_worksheet(download_template_ws)
         ws.title = _make_tracking_sheet_title(sheet_name, used_titles)
         _populate_tracking_sheet(ws, rows=sheet_rows)
+    wb.remove(download_template_ws)
     for ws in wb.worksheets:
         _apply_tracking_download_sheet_layout(ws)
     apply_standard_download_workbook_formatting(wb)
