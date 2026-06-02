@@ -184,7 +184,8 @@
       }
       const template = deps.state?.trackerTemplateStatus;
       if (!template) {
-        deps.dom.trackerTemplateStatus.textContent = "현재 서버 양식을 확인하는 중입니다.";
+        deps.dom.trackerTemplateStatus.textContent = "";
+        deps.dom.trackerTemplateStatus.classList.add("hidden");
         return;
       }
       const updatedAt = template.updated_at ? (deps.formatDate?.(template.updated_at) || template.updated_at) : "-";

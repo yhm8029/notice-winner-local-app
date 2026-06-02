@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 const htmlPath = path.resolve(__dirname, "../../frontend/index.html");
 const salesPanelControllerPath = path.resolve(__dirname, "../../frontend/sales-panel-controller.js");
 const runtimeEnhancementsPath = path.resolve(__dirname, "../../frontend/runtime-enhancements.js");
+const trackerDiagnosticsRuntimePath = path.resolve(__dirname, "../../frontend/tracker-controller-diagnostics-runtime.js");
 const bootstrapRuntimePath = path.resolve(__dirname, "../../frontend/bootstrap-runtime.js");
 const orgAdminRuntimePath = path.resolve(__dirname, "../../frontend/org-admin-runtime.js");
 
@@ -22,6 +23,10 @@ function readSalesPanelControllerSource() {
 
 function readRuntimeEnhancementsSource() {
   return fs.readFileSync(runtimeEnhancementsPath, "utf8");
+}
+
+function readTrackerDiagnosticsRuntimeSource() {
+  return fs.readFileSync(trackerDiagnosticsRuntimePath, "utf8");
 }
 
 function readBootstrapRuntimeSource() {
@@ -99,6 +104,7 @@ test("tracker render controller is cache busted for selection guard fixes", () =
   const html = readHtmlSource();
 
   assert.match(html, /\/tracker-render-controller\.js\?v=20260429a/);
+  assert.match(html, /\/tracker-controller-diagnostics-runtime\.js\?v=20260602f/);
 });
 
 test("tracker entry card runtimes are cache busted for hidden sales chrome", () => {
@@ -143,6 +149,15 @@ test("index.html hides local mode and sync status controls from the project work
   assert.match(html, /<div class="hero-meta hidden" aria-hidden="true">/);
   assert.match(html, /id="mode-toggle-button" class="ghost-button hero-mode-button hidden"/);
   assert.match(html, /id="auth-session-mode-toggle-button" class="ghost-button hidden"/);
+});
+
+test("index.html does not render tracker template status copy by default", () => {
+  const html = readHtmlSource();
+  const diagnosticsSource = readTrackerDiagnosticsRuntimeSource();
+
+  assert.match(html, /<div id="tracker-template-status" class="tracker-template-status hidden"><\/div>/);
+  assert.doesNotMatch(html, /현재 서버 양식을 확인하는 중입니다/);
+  assert.doesNotMatch(diagnosticsSource, /현재 서버 양식을 확인하는 중입니다/);
 });
 
 test("index.html does not load Google Sheets runtime assets", () => {
