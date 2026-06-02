@@ -28,7 +28,7 @@
     <script defer src="/console-data-runtime.js?v=20260426a"></script>
     <script defer src="/auth-session-runtime.js?v=20260426i"></script>
     <script defer src="/admin-tabs-runtime.js?v=20260503a"></script>
-    <script defer src="/app-shell-runtime.js?v=20260503a"></script>
+    <script defer src="/app-shell-runtime.js?v=20260602b"></script>
     <script defer src="/app-support-admin-runtime.js?v=20260503a"></script>
     <script defer src="/app-support-tracker-runtime.js?v=20260424a"></script>
     <script defer src="/app-support-org-runtime.js?v=20260424a"></script>
@@ -41,7 +41,7 @@
     <script defer src="/app-controller-context-runtime.js?v=20260418a"></script>
     <script defer src="/app-controller-wiring-auth-runtime.js?v=20260425b"></script>
     <script defer src="/app-controller-wiring-runtime.js?v=20260503r"></script>
-    <script defer src="/ui-mode-controller.js?v=20260503a"></script>
+    <script defer src="/ui-mode-controller.js?v=20260602b"></script>
     <script type="module" src="/app-controller-deps.js?v=20260503r"></script>
     <script type="module" src="/runtime-enhancements.js?v=20260503c"></script>
     <script type="module" src="/app-event-bindings.js?v=20260410a"></script>
@@ -92,7 +92,7 @@
     <script defer src="/app-launch-runtime-core.js?v=20260425a"></script>
     <script defer src="/app-launch-runtime.js?v=20260425a"></script>
     <script defer src="/app-host-bootstrap.js?v=20260418a"></script>
-    <script defer src="/app.js?v=20260503b"></script>
+    <script defer src="/app.js?v=20260602b"></script>
   </head>
   <body>
     <section id="auth-shell" class="auth-shell hidden">
@@ -182,7 +182,7 @@
       </div>
 
       <main class="layout-grid">
-        <section id="panel-dashboard" class="panel panel-dashboard">
+        <section id="panel-dashboard" class="panel panel-dashboard hidden">
           <div class="panel-heading">
             <div>
               <p class="kicker">운영 현황</p>
@@ -222,7 +222,7 @@
           <div class="panel-heading">
             <div>
               <p class="kicker">실행 생성</p>
-              <h2>프로젝트 트랙커 실행 생성</h2>
+              <h2>공고 추적</h2>
             </div>
             <button id="form-reset-button" class="ghost-button" type="button">초기화</button>
           </div>
@@ -315,7 +315,7 @@
           </form>
         </section>
 
-        <section id="panel-status" class="panel panel-status">
+        <section id="panel-status" class="panel panel-status hidden">
           <div class="panel-heading">
             <div>
               <p class="kicker">선택된 실행</p>
@@ -390,7 +390,7 @@
           </div>
         </section>
 
-        <section id="panel-runs" class="panel panel-runs">
+        <section id="panel-runs" class="panel panel-runs hidden">
           <div class="panel-heading">
             <div>
               <p class="kicker">이력</p>
@@ -414,7 +414,7 @@
               <span>실행 유형</span>
               <select id="run-filter-type">
                 <option value="">전체</option>
-                <option value="project_tracker">프로젝트 트랙커</option>
+                <option value="project_tracker">공고 추적</option>
                 <option value="tracker_export">트래커 내보내기</option>
               </select>
             </label>
@@ -448,7 +448,7 @@
           </div>
         </section>
 
-        <section id="panel-logs" class="panel panel-logs">
+        <section id="panel-logs" class="panel panel-logs hidden">
           <div class="panel-heading">
             <div>
               <p class="kicker">관측</p>
@@ -459,7 +459,7 @@
           <div id="logs-list" class="log-list empty-state">선택된 실행이 없습니다.</div>
         </section>
 
-        <section id="panel-report" class="panel panel-report">
+        <section id="panel-report" class="panel panel-report hidden">
           <div class="panel-heading">
             <div>
               <p class="kicker">동등성 리포트</p>
@@ -506,7 +506,7 @@
           </article>
         </section>
 
-        <section id="panel-artifacts" class="panel panel-artifacts">
+        <section id="panel-artifacts" class="panel panel-artifacts hidden">
           <div class="panel-heading">
             <div>
               <p class="kicker">산출물</p>
@@ -565,7 +565,7 @@
           </div>
         </section>
 
-        <section id="panel-editor" class="panel panel-editor">
+        <section id="panel-editor" class="panel panel-editor hidden">
           <div class="panel-heading">
             <div>
               <p class="kicker">항목 편집기</p>

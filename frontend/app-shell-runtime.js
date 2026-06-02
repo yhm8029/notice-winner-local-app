@@ -18,8 +18,8 @@
   ];
   
   const RUN_TYPE_LABELS = {
-    project_tracker: "프로젝트 트랙커",
-    winner_pipeline: "프로젝트 트랙커",
+    project_tracker: "공고 추적",
+    winner_pipeline: "공고 추적",
     tracker_export: "트래커 내보내기",
   };
   

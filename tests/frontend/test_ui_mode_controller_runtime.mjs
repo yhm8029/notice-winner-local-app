@@ -220,6 +220,26 @@ test("ui mode controller preserves chrome updates and transition loading behavio
   assert.equal(state.trackerChangeEventsWarmupHandle, null);
   assert.equal(state.backfillConflicts.length, 1);
   assert.equal(state.backfillConflictsLoading, true);
+  assert.deepEqual(calls.find((call) => call[1] === "panelForm" && call[2] === "hidden"), ["toggle", "panelForm", "hidden", false]);
+  for (const hiddenPanelName of [
+    "panelDashboard",
+    "panelStatus",
+    "panelRuns",
+    "panelLogs",
+    "panelReport",
+    "panelArtifacts",
+    "panelOrgAdmin",
+    "panelSalesSummary",
+    "trackerChangePanel",
+    "backfillConflictPanel",
+    "panelMissingReport",
+    "trackerInlineEditor",
+  ]) {
+    assert.deepEqual(
+      calls.find((call) => call[0] === "add" && call[1] === hiddenPanelName && call[2] === "hidden"),
+      ["add", hiddenPanelName, "hidden"],
+    );
+  }
 
   calls.length = 0;
   state.uiMode = "user";

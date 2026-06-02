@@ -100,8 +100,17 @@ test("app runtime body is cache busted for auth submit guard fixes", () => {
   const html = readHtmlSource();
   const appSource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app.js"), "utf8");
 
-  assert.match(html, /\/app\.js\?v=20260503b/);
-  assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260503b/);
+  assert.match(html, /\/app\.js\?v=20260602b/);
+  assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260602b/);
+});
+
+test("index.html cache busts local console chrome runtimes", () => {
+  const html = readHtmlSource();
+  const appRuntimeBodySource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app-runtime-body.js"), "utf8");
+
+  assert.match(html, /\/app-shell-runtime\.js\?v=20260602b/);
+  assert.match(html, /\/ui-mode-controller\.js\?v=20260602b/);
+  assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-runtime\.js\?v=20260602b/);
 });
 
 test("index.html does not load Google Sheets runtime assets", () => {
@@ -126,4 +135,30 @@ test("index.html starts directly in the local console instead of the login shell
 
   assert.match(html, /<section id="auth-shell" class="auth-shell hidden">/);
   assert.match(html, /<div id="console-shell" class="page-shell">/);
+});
+
+test("index.html hides nonessential local operations panels by default", () => {
+  const html = readHtmlSource();
+  const hiddenPanelIds = [
+    "panel-dashboard",
+    "panel-status",
+    "panel-runs",
+    "panel-logs",
+    "panel-report",
+    "panel-artifacts",
+    "panel-editor",
+  ];
+
+  for (const panelId of hiddenPanelIds) {
+    assert.match(
+      html,
+      new RegExp(`<section id="${panelId}" class="[^"]*\\bhidden\\b[^"]*">`),
+      `${panelId} should be hidden in the local console`,
+    );
+  }
+
+  assert.match(html, /<section id="panel-form" class="panel panel-form">/);
+  assert.match(html, /<section id="panel-tracker" class="panel panel-tracker">/);
+  assert.match(html, /<h2>공고 추적<\/h2>/);
+  assert.doesNotMatch(html, />프로젝트 트랙[커터]</);
 });

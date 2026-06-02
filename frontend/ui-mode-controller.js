@@ -110,11 +110,17 @@
       deps.dom?.panelSalesRecommendations?.classList.toggle("hidden", !showingSalesRecommendations);
 
       const showProjectStatusAdminPanels = adminMode && !showingSalesRecommendations;
-      const adminOnlyPanels = [
+      const visibleProjectStatusPanels = [
+        deps.dom?.panelForm,
+      ];
+      for (const panel of visibleProjectStatusPanels) {
+        panel?.classList.toggle("hidden", !showProjectStatusAdminPanels);
+      }
+
+      const hiddenLocalPanels = [
         deps.dom?.panelOrgAdmin,
         deps.dom?.panelDashboard,
         deps.dom?.panelStatus,
-        deps.dom?.panelForm,
         deps.dom?.panelRuns,
         deps.dom?.panelLogs,
         deps.dom?.panelReport,
@@ -124,13 +130,13 @@
         deps.dom?.trackerChangePanel,
         deps.dom?.backfillConflictPanel,
       ];
-      for (const panel of adminOnlyPanels) {
-        panel?.classList.toggle("hidden", !showProjectStatusAdminPanels);
+      for (const panel of hiddenLocalPanels) {
+        panel?.classList.add("hidden");
       }
 
       deps.dom?.panelEditor?.classList.add("hidden");
-      deps.dom?.panelMissingReport?.classList.toggle("hidden", !showProjectStatusAdminPanels);
-      deps.dom?.trackerInlineEditor?.classList.toggle("hidden", !showProjectStatusAdminPanels);
+      deps.dom?.panelMissingReport?.classList.add("hidden");
+      deps.dom?.trackerInlineEditor?.classList.add("hidden");
       deps.dom?.trackerEntriesList?.classList.toggle("hidden", showProjectStatusAdminPanels || showingSalesRecommendations);
       deps.dom?.entriesPrevButton?.closest(".pagination-row")?.classList.toggle("hidden", showProjectStatusAdminPanels || showingSalesRecommendations);
       deps.dom?.trackerBoard?.closest(".tracker-board")?.classList.toggle("hidden", !showProjectStatusAdminPanels);
