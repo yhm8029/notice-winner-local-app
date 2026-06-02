@@ -211,11 +211,11 @@ test("tracker workspace exposes a notice year filter and sends it to the tracker
   assert.match(html, /class="tracker-filter-controls-row"[\s\S]*id="tracker-region-buttons"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
   assert.match(html, /class="compact-row tracker-year-page-size-row"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
   assert.match(html, /class="compact tracker-page-size-field"/);
-  assert.match(runtimeActivityCss, /\.tracker-region-filter[\s\S]*flex:\s*0\s+1\s+50%/);
-  assert.match(runtimeActivityCss, /\.tracker-year-page-size-row[\s\S]*flex:\s*0\s+1\s+50%/);
-  assert.match(runtimeActivityCss, /\.tracker-year-filter,\s*[\r\n]+\.tracker-page-size-field[\s\S]*flex:\s*1\s+1\s+0/);
   assert.match(runtimeActivityCss, /\.tracker-filter-controls-row[\s\S]*grid-column:\s*1\s*\/\s*-1/);
-  assert.match(runtimeActivityCss, /\.tracker-filter-controls-row[\s\S]*display:\s*flex/);
+  assert.match(runtimeActivityCss, /\.tracker-filter-controls-row[\s\S]*display:\s*grid/);
+  assert.match(runtimeActivityCss, /\.tracker-filter-controls-row[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)/);
+  assert.match(runtimeActivityCss, /\.tracker-year-page-size-row[\s\S]*display:\s*grid/);
+  assert.match(runtimeActivityCss, /\.tracker-year-page-size-row[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)/);
   assert.match(controllerSource, /trackerFilters\.noticeYear/);
   assert.match(entriesRuntimeSource, /notice_year/);
   assert.match(appEventBindingsSource, /homeBootstrapTrackerSnapshotActive\s*=\s*false/);
