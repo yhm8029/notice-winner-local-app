@@ -52,7 +52,7 @@ class TrackerExportWorkbookCacheTests(unittest.TestCase):
 
         payload = json.loads(cache_key)
 
-        self.assertEqual(payload["workbook_layout_version"], 2)
+        self.assertEqual(payload["workbook_layout_version"], 3)
 
     def test_download_job_cache_key_includes_layout_version(self) -> None:
         cache_key = _build_tracker_download_job_cache_key(
@@ -69,7 +69,7 @@ class TrackerExportWorkbookCacheTests(unittest.TestCase):
 
         payload = json.loads(cache_key)
 
-        self.assertEqual(payload["workbook_layout_version"], 2)
+        self.assertEqual(payload["workbook_layout_version"], 3)
 
     def test_download_job_cache_key_includes_data_version(self) -> None:
         first_key = _build_tracker_download_job_cache_key(

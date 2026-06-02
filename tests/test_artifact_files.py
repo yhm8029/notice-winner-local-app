@@ -328,6 +328,7 @@ def test_build_tracking_download_workbook_applies_standard_download_formatting(m
                 "demand_org_name": "서울특별시",
                 "site_location_1": "서울특별시",
                 "notice_date": "20260418",
+                "progress_note": "NATIVE_WEB_MATCH",
             },
             {
                 "project_name": "창녕 교육지원청 청사",
@@ -335,6 +336,7 @@ def test_build_tracking_download_workbook_applies_standard_download_formatting(m
                 "client_location": "경상남도교육청 경상남도창녕교육지원청",
                 "site_location_1": "경상남도",
                 "notice_date": "20260501",
+                "progress_note": "NATIVE_WEB_MATCH",
             },
         ]
     )
@@ -346,18 +348,29 @@ def test_build_tracking_download_workbook_applies_standard_download_formatting(m
     assert wb.sheetnames == ["전체", "서울", "경남교육청"]
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
-        assert ws.auto_filter.ref == "A2:R4"
-        for column_letter in ("G", "L", "M", "O"):
+        assert ws.auto_filter.ref == "A2:Q4"
+        headers = [ws.cell(2, column).value for column in range(1, ws.max_column + 1)]
+        assert "주요진행사항" not in headers
+        cell_values = [
+            str(cell.value)
+            for row in ws.iter_rows()
+            for cell in row
+            if cell.value is not None
+        ]
+        assert not any("NATIVE_WEB_MATCH" in value for value in cell_values)
+        for column_letter in ("G", "L", "N"):
             assert ws.column_dimensions[column_letter].hidden is True
-        assert ws["Q2"].value == "설계사무소(전기)"
-        assert ws["R2"].value == "설계사무소(기계)"
+        assert ws.column_dimensions["M"].hidden is False
+        assert ws.column_dimensions["O"].hidden is False
+        assert ws["P2"].value == "설계사무소(전기)"
+        assert ws["Q2"].value == "설계사무소(기계)"
         assert ws["A2"].font.sz == 10
         assert ws["B3"].font.sz == 10
 
-    assert wb["전체"]["N3"].value == "2026-04-18"
-    assert wb["전체"]["N4"].value == "2026-05-01"
-    assert wb["서울"]["N3"].value == "2026-04-18"
-    assert wb["경남교육청"]["N3"].value == "2026-05-01"
+    assert wb["전체"]["M3"].value == "2026-04-18"
+    assert wb["전체"]["M4"].value == "2026-05-01"
+    assert wb["서울"]["M3"].value == "2026-04-18"
+    assert wb["경남교육청"]["M3"].value == "2026-05-01"
 
     wb.close()
 

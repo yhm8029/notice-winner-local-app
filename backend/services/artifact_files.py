@@ -100,7 +100,7 @@ TRACKING_DOWNLOAD_EXTRA_HEADERS = (
     (17, "설계사무소(전기)"),
     (18, "설계사무소(기계)"),
 )
-TRACKING_DOWNLOAD_HIDDEN_COLUMNS = ("G", "L", "M", "O")
+TRACKING_DOWNLOAD_HIDDEN_COLUMNS = ("G", "L", "N")
 
 
 @dataclass(frozen=True)
@@ -266,32 +266,37 @@ def _build_tracking_workbook(*, rows: list[dict[str, Any]], split_region_sheets:
     template_path = resolve_tracker_template_path()
     wb = load_workbook(template_path)
     base_ws = wb[wb.sheetnames[0]]
-    _populate_tracking_sheet(base_ws, rows=rows)
     if not split_region_sheets:
+        _populate_tracking_sheet(base_ws, rows=rows)
         apply_standard_download_workbook_formatting(wb)
         _apply_tracking_workbook_filters(wb)
         _apply_tracking_workbook_borders(wb)
         return wb
 
+    download_template_ws = wb.copy_worksheet(base_ws)
+    download_template_ws.title = "__download_template__"
+    _populate_tracking_sheet(base_ws, rows=rows)
     used_titles: set[str] = set()
     base_ws.title = _make_tracking_sheet_title("전체", used_titles)
-    _apply_tracking_download_sheet_layout(base_ws)
     ordinary_grouped, education_grouped = _group_tracking_rows_for_download_sheets(rows)
     if not ordinary_grouped and not education_grouped:
+        wb.remove(download_template_ws)
+        _apply_tracking_download_sheet_layout(base_ws)
         apply_standard_download_workbook_formatting(wb)
         _apply_tracking_workbook_filters(wb)
         _apply_tracking_workbook_borders(wb)
         return wb
 
     for region_name, region_rows in ordinary_grouped.items():
-        ws = wb.copy_worksheet(base_ws)
+        ws = wb.copy_worksheet(download_template_ws)
         ws.title = _make_tracking_sheet_title(_short_tracking_region_name(region_name), used_titles)
         _populate_tracking_sheet(ws, rows=region_rows)
-        _apply_tracking_download_sheet_layout(ws)
     for sheet_name, sheet_rows in education_grouped.items():
-        ws = wb.copy_worksheet(base_ws)
+        ws = wb.copy_worksheet(download_template_ws)
         ws.title = _make_tracking_sheet_title(sheet_name, used_titles)
         _populate_tracking_sheet(ws, rows=sheet_rows)
+    wb.remove(download_template_ws)
+    for ws in wb.worksheets:
         _apply_tracking_download_sheet_layout(ws)
     apply_standard_download_workbook_formatting(wb)
     _apply_tracking_workbook_filters(wb)
@@ -701,13 +706,22 @@ def _set_row_value(ws: Any, row: int, columns: list[int], value: str, index: int
 
 
 def _apply_tracking_download_sheet_layout(ws: Any) -> None:
+    _delete_tracking_progress_column(ws)
     for target_column, header in TRACKING_DOWNLOAD_EXTRA_HEADERS:
-        _copy_tracker_column_style(ws, source_column=16, target_column=target_column)
-        ws.cell(2, target_column).value = header
+        adjusted_target_column = target_column - 1
+        _copy_tracker_column_style(ws, source_column=15, target_column=adjusted_target_column)
+        ws.cell(2, adjusted_target_column).value = header
         for row in range(3, ws.max_row + 1):
-            ws.cell(row, target_column).value = None
+            ws.cell(row, adjusted_target_column).value = None
     for column_letter in TRACKING_DOWNLOAD_HIDDEN_COLUMNS:
         ws.column_dimensions[column_letter].hidden = True
+
+
+def _delete_tracking_progress_column(ws: Any) -> None:
+    header_cols = _header_columns(ws)
+    progress_columns = header_cols.get("progress", [])
+    if progress_columns:
+        ws.delete_cols(progress_columns[0], 1)
 
 
 def _copy_tracker_column_style(ws: Any, *, source_column: int, target_column: int) -> None:
