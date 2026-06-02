@@ -411,7 +411,7 @@ pre {
 .tracker-region-filter {
   display: grid;
   gap: 10px;
-  flex: 1 1 auto;
+  flex: 0 1 50%;
   min-width: 0;
 }
 
@@ -427,20 +427,15 @@ pre {
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  flex: 0 0 auto;
+  flex: 0 1 50%;
+  min-width: 0;
 }
 
 .tracker-year-filter,
 .tracker-page-size-field {
+  flex: 1 1 0;
+  min-width: 0;
   width: 100%;
-}
-
-.tracker-year-filter {
-  max-width: 150px;
-}
-
-.tracker-page-size-field {
-  max-width: 112px;
 }
 
 .tracker-year-filter select,
