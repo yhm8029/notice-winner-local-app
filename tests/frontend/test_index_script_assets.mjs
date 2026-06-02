@@ -156,6 +156,7 @@ test("index.html cache busts local console chrome runtimes", () => {
   const html = readHtmlSource();
   const appRuntimeBodySource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app-runtime-body.js"), "utf8");
 
+  assert.match(html, /\/styles\.css\?v=20260602d/);
   assert.match(html, /\/app-shell-runtime\.js\?v=20260602g/);
   assert.match(html, /\/app-event-bindings\.js\?v=20260602i/);
   assert.match(html, /\/download-controller\.js\?v=20260602g/);
@@ -207,11 +208,12 @@ test("tracker workspace exposes a notice year filter and sends it to the tracker
   assert.match(html, /id="tracker-notice-year"/);
   assert.match(html, /<option value="2023">2023<\/option>/);
   assert.match(html, /<option value="2045">2045<\/option>/);
-  assert.match(html, /id="tracker-region-buttons"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
+  assert.match(html, /class="tracker-filter-controls-row"[\s\S]*id="tracker-region-buttons"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
   assert.match(html, /class="compact-row tracker-year-page-size-row"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
   assert.match(html, /class="compact tracker-page-size-field"/);
   assert.match(runtimeActivityCss, /\.tracker-page-size-field[\s\S]*max-width:\s*112px/);
-  assert.match(runtimeActivityCss, /\.tracker-year-page-size-row[\s\S]*grid-column:\s*1\s*\/\s*-1/);
+  assert.match(runtimeActivityCss, /\.tracker-filter-controls-row[\s\S]*grid-column:\s*1\s*\/\s*-1/);
+  assert.match(runtimeActivityCss, /\.tracker-filter-controls-row[\s\S]*display:\s*flex/);
   assert.match(controllerSource, /trackerFilters\.noticeYear/);
   assert.match(entriesRuntimeSource, /notice_year/);
   assert.match(appEventBindingsSource, /homeBootstrapTrackerSnapshotActive\s*=\s*false/);
