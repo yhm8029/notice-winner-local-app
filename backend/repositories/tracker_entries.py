@@ -147,6 +147,20 @@ def tracker_entry_matches_title_visibility(
     return not any(_normalize_tracker_text(keyword) in title_norm for keyword in TRACKER_USER_HIDDEN_TITLE_KEYWORDS)
 
 
+def normalize_tracker_notice_year(notice_year: Any) -> str:
+    text = str(notice_year or "").strip()
+    return text if re.fullmatch(r"\d{4}", text) else ""
+
+
+def tracker_entry_matches_notice_year(row: TrackerEntryRow, notice_year: Any) -> bool:
+    normalized_year = normalize_tracker_notice_year(notice_year)
+    if not normalized_year:
+        return True
+    raw_date = str(row.get("notice_date") or row.get("notice_date_source") or "").strip()
+    digits = re.sub(r"[^0-9]", "", raw_date)
+    return len(digits) >= 4 and digits[:4] == normalized_year
+
+
 _TRACKER_OVERRIDE_DATE_RE = re.compile(r"^\s*(\d{4})[-./]?(\d{2})[-./]?(\d{2})\s*$")
 _TRACKER_COST_EOK_RE = re.compile(r"([0-9][0-9,]*(?:\.\d+)?)\s*억원")
 _TRACKER_RELATIVE_START_PREFIXES = ("착수일로부터", "착공일로부터", "계약일로부터", "계약일기준")
@@ -340,6 +354,7 @@ class TrackerEntryRepository(Protocol):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]: ...
 
     def list_entries(
@@ -355,6 +370,7 @@ class TrackerEntryRepository(Protocol):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]: ...
 
     def list_entries_for_export(
@@ -370,6 +386,7 @@ class TrackerEntryRepository(Protocol):
         source_tracker_run_id: UUID | None,
         sheet_name: str,
         section_name: str,
+        notice_year: str = "",
     ) -> tuple[list[TrackerEntryRow], int]: ...
 
     def get_entries_data_version(self) -> str: ...

@@ -10,8 +10,11 @@ const htmlPath = path.resolve(__dirname, "../../frontend/index.html");
 const salesPanelControllerPath = path.resolve(__dirname, "../../frontend/sales-panel-controller.js");
 const runtimeEnhancementsPath = path.resolve(__dirname, "../../frontend/runtime-enhancements.js");
 const trackerDiagnosticsRuntimePath = path.resolve(__dirname, "../../frontend/tracker-controller-diagnostics-runtime.js");
+const trackerControllerPath = path.resolve(__dirname, "../../frontend/tracker-controller.js");
+const trackerControllerEntriesRuntimePath = path.resolve(__dirname, "../../frontend/tracker-controller-entries-runtime.js");
 const bootstrapRuntimePath = path.resolve(__dirname, "../../frontend/bootstrap-runtime.js");
 const orgAdminRuntimePath = path.resolve(__dirname, "../../frontend/org-admin-runtime.js");
+const runtimeActivityCssPath = path.resolve(__dirname, "../../frontend/styles/runtime-activity.css");
 
 function readHtmlSource() {
   return fs.readFileSync(htmlPath, "utf8");
@@ -29,12 +32,24 @@ function readTrackerDiagnosticsRuntimeSource() {
   return fs.readFileSync(trackerDiagnosticsRuntimePath, "utf8");
 }
 
+function readTrackerControllerSource() {
+  return fs.readFileSync(trackerControllerPath, "utf8");
+}
+
+function readTrackerControllerEntriesRuntimeSource() {
+  return fs.readFileSync(trackerControllerEntriesRuntimePath, "utf8");
+}
+
 function readBootstrapRuntimeSource() {
   return fs.readFileSync(bootstrapRuntimePath, "utf8");
 }
 
 function readOrgAdminRuntimeSource() {
   return fs.readFileSync(orgAdminRuntimePath, "utf8");
+}
+
+function readRuntimeActivityCssSource() {
+  return fs.readFileSync(runtimeActivityCssPath, "utf8");
 }
 
 test("index.html loads the modular runtime assets before app.js", () => {
@@ -92,7 +107,7 @@ test("bootstrap and organization admin runtimes expose required bridge APIs", ()
   const bootstrapSource = readBootstrapRuntimeSource();
   const orgAdminSource = readOrgAdminRuntimeSource();
 
-  assert.match(html, /\/bootstrap-runtime\.js\?v=20260429a/);
+  assert.match(html, /\/bootstrap-runtime\.js\?v=20260602g/);
   assert.match(html, /\/org-admin-runtime\.js\?v=20260429a/);
   assert.match(bootstrapSource, /loadAdminConsoleData/);
   assert.match(bootstrapSource, /initializeConsole/);
@@ -119,19 +134,25 @@ test("app runtime body is cache busted for auth submit guard fixes", () => {
   const appSource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app.js"), "utf8");
 
   assert.match(html, /\/app\.js\?v=20260602c/);
-  assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260602b/);
+  assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260602g/);
 });
 
 test("index.html cache busts local console chrome runtimes", () => {
   const html = readHtmlSource();
   const appRuntimeBodySource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app-runtime-body.js"), "utf8");
 
-  assert.match(html, /\/app-shell-runtime\.js\?v=20260602c/);
+  assert.match(html, /\/app-shell-runtime\.js\?v=20260602g/);
+  assert.match(html, /\/app-event-bindings\.js\?v=20260602g/);
+  assert.match(html, /\/download-controller\.js\?v=20260602g/);
+  assert.match(html, /\/tracker-controller-entries-runtime\.js\?v=20260602g/);
+  assert.match(html, /\/tracker-controller\.js\?v=20260602g/);
+  assert.match(html, /\/app-bootstrap-bridge\.js\?v=20260602g/);
   assert.match(html, /\/ui-mode-controller\.js\?v=20260602c/);
   assert.match(html, /\/runtime-enhancements\.js\?v=20260602e/);
   assert.match(html, /\/sales-panel-controller\.js\?v=20260602c/);
   assert.match(html, /\/auth-controller\.js\?v=20260602c/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-runtime\.js\?v=20260602b/);
+  assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-shell-runtime\.js\?v=20260602g/);
 });
 
 test("runtime enhancements do not create local sales summary cards", () => {
@@ -158,6 +179,21 @@ test("index.html does not render tracker template status copy by default", () =>
   assert.match(html, /<div id="tracker-template-status" class="tracker-template-status hidden"><\/div>/);
   assert.doesNotMatch(html, /현재 서버 양식을 확인하는 중입니다/);
   assert.doesNotMatch(diagnosticsSource, /현재 서버 양식을 확인하는 중입니다/);
+});
+
+test("tracker workspace exposes a notice year filter and sends it to the tracker summary API", () => {
+  const html = readHtmlSource();
+  const controllerSource = readTrackerControllerSource();
+  const entriesRuntimeSource = readTrackerControllerEntriesRuntimeSource();
+  const runtimeActivityCss = readRuntimeActivityCssSource();
+
+  assert.match(html, /id="tracker-notice-year"/);
+  assert.match(html, /<option value="2023">2023<\/option>/);
+  assert.match(html, /id="tracker-region-buttons"[\s\S]*id="tracker-notice-year"[\s\S]*id="tracker-page-size"/);
+  assert.match(html, /class="compact tracker-page-size-field"/);
+  assert.match(runtimeActivityCss, /\.tracker-page-size-field[\s\S]*max-width:\s*112px/);
+  assert.match(controllerSource, /trackerFilters\.noticeYear/);
+  assert.match(entriesRuntimeSource, /notice_year/);
 });
 
 test("index.html does not load Google Sheets runtime assets", () => {

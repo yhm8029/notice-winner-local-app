@@ -199,6 +199,7 @@ export function createDownloadController(deps = {}) {
       && !useGlobalTrackerEntriesScope?.()
       && !state.trackerFilters?.q
       && !state.trackerFilters?.region
+      && !state.trackerFilters?.noticeYear
       && !state.trackerFilters?.editedOnly
       && state.selectedTrackerWorkbookArtifactId
     );
@@ -220,6 +221,9 @@ export function createDownloadController(deps = {}) {
     if (state.trackerFilters?.region) {
       params.set("region", state.trackerFilters.region);
     }
+    if (state.trackerFilters?.noticeYear) {
+      params.set("notice_year", state.trackerFilters.noticeYear);
+    }
     if (useGlobalTrackerEntriesScope?.()) {
       params.set("exclude_auxiliary_titles", "true");
     }
@@ -238,6 +242,7 @@ export function createDownloadController(deps = {}) {
       format: "xlsx",
       q: state.trackerFilters?.q || "",
       region: state.trackerFilters?.region || "",
+      notice_year: state.trackerFilters?.noticeYear || "",
       exclude_auxiliary_titles: Boolean(useGlobalTrackerEntriesScope?.()),
       edited_only: Boolean(state.trackerFilters?.editedOnly),
       blank_progress_note: state.uiMode === "user",
@@ -323,6 +328,9 @@ export function createDownloadController(deps = {}) {
     }
     if (state.trackerFilters?.region) {
       params.set("region", state.trackerFilters.region);
+    }
+    if (state.trackerFilters?.noticeYear) {
+      params.set("notice_year", state.trackerFilters.noticeYear);
     }
     params.set("exclude_auxiliary_titles", "true");
     if (state.trackerFilters?.editedOnly) {

@@ -239,6 +239,7 @@ export function createAppBootstrapBridge(context = {}) {
     if (state?.selectedTrackerRunId) params.set("tracker_run_id", state.selectedTrackerRunId);
     if (state?.trackerFilters?.q) params.set("tracker_q", state.trackerFilters.q);
     if (state?.trackerFilters?.region) params.set("tracker_region", state.trackerFilters.region);
+    if (state?.trackerFilters?.noticeYear) params.set("tracker_notice_year", state.trackerFilters.noticeYear);
     if (state?.trackerFilters?.editedOnly) params.set("tracker_edited", "1");
     if (Number(state?.trackerFilters?.page || 1) !== 1) params.set("tracker_page", String(state.trackerFilters.page));
     if (Number(state?.trackerFilters?.pageSize || 20) !== 20) params.set("tracker_page_size", String(state.trackerFilters.pageSize));
@@ -265,6 +266,11 @@ export function createAppBootstrapBridge(context = {}) {
     }
   }
 
+  function safeNormalizeTrackerNoticeYearFilter(value) {
+    const text = String(value || "").trim();
+    return /^\d{4}$/.test(text) ? text : "";
+  }
+
   function hydrateStateFromUrlFallback() {
     ensureFilterState();
     const urlSearch = runtimeWindow?.location?.search || "";
@@ -286,6 +292,7 @@ export function createAppBootstrapBridge(context = {}) {
     state.selectedTrackerRunId = params.get("tracker_run_id") || null;
     state.trackerFilters.q = params.get("tracker_q") || "";
     state.trackerFilters.region = safeNormalizeTrackerRegionFilter(params.get("tracker_region") || "");
+    state.trackerFilters.noticeYear = safeNormalizeTrackerNoticeYearFilter(params.get("tracker_notice_year") || "");
     state.trackerFilters.editedOnly = params.get("tracker_edited") === "1";
     state.trackerFilters.page = clampPage(params.get("tracker_page"), 1);
     state.trackerFilters.pageSize = clampPage(params.get("tracker_page_size"), 20);
@@ -421,6 +428,7 @@ export function createAppBootstrapBridge(context = {}) {
       snapshotActive: state?.homeBootstrapTrackerSnapshotActive,
       query: state?.trackerFilters?.q,
       region: state?.trackerFilters?.region,
+      noticeYear: state?.trackerFilters?.noticeYear,
       editedOnly: state?.trackerFilters?.editedOnly,
       page: state?.trackerFilters?.page,
     }) || (
@@ -429,6 +437,7 @@ export function createAppBootstrapBridge(context = {}) {
       && state?.homeBootstrapTrackerSnapshotActive
       && !String(state?.trackerFilters?.q || "").trim()
       && !String(state?.trackerFilters?.region || "").trim()
+      && !String(state?.trackerFilters?.noticeYear || "").trim()
       && !state?.trackerFilters?.editedOnly
       && Number(state?.trackerFilters?.page || 1) === 1
     );

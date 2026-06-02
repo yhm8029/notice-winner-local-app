@@ -232,6 +232,12 @@ export function createAppEventBindings(deps = {}) {
       syncUrlState();
       loadTrackerEntries();
     });
+    dom.trackerNoticeYear?.addEventListener("change", () => {
+      readTrackerFiltersFromControls();
+      state.trackerFilters.page = 1;
+      syncUrlState();
+      loadTrackerEntries();
+    });
     if (dom.trackerEntriesDownloadButton) {
       dom.trackerEntriesDownloadButton.addEventListener("click", () => {
         void triggerTrackerEntriesXlsxDownload(dom.trackerEntriesDownloadButton);

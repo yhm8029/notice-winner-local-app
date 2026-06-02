@@ -57,6 +57,7 @@
       snapshotActive: true,
       query: state.trackerFilters?.q,
       region: state.trackerFilters?.region,
+      noticeYear: state.trackerFilters?.noticeYear,
       editedOnly: state.trackerFilters?.editedOnly,
       page: state.trackerFilters?.page,
     }) || (
@@ -64,6 +65,7 @@
       && (runtimeDeps.useGlobalTrackerEntriesScope?.() ?? true)
       && !String(state.trackerFilters?.q || "").trim()
       && !String(state.trackerFilters?.region || "").trim()
+      && !String(state.trackerFilters?.noticeYear || "").trim()
       && !state.trackerFilters?.editedOnly
       && Number(state.trackerFilters?.page || 1) === 1
     );
@@ -78,6 +80,7 @@
       snapshotActive: state.homeBootstrapTrackerSnapshotActive,
       query: state.trackerFilters?.q,
       region: state.trackerFilters?.region,
+      noticeYear: state.trackerFilters?.noticeYear,
       editedOnly: state.trackerFilters?.editedOnly,
       page: state.trackerFilters?.page,
     });
@@ -89,6 +92,7 @@
       && state.homeBootstrapTrackerSnapshotActive
       && !String(state.trackerFilters?.q || "").trim()
       && !String(state.trackerFilters?.region || "").trim()
+      && !String(state.trackerFilters?.noticeYear || "").trim()
       && !state.trackerFilters?.editedOnly
       && Number(state.trackerFilters?.page || 1) === 1;
   }

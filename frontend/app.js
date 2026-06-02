@@ -12,7 +12,7 @@
   helperScript.dataset.spmsAppRuntimeBodyHelpers = "true";
   document.head.appendChild(helperScript);
   const script = document.createElement("script");
-  script.src = "/app/app-runtime-body.js?v=20260602b";
+  script.src = "/app/app-runtime-body.js?v=20260602g";
   script.defer = false;
   script.async = false;
   script.dataset.spmsAppRuntimeBody = "true";

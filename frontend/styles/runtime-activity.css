@@ -413,6 +413,25 @@ pre {
   gap: 10px;
 }
 
+.tracker-year-filter,
+.tracker-page-size-field {
+  width: 100%;
+}
+
+.tracker-year-filter {
+  max-width: 150px;
+}
+
+.tracker-page-size-field {
+  max-width: 112px;
+}
+
+.tracker-year-filter select,
+.tracker-page-size-field select {
+  width: 100%;
+  min-width: 0;
+}
+
 .region-filter-row {
   display: flex;
   flex-wrap: wrap;

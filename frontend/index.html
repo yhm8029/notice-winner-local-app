@@ -4,9 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SPMS</title>
-    <link rel="stylesheet" href="/styles.css?v=20260602a" />
+    <link rel="stylesheet" href="/styles.css?v=20260602b" />
     <script defer src="/cache-runtime.js?v=20260330ab"></script>
-    <script defer src="/bootstrap-runtime.js?v=20260429a"></script>
+    <script defer src="/bootstrap-runtime.js?v=20260602g"></script>
     <script defer src="/sales-runtime.js?v=20260330ab"></script>
     <script defer src="/sales-view-runtime.js?v=20260426a"></script>
     <script defer src="/tracker-change-runtime.js?v=20260330ab"></script>
@@ -28,7 +28,7 @@
     <script defer src="/console-data-runtime.js?v=20260426a"></script>
     <script defer src="/auth-session-runtime.js?v=20260426i"></script>
     <script defer src="/admin-tabs-runtime.js?v=20260503a"></script>
-    <script defer src="/app-shell-runtime.js?v=20260602c"></script>
+    <script defer src="/app-shell-runtime.js?v=20260602g"></script>
     <script defer src="/app-support-admin-runtime.js?v=20260503a"></script>
     <script defer src="/app-support-tracker-runtime.js?v=20260424a"></script>
     <script defer src="/app-support-org-runtime.js?v=20260424a"></script>
@@ -44,11 +44,11 @@
     <script defer src="/ui-mode-controller.js?v=20260602c"></script>
     <script type="module" src="/app-controller-deps.js?v=20260503r"></script>
     <script type="module" src="/runtime-enhancements.js?v=20260602e"></script>
-    <script type="module" src="/app-event-bindings.js?v=20260410a"></script>
+    <script type="module" src="/app-event-bindings.js?v=20260602g"></script>
     <script type="module" src="/tracker-render-controller.js?v=20260429a"></script>
     <script type="module" src="/tracker-entry-actions-controller.js?v=20260414a"></script>
     <script type="module" src="/selected-entry-controller.js?v=20260410a"></script>
-    <script type="module" src="/download-controller.js?v=20260410a"></script>
+    <script type="module" src="/download-controller.js?v=20260602g"></script>
     <script type="module" src="/console-panels-controller.js?v=20260410a"></script>
     <script type="module" src="/tracker-diagnostics-panel-controller.js?v=20260414a"></script>
     <script type="module" src="/report-panels-controller.js?v=20260414a"></script>
@@ -58,13 +58,13 @@
     <script type="module" src="/run-panels-controller.js?v=20260414a"></script>
     <script defer src="/tracker-controller-diagnostics-runtime.js?v=20260602f"></script>
     <script defer src="/tracker-controller-runs-runtime.js?v=20260424a"></script>
-    <script defer src="/tracker-controller-entries-runtime.js?v=20260424a"></script>
-    <script defer src="/tracker-controller.js?v=20260409a"></script>
+    <script defer src="/tracker-controller-entries-runtime.js?v=20260602g"></script>
+    <script defer src="/tracker-controller.js?v=20260602g"></script>
     <script type="module" src="/auth-controller.js?v=20260602c"></script>
     <script type="module" src="/app-auth-bridge.js?v=20260417a"></script>
     <script type="module" src="/project-related-controller.js?v=20260503l"></script>
     <script defer src="/app-core-runtime.js?v=20260426i"></script>
-    <script type="module" src="/app-bootstrap-bridge.js?v=20260503b"></script>
+    <script type="module" src="/app-bootstrap-bridge.js?v=20260602g"></script>
     <script type="module" src="/app-download-bridge.js?v=20260417a"></script>
     <script type="module" src="/app-console-bridge.js?v=20260417a"></script>
     <script type="module" src="/app-sales-bridge.js?v=20260417a"></script>
@@ -544,7 +544,17 @@
               <span>지역</span>
               <div id="tracker-region-buttons" class="region-filter-row" role="group" aria-label="지역 필터"></div>
             </div>
-            <label>
+            <label class="compact tracker-year-filter">
+              <span>연도</span>
+              <select id="tracker-notice-year">
+                <option value="">전체</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+              </select>
+            </label>
+            <label class="compact tracker-page-size-field">
               <span>페이지 크기</span>
               <select id="tracker-page-size">
                 <option value="10">10</option>

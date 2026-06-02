@@ -146,6 +146,7 @@ def _build_tracker_download_job_cache_key(
     source_tracker_run_id: UUID | None,
     sheet_name: str,
     section_name: str,
+    notice_year: str = "",
     data_version: str = "",
 ) -> str:
     return json.dumps(
@@ -155,6 +156,7 @@ def _build_tracker_download_job_cache_key(
             "data_version": str(data_version or ""),
             "q": str(q or "").strip(),
             "region": str(region or "").strip(),
+            "notice_year": str(notice_year or "").strip(),
             "exclude_auxiliary_titles": bool(exclude_auxiliary_titles),
             "edited_only": bool(edited_only),
             "blank_progress_note": bool(blank_progress_note),
