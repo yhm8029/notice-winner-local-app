@@ -36,3 +36,4 @@ def register_routes(app: FastAPI, *, frontend_dir: Path) -> None:
     for router in _ROUTERS:
         app.include_router(router)
     app.mount("/app", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+    app.mount("/", StaticFiles(directory=frontend_dir), name="frontend_assets")

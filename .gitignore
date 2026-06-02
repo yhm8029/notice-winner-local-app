@@ -12,6 +12,7 @@ frontend/.next/
 .worktrees/
 
 backups/
+data/*.sqlite*
 output/
 .tmp-test-runs/
 .tmp-auth-server/

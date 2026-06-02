@@ -5,13 +5,13 @@
 .runtime-project-item {
   padding: 14px 16px;
   border: 1px solid var(--line);
-  border-radius: 18px;
-  background: rgba(255, 252, 248, 0.88);
+  border-radius: var(--radius);
+  background: #ffffff;
 }
 
 .runtime-project-item.is-expanded {
-  border-color: rgba(170, 69, 25, 0.28);
-  box-shadow: 0 10px 26px rgba(96, 66, 42, 0.08);
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
 }
 
 .runtime-project-item p {
@@ -58,7 +58,7 @@
   gap: 12px;
   margin-top: 14px;
   padding-top: 14px;
-  border-top: 1px dashed rgba(131, 101, 70, 0.22);
+  border-top: 1px dashed rgba(15, 23, 42, 0.18);
 }
 
 .runtime-project-related-head {
@@ -77,9 +77,9 @@
   display: grid;
   gap: 8px;
   padding: 12px 14px;
-  border: 1px solid rgba(131, 101, 70, 0.16);
-  border-radius: 16px;
-  background: rgba(255, 248, 241, 0.88);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
 }
 
 .runtime-project-related-item p {
