@@ -45,7 +45,7 @@
     <script type="module" src="/app-controller-deps.js?v=20260503r"></script>
     <script type="module" src="/runtime-enhancements.js?v=20260602e"></script>
     <script type="module" src="/app-event-bindings.js?v=20260602g"></script>
-    <script type="module" src="/tracker-render-controller.js?v=20260429a"></script>
+    <script type="module" src="/tracker-render-controller.js?v=20260602h"></script>
     <script type="module" src="/tracker-entry-actions-controller.js?v=20260414a"></script>
     <script type="module" src="/selected-entry-controller.js?v=20260410a"></script>
     <script type="module" src="/download-controller.js?v=20260602g"></script>
@@ -55,7 +55,7 @@
     <script type="module" src="/sales-panel-controller.js?v=20260602c"></script>
     <script type="module" src="/org-admin-controller.js?v=20260410a"></script>
     <script type="module" src="/auth-ui-controller.js?v=20260414a"></script>
-    <script type="module" src="/run-panels-controller.js?v=20260414a"></script>
+    <script type="module" src="/run-panels-controller.js?v=20260602h"></script>
     <script defer src="/tracker-controller-diagnostics-runtime.js?v=20260602f"></script>
     <script defer src="/tracker-controller-runs-runtime.js?v=20260424a"></script>
     <script defer src="/tracker-controller-entries-runtime.js?v=20260602g"></script>
@@ -92,7 +92,7 @@
     <script defer src="/app-launch-runtime-core.js?v=20260425a"></script>
     <script defer src="/app-launch-runtime.js?v=20260425a"></script>
     <script defer src="/app-host-bootstrap.js?v=20260418a"></script>
-    <script defer src="/app.js?v=20260602c"></script>
+    <script defer src="/app.js?v=20260602h"></script>
   </head>
   <body>
     <section id="auth-shell" class="auth-shell hidden">
@@ -228,6 +228,11 @@
           </div>
 
           <form id="run-form" class="run-form">
+            <input name="contract_date_hint" type="hidden" value="" />
+            <input name="bid_no" type="hidden" value="" />
+            <input name="demand_org" type="hidden" value="" />
+            <input name="rows_per_page" type="hidden" value="999" />
+            <input name="max_pages" type="hidden" value="15" />
             <label>
               <span>시작일</span>
               <input name="start_date" type="text" inputmode="numeric" maxlength="8" value="20250101" required />
@@ -236,29 +241,9 @@
               <span>종료일</span>
               <input name="end_date" type="text" inputmode="numeric" maxlength="8" value="20250131" required />
             </label>
-            <label>
-              <span>계약일 힌트</span>
-              <input name="contract_date_hint" type="text" inputmode="numeric" maxlength="8" placeholder="선택 입력" />
-            </label>
-            <label>
-              <span>공고 번호</span>
-              <input name="bid_no" type="text" placeholder="공고명/수요기관으로 찾을 때는 비워두세요" />
-            </label>
             <label class="wide">
               <span>공고명</span>
               <input name="notice_title" type="text" value="기계설비 개선" />
-            </label>
-            <label class="wide">
-              <span>수요기관</span>
-              <input name="demand_org" type="text" value="도시시설사업부" />
-            </label>
-            <label>
-              <span>페이지당 행 수</span>
-              <input name="rows_per_page" type="number" min="1" value="100" required />
-            </label>
-            <label>
-              <span>최대 페이지 수</span>
-              <input name="max_pages" type="number" min="1" value="3" required />
             </label>
             <label>
               <span>API 범위</span>
@@ -310,7 +295,7 @@
 
             <div class="form-actions">
               <button id="submit-run-button" class="primary-button" type="submit">실행 시작</button>
-              <p class="hint-text">공고 번호, 공고명, 수요기관 중 하나 이상은 반드시 입력해야 합니다.</p>
+              <p class="hint-text">공고명 기준으로 공고 추적을 실행합니다.</p>
             </div>
           </form>
         </section>

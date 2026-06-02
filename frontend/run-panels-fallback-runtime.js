@@ -8,7 +8,6 @@
     runForm.reset();
     const defaults = {
       notice_title: "기계설비 개선",
-      demand_org: "도시시설사업부",
     };
     for (const [name, value] of Object.entries(defaults)) {
       const input = runForm.querySelector?.(`[name="${name}"]`);
@@ -35,12 +34,12 @@
       params: {
         start_date: String(formData.get("start_date") || "").trim(),
         end_date: String(formData.get("end_date") || "").trim(),
-        contract_date_hint: String(formData.get("contract_date_hint") || "").trim(),
-        bid_no: String(formData.get("bid_no") || "").trim(),
+        contract_date_hint: "",
+        bid_no: "",
         notice_title: String(formData.get("notice_title") || "").trim(),
-        demand_org: String(formData.get("demand_org") || "").trim(),
-        rows_per_page: Number(formData.get("rows_per_page") || 100),
-        max_pages: Number(formData.get("max_pages") || 3),
+        demand_org: "",
+        rows_per_page: 999,
+        max_pages: 15,
         api_scope: String(formData.get("api_scope") || "construction"),
       },
       advanced_options: {

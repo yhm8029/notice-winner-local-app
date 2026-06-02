@@ -15,6 +15,8 @@ const trackerControllerEntriesRuntimePath = path.resolve(__dirname, "../../front
 const bootstrapRuntimePath = path.resolve(__dirname, "../../frontend/bootstrap-runtime.js");
 const orgAdminRuntimePath = path.resolve(__dirname, "../../frontend/org-admin-runtime.js");
 const runtimeActivityCssPath = path.resolve(__dirname, "../../frontend/styles/runtime-activity.css");
+const runPanelsControllerPath = path.resolve(__dirname, "../../frontend/run-panels-controller.js");
+const runPanelsControllerHelpersPath = path.resolve(__dirname, "../../frontend/run-panels-controller-helpers.js");
 
 function readHtmlSource() {
   return fs.readFileSync(htmlPath, "utf8");
@@ -50,6 +52,14 @@ function readOrgAdminRuntimeSource() {
 
 function readRuntimeActivityCssSource() {
   return fs.readFileSync(runtimeActivityCssPath, "utf8");
+}
+
+function readRunPanelsControllerSource() {
+  return fs.readFileSync(runPanelsControllerPath, "utf8");
+}
+
+function readRunPanelsControllerHelpersSource() {
+  return fs.readFileSync(runPanelsControllerHelpersPath, "utf8");
 }
 
 test("index.html loads the modular runtime assets before app.js", () => {
@@ -118,7 +128,7 @@ test("bootstrap and organization admin runtimes expose required bridge APIs", ()
 test("tracker render controller is cache busted for selection guard fixes", () => {
   const html = readHtmlSource();
 
-  assert.match(html, /\/tracker-render-controller\.js\?v=20260429a/);
+  assert.match(html, /\/tracker-render-controller\.js\?v=20260602h/);
   assert.match(html, /\/tracker-controller-diagnostics-runtime\.js\?v=20260602f/);
 });
 
@@ -133,7 +143,7 @@ test("app runtime body is cache busted for auth submit guard fixes", () => {
   const html = readHtmlSource();
   const appSource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app.js"), "utf8");
 
-  assert.match(html, /\/app\.js\?v=20260602c/);
+  assert.match(html, /\/app\.js\?v=20260602h/);
   assert.match(appSource, /\/app\/app-runtime-body\.js\?v=20260602g/);
 });
 
@@ -150,6 +160,7 @@ test("index.html cache busts local console chrome runtimes", () => {
   assert.match(html, /\/ui-mode-controller\.js\?v=20260602c/);
   assert.match(html, /\/runtime-enhancements\.js\?v=20260602e/);
   assert.match(html, /\/sales-panel-controller\.js\?v=20260602c/);
+  assert.match(html, /\/run-panels-controller\.js\?v=20260602h/);
   assert.match(html, /\/auth-controller\.js\?v=20260602c/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-runtime\.js\?v=20260602b/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-shell-runtime\.js\?v=20260602g/);
@@ -194,6 +205,29 @@ test("tracker workspace exposes a notice year filter and sends it to the tracker
   assert.match(runtimeActivityCss, /\.tracker-page-size-field[\s\S]*max-width:\s*112px/);
   assert.match(controllerSource, /trackerFilters\.noticeYear/);
   assert.match(entriesRuntimeSource, /notice_year/);
+});
+
+test("project tracker create form hides fixed crawler parameters", () => {
+  const html = readHtmlSource();
+  const controllerSource = readRunPanelsControllerSource();
+  const helpersSource = readRunPanelsControllerHelpersSource();
+
+  assert.match(html, /<input name="contract_date_hint" type="hidden" value="" \/>/);
+  assert.match(html, /<input name="bid_no" type="hidden" value="" \/>/);
+  assert.match(html, /<input name="demand_org" type="hidden" value="" \/>/);
+  assert.match(html, /<input name="rows_per_page" type="hidden" value="999" \/>/);
+  assert.match(html, /<input name="max_pages" type="hidden" value="15" \/>/);
+  assert.doesNotMatch(html, /name="contract_date_hint" type="text"/);
+  assert.doesNotMatch(html, /name="bid_no" type="text"/);
+  assert.doesNotMatch(html, /name="demand_org" type="text"/);
+  assert.doesNotMatch(html, /name="rows_per_page" type="number"/);
+  assert.doesNotMatch(html, /name="max_pages" type="number"/);
+  assert.match(controllerSource, /run-panels-controller-helpers\.js\?v=20260602h/);
+  assert.match(helpersSource, /contract_date_hint:\s*""/);
+  assert.match(helpersSource, /bid_no:\s*""/);
+  assert.match(helpersSource, /demand_org:\s*""/);
+  assert.match(helpersSource, /rows_per_page:\s*999/);
+  assert.match(helpersSource, /max_pages:\s*15/);
 });
 
 test("index.html does not load Google Sheets runtime assets", () => {
