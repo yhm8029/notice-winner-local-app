@@ -442,6 +442,15 @@ def open_tracker_entry_notice_file_external(request: Request, entry_id: UUID):
     return tracker_app.open_tracker_entry_notice_file_external(entry_id, base_url=str(request.base_url))
 
 
+@router.post(
+    "/api/tracker-entries/{entry_id}/notice-file-warm",
+    responses={404: {"model": ErrorResponse}},
+)
+def warm_tracker_entry_notice_file(entry_id: UUID):
+    tracker_app = _app_module()
+    return tracker_app.warm_tracker_entry_notice_file(entry_id)
+
+
 @router.get(
     "/api/tracker-entries/{entry_id}/audit-logs",
     response_model=TrackerEntryAuditLogListResponse,

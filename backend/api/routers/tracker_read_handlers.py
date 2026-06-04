@@ -233,15 +233,30 @@ def open_tracker_entry_notice_file_external(entry_id: UUID, *, base_url: str) ->
         base = base[: -len("/app")]
     fallback_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view"
     notice_view_helpers = support._load_notice_view_helpers()
-    target_url = _resolve_tracker_entry_synap_viewer_url(entry_id, notice_view_helpers=notice_view_helpers) or fallback_url
+    target_url = _resolve_tracker_entry_synap_viewer_url(
+        entry_id,
+        notice_view_helpers=notice_view_helpers,
+        prefer_entry_bid=True,
+    ) or fallback_url
     opened = bool(notice_view_helpers["open_external_browser_url"](target_url))
     return {"opened": opened, "url": target_url}
+
+
+def warm_tracker_entry_notice_file(entry_id: UUID) -> dict[str, Any]:
+    notice_view_helpers = support._load_notice_view_helpers()
+    viewer_url = _resolve_tracker_entry_synap_viewer_url(
+        entry_id,
+        notice_view_helpers=notice_view_helpers,
+        prefer_entry_bid=True,
+    )
+    return {"ready": bool(viewer_url), "url": viewer_url}
 
 
 def _resolve_tracker_entry_synap_viewer_url(
     entry_id: UUID,
     *,
     notice_view_helpers: dict[str, Any],
+    prefer_entry_bid: bool = False,
 ) -> str:
     tracker_repository = support._get_tracker_repository()
     try:
@@ -256,7 +271,7 @@ def _resolve_tracker_entry_synap_viewer_url(
     if cached_viewer_url:
         return cached_viewer_url
 
-    source_row = support._select_tracker_entry_source_notice_row(entry)
+    source_row = None if prefer_entry_bid else support._select_tracker_entry_source_notice_row(entry)
     notice_source_row = _build_tracker_entry_notice_source_row(source_row=source_row, entry=entry)
     attachment = notice_view_helpers["select_primary_notice_attachment"](notice_source_row)
     attachment_url = str(attachment.get("url") or "").strip()

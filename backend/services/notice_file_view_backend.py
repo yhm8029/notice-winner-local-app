@@ -20,6 +20,7 @@ from .native_export_backend import _collect_attachment_documents
 from .seed_collect import collect_seed_rows_with_params
 
 ATTACHMENT_FILE_TIMEOUT_SEC = 30
+NOTICE_VIEWER_RESOLVE_TIMEOUT_SEC = 4
 G2B_TECH_ANNOUNCE_DETAIL_URL = "https://www.g2b.go.kr/pn/pnp/pnpe/TechBidPbac/selectTechAnncMngV.do"
 G2B_ATTACHMENT_DOC_VIEWER_URL = "https://www.g2b.go.kr/fs/fsc/fsca/atchFileDocViewer.do"
 ATTACHMENT_FILE_USER_AGENT = (
@@ -161,7 +162,7 @@ def resolve_notice_viewer_url(
                 "atchFileSqno": int(file_seq),
             }
         },
-        timeout=ATTACHMENT_FILE_TIMEOUT_SEC,
+        timeout=NOTICE_VIEWER_RESOLVE_TIMEOUT_SEC,
         headers={"User-Agent": ATTACHMENT_FILE_USER_AGENT, "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7"},
     )
     response.raise_for_status()
@@ -612,7 +613,7 @@ def _fetch_notice_attachment_group_no(*, bid_no: str, bid_ord: str) -> str:
     response = requests.post(
         G2B_TECH_ANNOUNCE_DETAIL_URL,
         json={"dmItemMap": {"bidPbancNo": str(bid_no or "").strip(), "bidPbancOrd": str(bid_ord or "").strip() or "000"}},
-        timeout=ATTACHMENT_FILE_TIMEOUT_SEC,
+        timeout=NOTICE_VIEWER_RESOLVE_TIMEOUT_SEC,
         headers={"User-Agent": ATTACHMENT_FILE_USER_AGENT, "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7"},
     )
     response.raise_for_status()

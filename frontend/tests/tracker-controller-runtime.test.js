@@ -611,6 +611,7 @@ test("tracker controller loadTrackerEntries still uses out-of-range handler deps
   controller.loadTrackerChangeEventUnreadCount = async () => {};
   controller.loadTrackerChangeEvents = async () => {};
   controller.prefetchVisibleProjectRelatedNotices = () => {};
+  controller.warmVisibleTrackerEntryNoticeFiles = () => {};
 
   await controller.loadTrackerEntries();
 
@@ -652,6 +653,39 @@ test("tracker controller sends notice year and region filters together", async (
   ]);
   assert.equal(state.trackerFilters.region, "서울");
   assert.equal(state.trackerFilters.noticeYear, "2025");
+});
+
+test("tracker controller warms visible notice viewers after loading entries", async () => {
+  const apiCalls = [];
+  const { controller } = createController({
+    api: async (url, options = {}) => {
+      apiCalls.push([url, options.method || "GET"]);
+      if (String(url).startsWith("/api/tracker-entry-summaries?")) {
+        return {
+          items: [
+            { id: "entry-1", project_name: "One" },
+            { id: "entry-2", project_name: "Two" },
+          ],
+          total: 2,
+        };
+      }
+      return { ready: true, url: "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=warm" };
+    },
+    TRACKER_NOTICE_WARM_LIMIT: 10,
+  });
+  controller.loadTrackerChangeEventUnreadCount = async () => {};
+  controller.loadTrackerChangeEvents = async () => {};
+  controller.prefetchVisibleProjectRelatedNotices = () => {};
+
+  await controller.loadTrackerEntries({ forceRefresh: true });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.deepEqual(apiCalls, [
+    ["/api/tracker-entry-summaries?page=1&page_size=10&source_tracker_run_id=run-1", "GET"],
+    ["/api/tracker-entries/entry-1/notice-file-warm", "POST"],
+    ["/api/tracker-entries/entry-2/notice-file-warm", "POST"],
+  ]);
 });
 
 test("tracker controller keeps selected entry detail state when loading from cache", async () => {
