@@ -402,6 +402,17 @@ input[type="checkbox"] {
   animation: download-progress-slide 1.2s ease-in-out infinite;
 }
 
+#run-progress-overlay.is-complete .download-progress-bar-fill,
+#run-progress-overlay.is-error .download-progress-bar-fill {
+  width: 100%;
+  animation: none;
+  transform: none;
+}
+
+#run-progress-overlay.is-error .download-progress-bar-fill {
+  background: linear-gradient(90deg, rgba(155, 34, 50, 0.28), rgba(155, 34, 50, 0.88));
+}
+
 @keyframes download-progress-spin {
   from {
     transform: rotate(0deg);

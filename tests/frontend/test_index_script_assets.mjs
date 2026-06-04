@@ -166,7 +166,7 @@ test("index.html cache busts local console chrome runtimes", () => {
   assert.match(html, /\/ui-mode-controller\.js\?v=20260602c/);
   assert.match(html, /\/runtime-enhancements\.js\?v=20260602e/);
   assert.match(html, /\/sales-panel-controller\.js\?v=20260602c/);
-  assert.match(html, /\/run-panels-controller\.js\?v=20260602h/);
+  assert.match(html, /\/run-panels-controller\.js\?v=20260604a/);
   assert.match(html, /\/auth-controller\.js\?v=20260602c/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-runtime\.js\?v=20260602b/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-shell-runtime\.js\?v=20260602g/);
@@ -237,7 +237,7 @@ test("project tracker create form hides fixed crawler parameters", () => {
   assert.doesNotMatch(html, /name="demand_org" type="text"/);
   assert.doesNotMatch(html, /name="rows_per_page" type="number"/);
   assert.doesNotMatch(html, /name="max_pages" type="number"/);
-  assert.match(controllerSource, /run-panels-controller-helpers\.js\?v=20260602h/);
+  assert.match(controllerSource, /run-panels-controller-helpers\.js\?v=20260604a/);
   assert.match(helpersSource, /contract_date_hint:\s*""/);
   assert.match(helpersSource, /bid_no:\s*""/);
   assert.match(helpersSource, /demand_org:\s*""/);
