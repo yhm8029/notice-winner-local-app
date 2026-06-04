@@ -6,6 +6,9 @@ function createClickableElement(attributeName, attributeValue) {
   const listeners = {};
   return {
     listeners,
+    disabled: false,
+    textContent: "",
+    dataset: {},
     addEventListener(type, handler) {
       listeners[type] = handler;
     },
@@ -19,8 +22,15 @@ function createClickableElement(attributeName, attributeValue) {
 }
 
 function createTrackerListElement(items) {
+  const noticeButtons = [
+    createClickableElement("data-entry-notice-view", "entry-1"),
+    createClickableElement("data-entry-notice-view", "entry-2"),
+  ];
+  noticeButtons[0].textContent = "공고문 보기";
+  noticeButtons[1].textContent = "공고문 보기";
   return {
     html: "",
+    noticeButtons,
     set innerHTML(value) {
       this.html = String(value || "");
     },
@@ -30,6 +40,9 @@ function createTrackerListElement(items) {
     querySelectorAll(selector) {
       if (selector === "[data-entry-id]") {
         return items;
+      }
+      if (selector === "[data-entry-notice-view]") {
+        return noticeButtons;
       }
       return [];
     },
@@ -55,7 +68,7 @@ function createTrackerBoardElement(rows) {
   };
 }
 
-function createControllerHarness({ selectionActive = false } = {}) {
+function createControllerHarness({ selectionActive = false, openTrackerEntryNoticeViewer } = {}) {
   const listItems = [
     createClickableElement("data-entry-id", "entry-1"),
     createClickableElement("data-entry-id", "entry-2"),
@@ -78,10 +91,12 @@ function createControllerHarness({ selectionActive = false } = {}) {
     trackerEntryDetailCache: {},
   };
   const calls = [];
+  const trackerEntriesList = createTrackerListElement(listItems);
+  const trackerBoard = createTrackerBoardElement(boardRows);
   const controller = createTrackerRenderController({
     dom: {
-      trackerEntriesList: createTrackerListElement(listItems),
-      trackerBoard: createTrackerBoardElement(boardRows),
+      trackerEntriesList,
+      trackerBoard,
     },
     state,
     window: {
@@ -104,7 +119,7 @@ function createControllerHarness({ selectionActive = false } = {}) {
     buildTrackerEntrySummaryDetail: (entry) => ({ id: entry.id, _summary_only: true }),
     loadSelectedEntryDetail: (...args) => calls.push(["loadSelectedEntryDetail", ...args]),
     toggleTrackerEntryRelated: (...args) => calls.push(["toggleTrackerEntryRelated", ...args]),
-    openTrackerEntryNoticeViewer: (...args) => calls.push(["openTrackerEntryNoticeViewer", ...args]),
+    openTrackerEntryNoticeViewer: openTrackerEntryNoticeViewer || ((...args) => calls.push(["openTrackerEntryNoticeViewer", ...args])),
     bindRelatedNoticeViewerButtons: () => calls.push("bindRelatedNoticeViewerButtons"),
     claimSalesProject: (...args) => calls.push(["claimSalesProject", ...args]),
     setSalesNoteDraft: (...args) => calls.push(["setSalesNoteDraft", ...args]),
@@ -125,7 +140,7 @@ function createControllerHarness({ selectionActive = false } = {}) {
     beginTrackerBoardEdit: (...args) => calls.push(["beginTrackerBoardEdit", ...args]),
     saveTrackerBoardEdit: (...args) => calls.push(["saveTrackerBoardEdit", ...args]),
   });
-  return { controller, state, calls, listItems, boardRows };
+  return { controller, state, calls, listItems, boardRows, trackerEntriesList, trackerBoard };
 }
 
 test("tracker card click does not select or rerender while text selection is active", () => {
@@ -150,4 +165,38 @@ test("tracker board row click does not select or rerender while text selection i
 
   assert.equal(state.selectedEntryId, "entry-1");
   assert.equal(calls.includes("syncUrlState"), false);
+});
+
+test("tracker notice button shows a busy state while opening the notice", async () => {
+  let resolveOpen;
+  const openPromise = new Promise((resolve) => {
+    resolveOpen = resolve;
+  });
+  const openCalls = [];
+  const { controller, state, trackerEntriesList } = createControllerHarness({
+    openTrackerEntryNoticeViewer: (...args) => {
+      openCalls.push(args);
+      return openPromise;
+    },
+  });
+
+  controller.renderTrackerEntries(state.trackerEntries, { refreshSelectedEntry: false });
+  const noticeButton = trackerEntriesList.noticeButtons[0];
+  noticeButton.listeners.click({
+    stopPropagation() {},
+  });
+
+  assert.equal(noticeButton.disabled, true);
+  assert.equal(noticeButton.textContent, "공고문 여는 중...");
+  assert.equal(noticeButton.dataset.originalLabel, "공고문 보기");
+  await Promise.resolve();
+  assert.equal(openCalls.length, 1);
+  assert.equal(openCalls[0][0], "entry-1");
+
+  resolveOpen();
+  await openPromise;
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(noticeButton.disabled, false);
+  assert.equal(noticeButton.textContent, "공고문 보기");
 });

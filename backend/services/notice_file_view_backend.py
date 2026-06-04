@@ -539,6 +539,26 @@ def _load_notice_viewer_url_from_cache(*, bid_no: str, bid_ord: str, file_seq: s
         return str(_read_notice_viewer_cache().get(key) or "").strip()
 
 
+def load_cached_notice_viewer_url_by_bid(*, bid_no: str, bid_ord: str = "000") -> str:
+    normalized_prefix = "|".join(
+        (
+            str(bid_no or "").strip().upper(),
+            str(bid_ord or "").strip() or "000",
+            "",
+        )
+    )
+    if not normalized_prefix.strip("|"):
+        return ""
+    with NOTICE_VIEWER_CACHE_LOCK:
+        payload = _read_notice_viewer_cache()
+    for key, value in payload.items():
+        if str(key).startswith(normalized_prefix):
+            cached_url = str(value or "").strip()
+            if "SynapDocViewServer" in cached_url:
+                return cached_url
+    return ""
+
+
 def _store_notice_viewer_url_in_cache(
     *,
     bid_no: str,

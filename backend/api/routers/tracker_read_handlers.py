@@ -252,6 +252,10 @@ def _resolve_tracker_entry_synap_viewer_url(
     if entry is None:
         support._not_found(f"tracker_entry not found: {entry_id}")
 
+    cached_viewer_url = _load_cached_tracker_entry_synap_viewer_url(entry, notice_view_helpers=notice_view_helpers)
+    if cached_viewer_url:
+        return cached_viewer_url
+
     source_row = support._select_tracker_entry_source_notice_row(entry)
     notice_source_row = _build_tracker_entry_notice_source_row(source_row=source_row, entry=entry)
     attachment = notice_view_helpers["select_primary_notice_attachment"](notice_source_row)
@@ -275,6 +279,24 @@ def _resolve_tracker_entry_synap_viewer_url(
             )
             or ""
         ).strip()
+    except Exception:
+        return ""
+
+
+def _load_cached_tracker_entry_synap_viewer_url(
+    entry: dict[str, Any],
+    *,
+    notice_view_helpers: dict[str, Any],
+) -> str:
+    load_cached = notice_view_helpers.get("load_cached_notice_viewer_url_by_bid")
+    if not callable(load_cached):
+        return ""
+    bid_no = str(entry.get("source_bid_no") or "").strip().upper()
+    if not bid_no:
+        return ""
+    bid_ord = str(entry.get("source_bid_ord") or "000").strip() or "000"
+    try:
+        return str(load_cached(bid_no=bid_no, bid_ord=bid_ord) or "").strip()
     except Exception:
         return ""
 

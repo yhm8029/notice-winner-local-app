@@ -329,6 +329,49 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         )
         self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=direct")
 
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_open_tracker_entry_notice_file_external_uses_cached_synap_url_before_source_lookup(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        select_tracker_entry_source_notice_row,
+    ) -> None:
+        from backend.api.routers.tracker_read_handlers import open_tracker_entry_notice_file_external
+
+        entry_id = uuid4()
+        opened_urls: list[str] = []
+        select_tracker_entry_source_notice_row.side_effect = AssertionError("source lookup should not run")
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Cached desktop notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+        load_notice_view_helpers.return_value = {
+            "load_cached_notice_viewer_url_by_bid": lambda **_kwargs: (
+                "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"
+            ),
+            "select_primary_notice_attachment": lambda _row: {},
+            "resolve_notice_viewer_url": lambda **_kwargs: "",
+            "open_external_browser_url": lambda url: opened_urls.append(url) or True,
+        }
+
+        response = open_tracker_entry_notice_file_external(
+            entry_id,
+            base_url="http://127.0.0.1:8765/app/",
+        )
+
+        self.assertEqual(response["opened"], True)
+        self.assertEqual(
+            opened_urls,
+            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"],
+        )
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -133,7 +133,7 @@ test("bootstrap and organization admin runtimes expose required bridge APIs", ()
 test("tracker render controller is cache busted for selection guard fixes", () => {
   const html = readHtmlSource();
 
-  assert.match(html, /\/tracker-render-controller\.js\?v=20260602h/);
+  assert.match(html, /\/tracker-render-controller\.js\?v=20260604a/);
   assert.match(html, /\/tracker-controller-diagnostics-runtime\.js\?v=20260602f/);
 });
 

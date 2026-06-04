@@ -35,6 +35,7 @@ def _load_notice_view_helpers(*, load_notice_seed_row_by_bid_fn=load_notice_seed
     from backend.services.notice_file_view_backend import build_synap_viewer_embed_html
     from backend.services.notice_file_view_backend import download_notice_attachment
     from backend.services.notice_file_view_backend import infer_notice_attachment_suffix
+    from backend.services.notice_file_view_backend import load_cached_notice_viewer_url_by_bid
     from backend.services.notice_file_view_backend import open_external_browser_url
     from backend.services.notice_file_view_backend import render_hwp_notice_html
     from backend.services.notice_file_view_backend import resolve_notice_viewer_url
@@ -48,6 +49,7 @@ def _load_notice_view_helpers(*, load_notice_seed_row_by_bid_fn=load_notice_seed
         "build_synap_viewer_embed_html": build_synap_viewer_embed_html,
         "download_notice_attachment": download_notice_attachment,
         "infer_notice_attachment_suffix": infer_notice_attachment_suffix,
+        "load_cached_notice_viewer_url_by_bid": load_cached_notice_viewer_url_by_bid,
         "load_notice_seed_row_by_bid": load_notice_seed_row_by_bid_fn,
         "open_external_browser_url": open_external_browser_url,
         "render_hwp_notice_html": render_hwp_notice_html,
