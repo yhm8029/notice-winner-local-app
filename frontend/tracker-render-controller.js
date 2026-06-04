@@ -283,7 +283,6 @@ export function createTrackerRenderController(deps = {}) {
         });
       }
     }
-    prefetchTrackerEntryDetails(displayEntries);
   }
 
 

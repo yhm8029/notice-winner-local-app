@@ -167,6 +167,17 @@ test("tracker board row click does not select or rerender while text selection i
   assert.equal(calls.includes("syncUrlState"), false);
 });
 
+test("tracker render controller does not prefetch entry details on page render", () => {
+  const { controller, state, calls } = createControllerHarness();
+
+  controller.renderTrackerEntries(state.trackerEntries, { refreshSelectedEntry: false });
+
+  assert.deepEqual(
+    calls.filter((call) => Array.isArray(call) && call[0] === "prefetchTrackerEntryDetails"),
+    [],
+  );
+});
+
 test("tracker notice button shows a busy state while opening the notice", async () => {
   let resolveOpen;
   const openPromise = new Promise((resolve) => {

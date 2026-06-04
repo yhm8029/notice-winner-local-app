@@ -657,6 +657,9 @@ test("tracker controller sends notice year and region filters together", async (
 
 test("tracker controller does not prewarm notice viewers after loading entries", async () => {
   const apiCalls = [];
+  let changeUnreadLoads = 0;
+  let changeEventLoads = 0;
+  let relatedPrefetchLoads = 0;
   const { controller } = createController({
     api: async (url, options = {}) => {
       apiCalls.push([url, options.method || "GET"]);
@@ -673,9 +676,15 @@ test("tracker controller does not prewarm notice viewers after loading entries",
     },
     TRACKER_NOTICE_WARM_LIMIT: 10,
   });
-  controller.loadTrackerChangeEventUnreadCount = async () => {};
-  controller.loadTrackerChangeEvents = async () => {};
-  controller.prefetchVisibleProjectRelatedNotices = () => {};
+  controller.loadTrackerChangeEventUnreadCount = async () => {
+    changeUnreadLoads += 1;
+  };
+  controller.loadTrackerChangeEvents = async () => {
+    changeEventLoads += 1;
+  };
+  controller.prefetchVisibleProjectRelatedNotices = () => {
+    relatedPrefetchLoads += 1;
+  };
 
   await controller.loadTrackerEntries({ forceRefresh: true });
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -684,6 +693,9 @@ test("tracker controller does not prewarm notice viewers after loading entries",
   assert.deepEqual(apiCalls, [
     ["/api/tracker-entry-summaries?page=1&page_size=10&source_tracker_run_id=run-1", "GET"],
   ]);
+  assert.equal(changeUnreadLoads, 0);
+  assert.equal(changeEventLoads, 0);
+  assert.equal(relatedPrefetchLoads, 0);
 });
 
 test("tracker controller keeps selected entry detail state when loading from cache", async () => {

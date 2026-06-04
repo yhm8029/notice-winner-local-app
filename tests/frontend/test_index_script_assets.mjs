@@ -133,7 +133,7 @@ test("bootstrap and organization admin runtimes expose required bridge APIs", ()
 test("tracker render controller is cache busted for selection guard fixes", () => {
   const html = readHtmlSource();
 
-  assert.match(html, /\/tracker-render-controller\.js\?v=20260604a/);
+  assert.match(html, /\/tracker-render-controller\.js\?v=20260604b/);
   assert.match(html, /\/tracker-controller-diagnostics-runtime\.js\?v=20260602f/);
 });
 
@@ -141,7 +141,7 @@ test("tracker entry card runtimes are cache busted for hidden sales chrome", () 
   const html = readHtmlSource();
 
   assert.match(html, /\/tracker-entry-runtime\.js\?v=20260602d/);
-  assert.match(html, /\/tracker-render-fallback-entry-runtime\.js\?v=20260602d/);
+  assert.match(html, /\/tracker-render-fallback-entry-runtime\.js\?v=20260604a/);
 });
 
 test("app runtime body is cache busted for auth submit guard fixes", () => {
@@ -160,7 +160,7 @@ test("index.html cache busts local console chrome runtimes", () => {
   assert.match(html, /\/app-shell-runtime\.js\?v=20260602g/);
   assert.match(html, /\/app-event-bindings\.js\?v=20260602i/);
   assert.match(html, /\/download-controller\.js\?v=20260602g/);
-  assert.match(html, /\/tracker-controller-entries-runtime\.js\?v=20260604b/);
+  assert.match(html, /\/tracker-controller-entries-runtime\.js\?v=20260604c/);
   assert.match(html, /\/tracker-controller\.js\?v=20260602g/);
   assert.match(html, /\/app-bootstrap-bridge\.js\?v=20260602g/);
   assert.match(html, /\/ui-mode-controller\.js\?v=20260602c/);
