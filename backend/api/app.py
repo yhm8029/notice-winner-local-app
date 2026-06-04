@@ -146,6 +146,7 @@ def _load_run_execution_helpers():
 
 def _load_notice_view_helpers():
     from backend.services.notice_file_view_backend import build_notice_file_fallback_html
+    from backend.services.notice_file_view_backend import build_synap_viewer_embed_html
     from backend.services.notice_file_view_backend import download_notice_attachment
     from backend.services.notice_file_view_backend import infer_notice_attachment_suffix
     from backend.services.notice_file_view_backend import render_hwp_notice_html
@@ -155,6 +156,7 @@ def _load_notice_view_helpers():
 
     return {
         "build_notice_file_fallback_html": build_notice_file_fallback_html,
+        "build_synap_viewer_embed_html": build_synap_viewer_embed_html,
         "build_notice_view_payload": build_notice_view_payload,
         "download_notice_attachment": download_notice_attachment,
         "infer_notice_attachment_suffix": infer_notice_attachment_suffix,
@@ -248,6 +250,11 @@ async def enforce_phase2_auth(request: Request, call_next):
 @app.exception_handler(ApiError)
 def handle_api_error(_request: Request, exc: ApiError) -> JSONResponse:
     return app_http_support.handle_api_error(_request, exc)
+
+
+@app.exception_handler(Exception)
+def handle_unhandled_error(_request: Request, exc: Exception) -> JSONResponse:
+    return app_http_support.handle_unhandled_error(_request, exc)
 
 
 @app.get("/health")

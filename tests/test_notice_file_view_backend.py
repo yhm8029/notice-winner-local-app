@@ -151,6 +151,50 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(seen_rows[0]["bid_no"], "R26BK01434430")
         self.assertIn("bidPbancNo=R26BK01434430", seen_rows[0]["notice_url"])
 
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row", return_value=None)
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_view_tracker_entry_notice_file_can_embed_synap_viewer_locally(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        _select_tracker_entry_source_notice_row,
+    ) -> None:
+        entry_id = uuid4()
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Synap embedded notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+
+        def _select_primary_notice_attachment(_row):  # type: ignore[no-untyped-def]
+            return {
+                "url": (
+                    "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                    "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                ),
+                "file_name": "notice.hwp",
+            }
+
+        load_notice_view_helpers.return_value = {
+            "build_notice_file_fallback_html": lambda **_kwargs: "<html>fallback</html>",
+            "download_notice_attachment": lambda **_kwargs: (b"", ""),
+            "infer_notice_attachment_suffix": lambda **_kwargs: "",
+            "render_hwp_notice_html": lambda **_kwargs: None,
+            "resolve_notice_viewer_url": lambda **_kwargs: "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=synap-key",
+            "select_primary_notice_attachment": _select_primary_notice_attachment,
+            "build_synap_viewer_embed_html": lambda **kwargs: f"<html><iframe src=\"{kwargs['viewer_url']}\"></iframe></html>",
+        }
+
+        response = view_tracker_entry_notice_file(entry_id, embed=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.media_type, "text/html")
+        self.assertIn("synap-key", response.body.decode("utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

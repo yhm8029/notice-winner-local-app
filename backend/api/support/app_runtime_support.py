@@ -31,6 +31,7 @@ def load_notice_seed_row_by_bid(*, bid_no: str, bid_ord: str = "000") -> dict[st
 
 def _load_notice_view_helpers(*, load_notice_seed_row_by_bid_fn=load_notice_seed_row_by_bid):
     from backend.services.notice_file_view_backend import build_notice_file_fallback_html
+    from backend.services.notice_file_view_backend import build_synap_viewer_embed_html
     from backend.services.notice_file_view_backend import download_notice_attachment
     from backend.services.notice_file_view_backend import infer_notice_attachment_suffix
     from backend.services.notice_file_view_backend import render_hwp_notice_html
@@ -41,6 +42,7 @@ def _load_notice_view_helpers(*, load_notice_seed_row_by_bid_fn=load_notice_seed
     return {
         "build_notice_view_payload": build_notice_view_payload,
         "build_notice_file_fallback_html": build_notice_file_fallback_html,
+        "build_synap_viewer_embed_html": build_synap_viewer_embed_html,
         "download_notice_attachment": download_notice_attachment,
         "infer_notice_attachment_suffix": infer_notice_attachment_suffix,
         "load_notice_seed_row_by_bid": load_notice_seed_row_by_bid_fn,

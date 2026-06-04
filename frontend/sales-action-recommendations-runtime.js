@@ -460,7 +460,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
           flash("공고문을 열 수 있는 트래커 항목 정보가 없습니다.", "warn");
           return;
         }
-        const opened = appWindow?.open?.(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view`, "_blank");
+        const opened = appWindow?.open?.(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?embed=1`, "_blank");
         if (!opened) {
           flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
         }

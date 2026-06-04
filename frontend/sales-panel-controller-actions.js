@@ -1,4 +1,4 @@
-import { createSalesActionRecommendationsRuntime } from "./sales-action-recommendations-runtime.js?v=20260503r";
+import { createSalesActionRecommendationsRuntime } from "./sales-action-recommendations-runtime.js?v=20260604a";
 
 export function createSalesPanelControllerActions(deps = {}) {
   const {

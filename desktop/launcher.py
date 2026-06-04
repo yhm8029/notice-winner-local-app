@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import os
 import socket
 import sys
@@ -66,6 +67,23 @@ def build_app_url(host: str, port: int) -> str:
 def ensure_runtime_directories(writable_root: Path) -> None:
     (writable_root / "data").mkdir(parents=True, exist_ok=True)
     (writable_root / "output" / "artifacts").mkdir(parents=True, exist_ok=True)
+    (writable_root / "logs").mkdir(parents=True, exist_ok=True)
+
+
+def configure_desktop_logging(writable_root: Path) -> Path:
+    log_path = writable_root / "logs" / "server.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.touch(exist_ok=True)
+    root_logger = logging.getLogger()
+    log_path_text = str(log_path)
+    if not any(getattr(handler, "_notice_winner_log_path", "") == log_path_text for handler in root_logger.handlers):
+        handler = logging.FileHandler(log_path, encoding="utf-8")
+        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+        handler._notice_winner_log_path = log_path_text  # type: ignore[attr-defined]
+        root_logger.addHandler(handler)
+    root_logger.setLevel(logging.INFO)
+    os.environ.setdefault("DESKTOP_SERVER_LOG_PATH", log_path_text)
+    return log_path
 
 
 def build_desktop_environment(
@@ -79,6 +97,7 @@ def build_desktop_environment(
         env.setdefault(key, "sqlite")
     env.setdefault("PYTHONUTF8", "1")
     env.setdefault("PYTHONIOENCODING", "utf-8")
+    env.setdefault("LOCAL_APP_EXPOSE_INTERNAL_ERRORS", "1")
     env.setdefault("LOCAL_SQLITE_PATH", str(writable_root / "data" / "local.sqlite3"))
     env.setdefault("ARTIFACTS_ROOT", str(writable_root / "output" / "artifacts"))
     env.setdefault("RUN_WORKSPACE_ROOT", str(writable_root / "output" / "runs"))
@@ -126,6 +145,7 @@ def configure_desktop_environment() -> tuple[Path, Path]:
     bundle_root = resolve_bundle_root()
     writable_root = resolve_writable_root()
     ensure_runtime_directories(writable_root)
+    configure_desktop_logging(writable_root)
     desktop_env = load_desktop_env_files(
         bundle_root=bundle_root,
         writable_root=writable_root,

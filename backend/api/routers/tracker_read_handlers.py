@@ -119,7 +119,7 @@ def get_tracker_entry(request, *, entry_id: UUID) -> Any:
     return support._to_tracker_entry_model(detail_row)
 
 
-def view_tracker_entry_notice_file(entry_id: UUID):
+def view_tracker_entry_notice_file(entry_id: UUID, *, embed: bool = False):
     notice_view_helpers = support._load_notice_view_helpers()
     tracker_repository = support._get_tracker_repository()
     try:
@@ -162,6 +162,14 @@ def view_tracker_entry_notice_file(entry_id: UUID):
     except Exception:
         viewer_url = ""
     if viewer_url:
+        if embed:
+            return HTMLResponse(
+                notice_view_helpers["build_synap_viewer_embed_html"](
+                    title=title,
+                    viewer_url=viewer_url,
+                    file_url=attachment_url,
+                )
+            )
         return RedirectResponse(url=viewer_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
     try:

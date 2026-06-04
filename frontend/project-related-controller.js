@@ -236,15 +236,10 @@ export function createProjectRelatedController(deps = {}) {
     if (!entryId) {
       return;
     }
-    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view`);
+    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?embed=1`);
   }
 
   async function openProjectNoticeViewer(project) {
-    const directNoticeUrl = buildProjectNoticeUrl(project);
-    if (directNoticeUrl) {
-      openNoticeWindow(directNoticeUrl);
-      return;
-    }
     const viewerWindow = window.open("", "_blank", "width=1280,height=900");
     if (!viewerWindow) {
       flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
@@ -255,6 +250,9 @@ export function createProjectRelatedController(deps = {}) {
       body: '<p class="notice-viewer-state">공고문을 불러오는 중입니다.</p>',
     });
     try {
+      if (!project?.id) {
+        throw new Error("project id is required");
+      }
       const payload = await api(`/api/projects/${encodeURIComponent(project.id)}/notice-view`, { timeoutMs: 45000 });
       renderNoticeViewerPayload(viewerWindow, payload, project?.project_name || "공고문");
     } catch (err) {

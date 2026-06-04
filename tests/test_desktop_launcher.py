@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 
@@ -36,6 +37,7 @@ def test_build_desktop_environment_sets_utf8_and_run_workspace(tmp_path: Path) -
     assert env["PYTHONUTF8"] == "1"
     assert env["PYTHONIOENCODING"] == "utf-8"
     assert env["RUN_WORKSPACE_ROOT"] == str(tmp_path / "app" / "output" / "runs")
+    assert env["LOCAL_APP_EXPOSE_INTERNAL_ERRORS"] == "1"
 
 
 def test_desktop_requirements_include_windows_timezone_data() -> None:
@@ -98,3 +100,17 @@ def test_ensure_runtime_directories_creates_writable_storage(tmp_path: Path) -> 
 
     assert (tmp_path / "data").is_dir()
     assert (tmp_path / "output" / "artifacts").is_dir()
+    assert (tmp_path / "logs").is_dir()
+
+
+def test_configure_desktop_logging_writes_to_server_log(tmp_path: Path, monkeypatch) -> None:
+    from desktop.launcher import configure_desktop_logging
+
+    monkeypatch.delenv("DESKTOP_SERVER_LOG_PATH", raising=False)
+
+    log_path = configure_desktop_logging(tmp_path)
+
+    assert log_path == tmp_path / "logs" / "server.log"
+    assert log_path.parent.is_dir()
+    assert log_path.exists()
+    assert os.environ["DESKTOP_SERVER_LOG_PATH"] == str(log_path)

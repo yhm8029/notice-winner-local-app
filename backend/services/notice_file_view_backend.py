@@ -252,6 +252,81 @@ def build_notice_file_fallback_html(*, title: str, message: str, file_url: str =
 </html>"""
 
 
+def build_synap_viewer_embed_html(*, title: str, viewer_url: str, file_url: str = "") -> str:
+    safe_title = html.escape(str(title or "공고문").strip() or "공고문")
+    safe_viewer_url = html.escape(str(viewer_url or "").strip(), quote=True)
+    safe_file_url = html.escape(str(file_url or "").strip(), quote=True)
+    fallback_link = (
+        f'<a href="{safe_file_url}" target="_blank" rel="noreferrer">원본 파일 열기</a>'
+        if safe_file_url
+        else ""
+    )
+    return f"""<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{safe_title}</title>
+    <style>
+      html,
+      body {{
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background: #f6f7fb;
+        color: #0f172a;
+        font-family: "Malgun Gothic", Arial, sans-serif;
+      }}
+      .synap-viewer-shell {{
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        width: 100%;
+        height: 100%;
+      }}
+      .synap-viewer-header {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 10px 16px;
+        border-bottom: 1px solid #d6dfef;
+        background: #ffffff;
+      }}
+      .synap-viewer-title {{
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        font-weight: 700;
+      }}
+      .synap-viewer-header a {{
+        color: #1d4ed8;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+      }}
+      iframe {{
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #ffffff;
+      }}
+    </style>
+  </head>
+  <body>
+    <main class="synap-viewer-shell">
+      <header class="synap-viewer-header">
+        <div class="synap-viewer-title">{safe_title}</div>
+        {fallback_link}
+      </header>
+      <iframe src="{safe_viewer_url}" title="{safe_title}" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </main>
+  </body>
+</html>"""
+
+
 def _resolve_tool_path(candidates: tuple[str, ...]) -> str:
     for candidate in candidates:
         value = str(candidate or "").strip()

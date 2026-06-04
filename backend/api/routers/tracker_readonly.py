@@ -217,8 +217,8 @@ def get_tracker_entry(request: Request, entry_id: UUID) -> TrackerEntryItem:
     "/api/tracker-entries/{entry_id}/notice-file-view",
     responses={404: {"model": ErrorResponse}},
 )
-def view_tracker_entry_notice_file(entry_id: UUID):
-    return tracker_read_handlers.view_tracker_entry_notice_file(entry_id)
+def view_tracker_entry_notice_file(entry_id: UUID, embed: bool = Query(default=False)):
+    return tracker_read_handlers.view_tracker_entry_notice_file(entry_id, embed=embed)
 
 
 @router.get(
