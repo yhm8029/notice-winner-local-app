@@ -4,6 +4,7 @@ import { createProjectRelatedController } from "../../frontend/project-related-c
 
 function createController(overrides = {}) {
   const openedUrls = [];
+  const assignedUrls = [];
   const apiCalls = [];
   const renderedPayloads = [];
   const appendedElements = [];
@@ -66,6 +67,13 @@ function createController(overrides = {}) {
     },
     window: {
       localStorage: null,
+      location: {
+        href: "",
+        assign(url) {
+          assignedUrls.push(url);
+          this.href = url;
+        },
+      },
       document: {
         body: {
           appendChild(element) {
@@ -120,16 +128,17 @@ function createController(overrides = {}) {
     loadProjectRelatedNotices: async () => {},
     loadSelectedEntryDetail: async () => null,
   });
-  return { controller, openedUrls, apiCalls, renderedPayloads, appendedElements, createdIframes };
+  return { controller, openedUrls, assignedUrls, apiCalls, renderedPayloads, appendedElements, createdIframes };
 }
 
-test("tracker entry notice viewer opens the local Synap embed route in an app iframe", async () => {
-  const { controller, openedUrls, createdIframes } = createController();
+test("tracker entry notice viewer navigates the current WebView to the Synap route", async () => {
+  const { controller, openedUrls, assignedUrls, createdIframes } = createController();
 
   await controller.openTrackerEntryNoticeViewer("entry-1");
 
   assert.deepEqual(openedUrls, []);
-  assert.equal(createdIframes.at(-1)?.src, "/api/tracker-entries/entry-1/notice-file-view?embed=1");
+  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view"]);
+  assert.equal(createdIframes.length, 0);
 });
 
 test("project notice viewer uses the local notice API instead of opening a popup or raw g2b link", async () => {

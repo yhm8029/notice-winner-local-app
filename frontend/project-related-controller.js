@@ -231,17 +231,16 @@ export function createProjectRelatedController(deps = {}) {
   }
 
   function openNoticeWindow(url) {
-    const popup = createNoticeViewerFrame({ title: "공고문", url });
-    if (!popup) {
+    if (!url) {
       flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
       return null;
     }
-    try {
-      popup.location.replace(url);
-    } catch (_err) {
-      popup.location.href = url;
+    if (typeof window?.location?.assign === "function") {
+      window.location.assign(url);
+    } else if (window?.location) {
+      window.location.href = url;
     }
-    return popup;
+    return window;
   }
 
   async function openRelatedNoticeViewer(item) {
@@ -304,7 +303,7 @@ export function createProjectRelatedController(deps = {}) {
     if (!entryId) {
       return;
     }
-    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?embed=1`);
+    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view`);
   }
 
   async function openProjectNoticeViewer(project) {

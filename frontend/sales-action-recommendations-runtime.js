@@ -501,10 +501,11 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
           flash("공고문을 열 수 있는 트래커 항목 정보가 없습니다.", "warn");
           return;
         }
-        const opened = openNoticeViewerFrame(
-          `/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?embed=1`,
-          item?.project_name || "공고문",
-        );
+        const noticeUrl = `/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view`;
+        const opened =
+          typeof appWindow?.location?.assign === "function"
+            ? (appWindow.location.assign(noticeUrl), true)
+            : openNoticeViewerFrame(noticeUrl, item?.project_name || "공고문");
         if (!opened) {
           flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
         }

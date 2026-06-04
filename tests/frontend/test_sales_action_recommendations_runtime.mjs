@@ -172,6 +172,7 @@ test("sales action recommendations render a notice viewer button for tracker ent
     "data-sales-action-related-open": [relatedButton],
   });
   const openedUrls = [];
+  const assignedUrls = [];
   const flashMessages = [];
   const documentHarness = makeDocumentHarness();
   const recommendations = runtime.createSalesActionRecommendationsRuntime({
@@ -183,6 +184,13 @@ test("sales action recommendations render a notice viewer button for tracker ent
     },
     window: {
       document: documentHarness.document,
+      location: {
+        href: "",
+        assign(url) {
+          assignedUrls.push(url);
+          this.href = url;
+        },
+      },
       localStorage: { getItem: () => "{}", setItem: () => {} },
       open(url) {
         openedUrls.push(url);
@@ -221,7 +229,8 @@ test("sales action recommendations render a notice viewer button for tracker ent
   noticeButton.click();
 
   assert.deepEqual(openedUrls, []);
-  assert.equal(documentHarness.createdIframes.at(-1)?.src, "/api/tracker-entries/entry-1/notice-file-view?embed=1");
+  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view"]);
+  assert.equal(documentHarness.createdIframes.length, 0);
   assert.deepEqual(flashMessages, []);
 });
 
