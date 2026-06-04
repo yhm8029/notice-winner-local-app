@@ -12,6 +12,7 @@ import threading
 from typing import Any
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
+import webbrowser
 
 import requests
 
@@ -99,6 +100,23 @@ def download_notice_attachment(*, url: str) -> tuple[bytes, str]:
     )
     response.raise_for_status()
     return response.content, str(response.headers.get("content-type") or "").strip().lower()
+
+
+def open_external_browser_url(url: str) -> bool:
+    target = str(url or "").strip()
+    if not target:
+        return False
+    chrome_path = _resolve_chrome_path()
+    if chrome_path:
+        try:
+            subprocess.Popen([chrome_path, target], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return True
+        except Exception:
+            pass
+    try:
+        return bool(webbrowser.open(target, new=2))
+    except Exception:
+        return False
 
 
 def resolve_notice_viewer_url(
@@ -465,6 +483,20 @@ def _notice_viewer_cache_path() -> Path:
     else:
         base_path = Path("output")
     return base_path / "cache" / "notice_viewer_urls.json"
+
+
+def _resolve_chrome_path() -> str:
+    configured = str(os.getenv("CHROME_PATH") or os.getenv("GOOGLE_CHROME_PATH") or "").strip()
+    candidates = [configured] if configured else []
+    for env_key in ("PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA"):
+        root = str(os.getenv(env_key) or "").strip()
+        if not root:
+            continue
+        candidates.append(str(Path(root) / "Google" / "Chrome" / "Application" / "chrome.exe"))
+    for candidate in candidates:
+        if candidate and Path(candidate).exists():
+            return candidate
+    return shutil.which("chrome") or shutil.which("chrome.exe") or ""
 
 
 def _notice_viewer_cache_key(*, bid_no: str, bid_ord: str, file_seq: str, group_no: str = "") -> str:

@@ -133,7 +133,7 @@ function makeDocumentHarness() {
   };
 }
 
-test("sales action recommendations render a notice viewer button for tracker entries", () => {
+test("sales action recommendations render a notice viewer button for tracker entries", async () => {
   const runtime = loadRuntime();
   const noticeButton = makeButton("data-sales-action-notice-view", "0");
   const relatedButton = makeButton("data-sales-action-related-open", "0");
@@ -174,6 +174,7 @@ test("sales action recommendations render a notice viewer button for tracker ent
   const openedUrls = [];
   const assignedUrls = [];
   const flashMessages = [];
+  const apiCalls = [];
   const documentHarness = makeDocumentHarness();
   const recommendations = runtime.createSalesActionRecommendationsRuntime({
     state,
@@ -200,7 +201,10 @@ test("sales action recommendations render a notice viewer button for tracker ent
     flash(message) {
       flashMessages.push(message);
     },
-    api: async () => ({}),
+    api: async (url) => {
+      apiCalls.push(url);
+      return { opened: true };
+    },
     escapeHtml: (value) => String(value ?? ""),
     replaceSalesListHtmlIfChanged(element, html) {
       element.innerHTML = html;
@@ -227,9 +231,11 @@ test("sales action recommendations render a notice viewer button for tracker ent
   assert.match(list.innerHTML, />공고문 보기<\/button>/);
 
   noticeButton.click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
 
   assert.deepEqual(openedUrls, []);
-  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view?desktop=1"]);
+  assert.deepEqual(assignedUrls, []);
+  assert.deepEqual(apiCalls, ["/api/tracker-entries/entry-1/notice-file-open-external"]);
   assert.equal(documentHarness.createdIframes.length, 0);
   assert.deepEqual(flashMessages, []);
 });

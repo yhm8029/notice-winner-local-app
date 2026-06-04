@@ -227,6 +227,15 @@ def view_tracker_entry_notice_file(entry_id: UUID, *, embed: bool = False, deskt
     )
 
 
+def open_tracker_entry_notice_file_external(entry_id: UUID, *, base_url: str) -> dict[str, Any]:
+    base = str(base_url or "").strip().rstrip("/")
+    if base.endswith("/app"):
+        base = base[: -len("/app")]
+    notice_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view"
+    opened = bool(support._load_notice_view_helpers()["open_external_browser_url"](notice_url))
+    return {"opened": opened, "url": notice_url}
+
+
 def _build_tracker_entry_notice_source_row(
     *,
     source_row: dict[str, Any] | None,

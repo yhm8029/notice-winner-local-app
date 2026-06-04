@@ -131,13 +131,14 @@ function createController(overrides = {}) {
   return { controller, openedUrls, assignedUrls, apiCalls, renderedPayloads, appendedElements, createdIframes };
 }
 
-test("tracker entry notice viewer navigates the current WebView to the Synap route", async () => {
-  const { controller, openedUrls, assignedUrls, createdIframes } = createController();
+test("tracker entry notice viewer asks the local API to open an external browser", async () => {
+  const { controller, openedUrls, assignedUrls, apiCalls, createdIframes } = createController();
 
   await controller.openTrackerEntryNoticeViewer("entry-1");
 
   assert.deepEqual(openedUrls, []);
-  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view?desktop=1"]);
+  assert.deepEqual(assignedUrls, []);
+  assert.deepEqual(apiCalls, ["/api/tracker-entries/entry-1/notice-file-open-external"]);
   assert.equal(createdIframes.length, 0);
 });
 

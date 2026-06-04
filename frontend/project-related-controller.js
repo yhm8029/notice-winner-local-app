@@ -303,7 +303,17 @@ export function createProjectRelatedController(deps = {}) {
     if (!entryId) {
       return;
     }
-    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?desktop=1`);
+    try {
+      const payload = await api(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-open-external`, {
+        method: "POST",
+        timeoutMs: 45000,
+      });
+      if (!payload?.opened) {
+        flash("공고문을 외부 브라우저로 열지 못했습니다.", "warn");
+      }
+    } catch (err) {
+      flash(err?.message || "공고문을 외부 브라우저로 열지 못했습니다.", "warn");
+    }
   }
 
   async function openProjectNoticeViewer(project) {

@@ -150,6 +150,7 @@ def _load_notice_view_helpers():
     from backend.services.notice_file_view_backend import build_synap_viewer_embed_html
     from backend.services.notice_file_view_backend import download_notice_attachment
     from backend.services.notice_file_view_backend import infer_notice_attachment_suffix
+    from backend.services.notice_file_view_backend import open_external_browser_url
     from backend.services.notice_file_view_backend import render_hwp_notice_html
     from backend.services.notice_file_view_backend import resolve_notice_viewer_url
     from backend.services.notice_file_view_backend import select_primary_notice_attachment
@@ -163,6 +164,7 @@ def _load_notice_view_helpers():
         "download_notice_attachment": download_notice_attachment,
         "infer_notice_attachment_suffix": infer_notice_attachment_suffix,
         "load_notice_seed_row_by_bid": load_notice_seed_row_by_bid,
+        "open_external_browser_url": open_external_browser_url,
         "render_hwp_notice_html": render_hwp_notice_html,
         "resolve_notice_viewer_url": resolve_notice_viewer_url,
         "select_primary_notice_attachment": select_primary_notice_attachment,

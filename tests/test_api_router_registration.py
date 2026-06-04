@@ -227,6 +227,7 @@ class ApiRouterRegistrationTests(unittest.TestCase):
             ("PATCH", "/api/tracker-entries/{entry_id}"),
             ("GET", "/api/tracker-entries/{entry_id}"),
             ("GET", "/api/tracker-entries/{entry_id}/notice-file-view"),
+            ("POST", "/api/tracker-entries/{entry_id}/notice-file-open-external"),
             ("GET", "/api/tracker-entries/{entry_id}/audit-logs"),
             ("GET", "/api/tracker-change-events/unread-count"),
             ("GET", "/api/tracker-change-events"),

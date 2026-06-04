@@ -282,6 +282,27 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(viewer_url, "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached")
         post.assert_not_called()
 
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_open_tracker_entry_notice_file_external_opens_local_redirect_route(self, load_notice_view_helpers) -> None:
+        from backend.api.routers.tracker_read_handlers import open_tracker_entry_notice_file_external
+
+        entry_id = uuid4()
+        opened_urls: list[str] = []
+        load_notice_view_helpers.return_value = {
+            "open_external_browser_url": lambda url: opened_urls.append(url) or True,
+        }
+
+        response = open_tracker_entry_notice_file_external(
+            entry_id,
+            base_url="http://127.0.0.1:8765/app/",
+        )
+
+        self.assertEqual(response["opened"], True)
+        self.assertEqual(
+            opened_urls,
+            [f"http://127.0.0.1:8765/api/tracker-entries/{entry_id}/notice-file-view"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
