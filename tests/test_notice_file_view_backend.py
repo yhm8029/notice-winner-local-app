@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import os
+from pathlib import Path
+import tempfile
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -234,6 +238,49 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertIn("Desktop notice", body)
         self.assertIn(f"/api/tracker-entries/{entry_id}/notice-file-view", body)
         self.assertEqual(resolve_calls, [])
+
+    def test_build_desktop_notice_loading_html_returns_with_browser_history(self) -> None:
+        from backend.services.notice_file_view_backend import build_desktop_notice_loading_html
+
+        body = build_desktop_notice_loading_html(
+            title="Desktop notice",
+            redirect_url="/api/tracker-entries/entry-1/notice-file-view",
+            app_url="/app/",
+        )
+
+        self.assertIn("앱으로 돌아가기", body)
+        self.assertIn("history.back()", body)
+        self.assertIn("window.location.replace", body)
+        self.assertIn("/api/tracker-entries/entry-1/notice-file-view", body)
+
+    def test_resolve_notice_viewer_url_uses_local_cache_without_g2b_request(self) -> None:
+        from backend.services.notice_file_view_backend import resolve_notice_viewer_url
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_path = Path(temp_dir) / "notice_viewer_cache.json"
+            cache_path.write_text(
+                json.dumps(
+                    {
+                        "R26BK01434430|000|1|": (
+                            "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached"
+                        )
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch.dict(os.environ, {"NOTICE_VIEWER_CACHE_PATH": str(cache_path)}):
+                with patch("backend.services.notice_file_view_backend.requests.post") as post:
+                    viewer_url = resolve_notice_viewer_url(
+                        bid_no="R26BK01434430",
+                        bid_ord="000",
+                        attachment_url=(
+                            "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                            "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                        ),
+                    )
+
+        self.assertEqual(viewer_url, "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached")
+        post.assert_not_called()
 
 
 if __name__ == "__main__":

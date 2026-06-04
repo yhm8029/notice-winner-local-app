@@ -96,6 +96,10 @@ def build_desktop_return_button_script(app_url: str) -> str:
   button.style.boxShadow = "0 10px 30px rgba(15, 23, 42, 0.24)";
   button.style.cursor = "pointer";
   button.addEventListener("click", function () {{
+    if (history.length > 1) {{
+      history.back();
+      return;
+    }}
     location.href = appUrl;
   }});
   document.body.appendChild(button);
@@ -145,6 +149,7 @@ def build_desktop_environment(
     env.setdefault("PYTHONIOENCODING", "utf-8")
     env.setdefault("LOCAL_APP_EXPOSE_INTERNAL_ERRORS", "1")
     env.setdefault("LOCAL_SQLITE_PATH", str(writable_root / "data" / "local.sqlite3"))
+    env.setdefault("NOTICE_VIEWER_CACHE_PATH", str(writable_root / "data" / "notice_viewer_cache.json"))
     env.setdefault("ARTIFACTS_ROOT", str(writable_root / "output" / "artifacts"))
     env.setdefault("RUN_WORKSPACE_ROOT", str(writable_root / "output" / "runs"))
     env.setdefault(

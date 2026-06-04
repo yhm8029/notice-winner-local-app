@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 from typing import Any
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
@@ -24,6 +25,7 @@ ATTACHMENT_FILE_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 )
+NOTICE_VIEWER_CACHE_LOCK = threading.Lock()
 HWP5HTML_CANDIDATES = (
     "hwp5html.exe",
     str(Path.home() / "AppData" / "Local" / "Programs" / "Python" / "Python313" / "Scripts" / "hwp5html.exe"),
@@ -111,12 +113,28 @@ def resolve_notice_viewer_url(
     file_seq = _extract_attachment_file_seq(attachment_url)
     if not normalized_bid_no or not file_seq:
         return ""
+    cached_viewer_url = _load_notice_viewer_url_from_cache(
+        bid_no=normalized_bid_no,
+        bid_ord=normalized_bid_ord,
+        file_seq=file_seq,
+        group_no="",
+    )
+    if cached_viewer_url:
+        return cached_viewer_url
     group_no = str(unty_atch_file_no or "").strip() or _fetch_notice_attachment_group_no(
         bid_no=normalized_bid_no,
         bid_ord=normalized_bid_ord,
     )
     if not group_no:
         return ""
+    cached_viewer_url = _load_notice_viewer_url_from_cache(
+        bid_no=normalized_bid_no,
+        bid_ord=normalized_bid_ord,
+        file_seq=file_seq,
+        group_no=group_no,
+    )
+    if cached_viewer_url:
+        return cached_viewer_url
     response = requests.post(
         G2B_ATTACHMENT_DOC_VIEWER_URL,
         json={
@@ -130,7 +148,16 @@ def resolve_notice_viewer_url(
     )
     response.raise_for_status()
     payload = response.json()
-    return str((payload.get("result") or {}).get("viewUrlPath") or "").strip()
+    viewer_url = str((payload.get("result") or {}).get("viewUrlPath") or "").strip()
+    if viewer_url:
+        _store_notice_viewer_url_in_cache(
+            bid_no=normalized_bid_no,
+            bid_ord=normalized_bid_ord,
+            file_seq=file_seq,
+            group_no=group_no,
+            viewer_url=viewer_url,
+        )
+    return viewer_url
 
 
 def infer_notice_attachment_suffix(*, file_name: str, content_type: str = "", data: bytes = b"") -> str:
@@ -330,13 +357,19 @@ def build_desktop_notice_loading_html(*, title: str, redirect_url: str, app_url:
   </head>
   <body>
     <main>
-      <a href="{safe_app_url}">앱으로 돌아가기</a>
+      <a href="{safe_app_url}" id="notice-return-link">앱으로 돌아가기</a>
       <h1>{safe_title}</h1>
       <p>공고문을 여는 중입니다.</p>
       <div class="bar" role="progressbar" aria-label="공고문 열기 진행 중"></div>
       <noscript><p><a href="{safe_redirect_url}">공고문 열기</a></p></noscript>
     </main>
     <script>
+      document.getElementById("notice-return-link").addEventListener("click", function (event) {{
+        if (history.length > 1) {{
+          event.preventDefault();
+          history.back();
+        }}
+      }});
       window.setTimeout(function () {{
         window.location.replace({redirect_url_json});
       }}, 50);
@@ -418,6 +451,82 @@ def build_synap_viewer_embed_html(*, title: str, viewer_url: str, file_url: str 
     </main>
   </body>
 </html>"""
+
+
+def _notice_viewer_cache_path() -> Path:
+    configured = str(os.getenv("NOTICE_VIEWER_CACHE_PATH") or "").strip()
+    if configured:
+        return Path(configured)
+    runtime_root = str(os.getenv("RUN_WORKSPACE_ROOT") or os.getenv("ARTIFACTS_ROOT") or "").strip()
+    if runtime_root:
+        base_path = Path(runtime_root)
+        if base_path.name.lower() in {"runs", "artifacts"}:
+            base_path = base_path.parent
+    else:
+        base_path = Path("output")
+    return base_path / "cache" / "notice_viewer_urls.json"
+
+
+def _notice_viewer_cache_key(*, bid_no: str, bid_ord: str, file_seq: str, group_no: str = "") -> str:
+    return "|".join(
+        (
+            str(bid_no or "").strip().upper(),
+            str(bid_ord or "").strip() or "000",
+            str(file_seq or "").strip(),
+            str(group_no or "").strip(),
+        )
+    )
+
+
+def _read_notice_viewer_cache() -> dict[str, str]:
+    cache_path = _notice_viewer_cache_path()
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    return {str(key): str(value) for key, value in payload.items() if str(value or "").strip()}
+
+
+def _write_notice_viewer_cache(payload: dict[str, str]) -> None:
+    cache_path = _notice_viewer_cache_path()
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(
+            json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2),
+            encoding="utf-8",
+        )
+    except Exception:
+        return
+
+
+def _load_notice_viewer_url_from_cache(*, bid_no: str, bid_ord: str, file_seq: str, group_no: str = "") -> str:
+    key = _notice_viewer_cache_key(bid_no=bid_no, bid_ord=bid_ord, file_seq=file_seq, group_no=group_no)
+    with NOTICE_VIEWER_CACHE_LOCK:
+        return str(_read_notice_viewer_cache().get(key) or "").strip()
+
+
+def _store_notice_viewer_url_in_cache(
+    *,
+    bid_no: str,
+    bid_ord: str,
+    file_seq: str,
+    group_no: str,
+    viewer_url: str,
+) -> None:
+    normalized_url = str(viewer_url or "").strip()
+    if not normalized_url:
+        return
+    keys = {
+        _notice_viewer_cache_key(bid_no=bid_no, bid_ord=bid_ord, file_seq=file_seq, group_no=""),
+        _notice_viewer_cache_key(bid_no=bid_no, bid_ord=bid_ord, file_seq=file_seq, group_no=group_no),
+    }
+    with NOTICE_VIEWER_CACHE_LOCK:
+        payload = _read_notice_viewer_cache()
+        for key in keys:
+            payload[key] = normalized_url
+        _write_notice_viewer_cache(payload)
 
 
 def _resolve_tool_path(candidates: tuple[str, ...]) -> str:
