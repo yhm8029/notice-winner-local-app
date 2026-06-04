@@ -71,14 +71,14 @@ export function createRunPanelsFormHelpers(deps = {}) {
   async function createWinnerRun({ collectModeOverride = "", submitButton = null, busyLabel = "" } = {}) {
     const payload = buildRunPayload({ collectModeOverride });
     const button = submitButton || dom.submitRunButton;
-    const originalLabel = button.textContent || "???덈뺄 ??戮곗굚";
-    setBusy(button, true, busyLabel || "???덈뺄 ??戮곗굚 繞?..");
+    const originalLabel = button.textContent || "실행 시작";
+    setBusy(button, true, busyLabel || "실행 시작 중...");
     try {
       const response = await api("/api/runs", {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      flash(`???덈뺄 ?繹먮굞夷? ${response.id}`);
+      flash(`실행을 시작했습니다: ${response.id}`);
       state.selectedTrackerRunId = null;
       state.selectedEntryId = null;
       state.runFilters.page = 1;

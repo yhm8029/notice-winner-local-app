@@ -3,6 +3,41 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def test_load_desktop_env_files_reads_writable_root_env(tmp_path: Path) -> None:
+    from desktop.launcher import load_desktop_env_files
+
+    writable_root = tmp_path / "app"
+    writable_root.mkdir()
+    (writable_root / ".env").write_text(
+        "G2B_SERVICE_KEY=local-key\n"
+        "DATA_GO_KR_SERVICE_KEY=should-not-override\n",
+        encoding="utf-8",
+    )
+
+    env = load_desktop_env_files(
+        bundle_root=tmp_path / "bundle",
+        writable_root=writable_root,
+        current_env={"DATA_GO_KR_SERVICE_KEY": "explicit-key"},
+    )
+
+    assert env["G2B_SERVICE_KEY"] == "local-key"
+    assert env["DATA_GO_KR_SERVICE_KEY"] == "explicit-key"
+
+
+def test_build_desktop_environment_sets_utf8_and_run_workspace(tmp_path: Path) -> None:
+    from desktop.launcher import build_desktop_environment
+
+    env = build_desktop_environment(
+        bundle_root=tmp_path / "bundle",
+        writable_root=tmp_path / "app",
+        current_env={},
+    )
+
+    assert env["PYTHONUTF8"] == "1"
+    assert env["PYTHONIOENCODING"] == "utf-8"
+    assert env["RUN_WORKSPACE_ROOT"] == str(tmp_path / "app" / "output" / "runs")
+
+
 def test_desktop_requirements_include_windows_timezone_data() -> None:
     requirements = Path("requirements-desktop.txt").read_text(encoding="utf-8")
 

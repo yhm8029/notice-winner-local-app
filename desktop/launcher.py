@@ -29,6 +29,36 @@ SQLITE_BACKEND_ENV_KEYS = (
 )
 
 
+def _load_env_file(env_path: Path, env: dict[str, str]) -> None:
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        raw = line.strip()
+        if not raw or raw.startswith("#") or "=" not in raw:
+            continue
+        key, value = raw.split("=", 1)
+        key = key.strip().lstrip("\ufeff")
+        value = value.strip().strip("\"'")
+        if key and value and key not in env:
+            env[key] = value
+
+
+def load_desktop_env_files(
+    *,
+    bundle_root: Path,
+    writable_root: Path,
+    current_env: Mapping[str, str],
+) -> dict[str, str]:
+    env = dict(current_env)
+    for env_path in (
+        writable_root / ".env",
+        writable_root / "config" / ".env",
+        bundle_root / ".env",
+    ):
+        _load_env_file(env_path, env)
+    return env
+
+
 def build_app_url(host: str, port: int) -> str:
     return f"http://{host}:{port}/app/"
 
@@ -47,8 +77,11 @@ def build_desktop_environment(
     env = dict(current_env)
     for key in SQLITE_BACKEND_ENV_KEYS:
         env.setdefault(key, "sqlite")
+    env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("PYTHONIOENCODING", "utf-8")
     env.setdefault("LOCAL_SQLITE_PATH", str(writable_root / "data" / "local.sqlite3"))
     env.setdefault("ARTIFACTS_ROOT", str(writable_root / "output" / "artifacts"))
+    env.setdefault("RUN_WORKSPACE_ROOT", str(writable_root / "output" / "runs"))
     env.setdefault(
         "TRACKER_TEMPLATE_PATH",
         str(bundle_root / "assets" / "project_tracker_template.xlsx"),
@@ -93,11 +126,16 @@ def configure_desktop_environment() -> tuple[Path, Path]:
     bundle_root = resolve_bundle_root()
     writable_root = resolve_writable_root()
     ensure_runtime_directories(writable_root)
+    desktop_env = load_desktop_env_files(
+        bundle_root=bundle_root,
+        writable_root=writable_root,
+        current_env=os.environ,
+    )
     os.environ.update(
         build_desktop_environment(
             bundle_root=bundle_root,
             writable_root=writable_root,
-            current_env=os.environ,
+            current_env=desktop_env,
         )
     )
     return bundle_root, writable_root

@@ -16,6 +16,7 @@
 ```text
 notice-winner/
 ├─ notice-winner.exe
+├─ .env
 ├─ data/
 │  └─ local.sqlite3
 └─ output/
@@ -23,6 +24,14 @@ notice-winner/
 ```
 
 기본 저장소 백엔드는 SQLite로 설정된다. 명시적인 환경변수가 이미 있으면 그 값을 우선한다.
+
+`.env`는 실행 파일 옆에 둘 수 있다. 런처는 다음 순서로 env 파일을 읽는다.
+
+1. `notice-winner/.env`
+2. `notice-winner/config/.env`
+3. 패키지 내부 `.env`
+
+G2B 실행에는 `DATA_GO_KR_SERVICE_KEY`, `PUBLIC_DATA_SERVICE_KEY`, 또는 `G2B_SERVICE_KEY` 중 하나가 필요하다.
 
 ## 개발 실행
 
@@ -49,6 +58,16 @@ python -m desktop.launcher --port 8000
 .\scripts\build_desktop_exe.ps1 -InstallDependencies -IncludeLocalData
 ```
 
+다른 위치의 실제 로컬 DB와 env 파일을 포함하려면 다음처럼 실행한다.
+
+```powershell
+.\scripts\build_desktop_exe.ps1 `
+  -InstallDependencies `
+  -IncludeLocalData `
+  -LocalSqlitePath "C:\Users\user\notice-winner-local-app\data\local.sqlite3" `
+  -EnvPath "C:\path\to\.env"
+```
+
 빌드 결과는 다음 위치에 생성된다.
 
 ```text
@@ -59,5 +78,6 @@ dist/notice-winner/notice-winner.exe
 
 - `dist/notice-winner/` 폴더 전체를 옮기는 폴더형 배포가 기본이다.
 - `data/local.sqlite3`는 사용자 데이터이므로 단일 exe 안에 넣지 않는다.
+- 나라장터 실행을 하려면 `.env`도 `notice-winner.exe` 옆에 있어야 한다.
 - G2B, 건축HUB, 세움터, 교육청 등 외부 조회 사이트 연결은 기존 웹앱 동작을 그대로 사용한다.
 - WebView 런타임은 Windows WebView2/Edge 기반이다. 일반적인 Windows 10/11 환경에는 이미 설치되어 있다.

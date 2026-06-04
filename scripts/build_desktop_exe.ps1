@@ -1,6 +1,8 @@
 param(
     [switch]$InstallDependencies,
-    [switch]$IncludeLocalData
+    [switch]$IncludeLocalData,
+    [string]$LocalSqlitePath = "",
+    [string]$EnvPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -37,9 +39,19 @@ New-Item -ItemType Directory -Force -Path (Join-Path $DistRoot "data") | Out-Nul
 New-Item -ItemType Directory -Force -Path (Join-Path $DistRoot "output\artifacts") | Out-Null
 
 if ($IncludeLocalData) {
-    $LocalDb = Join-Path $RepoRoot "data\local.sqlite3"
+    $LocalDb = if ($LocalSqlitePath) { $LocalSqlitePath } else { Join-Path $RepoRoot "data\local.sqlite3" }
     if (Test-Path $LocalDb) {
         Copy-Item -Force $LocalDb (Join-Path $DistRoot "data\local.sqlite3")
+    } else {
+        Write-Warning "Local SQLite file was not found: $LocalDb"
+    }
+}
+
+if ($EnvPath) {
+    if (Test-Path $EnvPath) {
+        Copy-Item -Force $EnvPath (Join-Path $DistRoot ".env")
+    } else {
+        Write-Warning "Env file was not found: $EnvPath"
     }
 }
 

@@ -118,7 +118,7 @@
           deps.renderRunDetail?.(null);
         }
       } catch (err) {
-        if (deps.handleOutOfRangePageError?.(err, deps.state?.runFilters, "?ㅽ뻾")) {
+        if (deps.handleOutOfRangePageError?.(err, deps.state?.runFilters, "실행")) {
           deps.syncUrlState?.();
           void controller.loadRuns({ initial, silent, preservePage: true });
           return;

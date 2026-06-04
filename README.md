@@ -142,6 +142,12 @@ Build a folder-style Windows executable:
 .\scripts\build_desktop_exe.ps1 -InstallDependencies -IncludeLocalData
 ```
 
+For a usable local distribution, pass the real SQLite DB and local `.env` explicitly:
+
+```powershell
+.\scripts\build_desktop_exe.ps1 -InstallDependencies -IncludeLocalData -LocalSqlitePath "C:\Users\user\notice-winner-local-app\data\local.sqlite3" -EnvPath "C:\path\to\.env"
+```
+
 See `docs/DESKTOP_WEBVIEW_APP_KR.md` for runtime paths and distribution notes.
 
 ## Local Conversion Backup Inventory

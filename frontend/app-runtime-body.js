@@ -845,7 +845,7 @@ async function loadDashboardSummary({ silent = false } = {}) {
 function renderDashboard(summary, errorMessage = "") { const controller = getConsolePanelsController(); return controller.renderDashboard(summary, errorMessage); }
 async function handleRunCreate(event) {
   event.preventDefault();
-  await createWinnerRun({ submitButton: dom.submitRunButton, busyLabel: "?ㅽ뻾 ?쒖옉 以?.." });
+  await createWinnerRun({ submitButton: dom.submitRunButton, busyLabel: "실행 시작 중..." });
 }
 async function loadRuns({ initial = false, silent = false, preservePage = false } = {}) { return getTrackerController().loadRuns({ initial, silent, preservePage }); }
 async function refreshSelectedRun({ silent = false } = {}) { return getTrackerController().refreshSelectedRun({ silent }); }
