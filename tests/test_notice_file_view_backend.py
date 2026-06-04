@@ -282,13 +282,38 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(viewer_url, "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached")
         post.assert_not_called()
 
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row", return_value=None)
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_opens_local_redirect_route(self, load_notice_view_helpers) -> None:
+    def test_open_tracker_entry_notice_file_external_opens_direct_synap_url(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        _select_tracker_entry_source_notice_row,
+    ) -> None:
         from backend.api.routers.tracker_read_handlers import open_tracker_entry_notice_file_external
 
         entry_id = uuid4()
         opened_urls: list[str] = []
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Desktop notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
         load_notice_view_helpers.return_value = {
+            "select_primary_notice_attachment": lambda _row: {
+                "url": (
+                    "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                    "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                ),
+                "file_name": "notice.hwp",
+            },
+            "resolve_notice_viewer_url": lambda **_kwargs: (
+                "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=direct"
+            ),
             "open_external_browser_url": lambda url: opened_urls.append(url) or True,
         }
 
@@ -300,8 +325,9 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response["opened"], True)
         self.assertEqual(
             opened_urls,
-            [f"http://127.0.0.1:8765/api/tracker-entries/{entry_id}/notice-file-view"],
+            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=direct"],
         )
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=direct")
 
 
 if __name__ == "__main__":

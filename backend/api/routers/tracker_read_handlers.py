@@ -231,9 +231,52 @@ def open_tracker_entry_notice_file_external(entry_id: UUID, *, base_url: str) ->
     base = str(base_url or "").strip().rstrip("/")
     if base.endswith("/app"):
         base = base[: -len("/app")]
-    notice_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view"
-    opened = bool(support._load_notice_view_helpers()["open_external_browser_url"](notice_url))
-    return {"opened": opened, "url": notice_url}
+    fallback_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view"
+    notice_view_helpers = support._load_notice_view_helpers()
+    target_url = _resolve_tracker_entry_synap_viewer_url(entry_id, notice_view_helpers=notice_view_helpers) or fallback_url
+    opened = bool(notice_view_helpers["open_external_browser_url"](target_url))
+    return {"opened": opened, "url": target_url}
+
+
+def _resolve_tracker_entry_synap_viewer_url(
+    entry_id: UUID,
+    *,
+    notice_view_helpers: dict[str, Any],
+) -> str:
+    tracker_repository = support._get_tracker_repository()
+    try:
+        entry = tracker_repository.get_entry(entry_id)
+    except support.TrackerEntryRepositoryError as exc:
+        support._repository_error(str(exc))
+
+    if entry is None:
+        support._not_found(f"tracker_entry not found: {entry_id}")
+
+    source_row = support._select_tracker_entry_source_notice_row(entry)
+    notice_source_row = _build_tracker_entry_notice_source_row(source_row=source_row, entry=entry)
+    attachment = notice_view_helpers["select_primary_notice_attachment"](notice_source_row)
+    attachment_url = str(attachment.get("url") or "").strip()
+    if not attachment_url:
+        return ""
+    bid_no = str((notice_source_row or {}).get("bid_no") or entry.get("source_bid_no") or "").strip().upper()
+    bid_ord = str((notice_source_row or {}).get("bid_ord") or entry.get("source_bid_ord") or "000").strip() or "000"
+    unty_atch_file_no = str(
+        (notice_source_row or {}).get("item_pbanc_unty_atch_file_no")
+        or (notice_source_row or {}).get("itemPbancUntyAtchFileNo")
+        or ""
+    ).strip()
+    try:
+        return str(
+            notice_view_helpers["resolve_notice_viewer_url"](
+                bid_no=bid_no,
+                bid_ord=bid_ord,
+                attachment_url=attachment_url,
+                unty_atch_file_no=unty_atch_file_no,
+            )
+            or ""
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _build_tracker_entry_notice_source_row(
