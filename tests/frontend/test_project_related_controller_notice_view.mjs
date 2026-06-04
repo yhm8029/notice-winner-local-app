@@ -6,6 +6,39 @@ function createController(overrides = {}) {
   const openedUrls = [];
   const apiCalls = [];
   const renderedPayloads = [];
+  const appendedElements = [];
+  const createdIframes = [];
+  const createElement = (tagName) => {
+    const element = {
+      tagName: String(tagName || "").toUpperCase(),
+      className: "",
+      textContent: "",
+      attributes: {},
+      children: [],
+      style: {},
+      closed: false,
+      src: "",
+      srcdoc: "",
+      setAttribute(name, value) {
+        this.attributes[name] = String(value);
+      },
+      append(...children) {
+        this.children.push(...children);
+      },
+      appendChild(child) {
+        this.children.push(child);
+        return child;
+      },
+      addEventListener() {},
+      remove() {
+        this.removed = true;
+      },
+    };
+    if (element.tagName === "IFRAME") {
+      createdIframes.push(element);
+    }
+    return element;
+  };
   const popup = {
     closed: false,
     location: {
@@ -33,7 +66,20 @@ function createController(overrides = {}) {
     },
     window: {
       localStorage: null,
+      document: {
+        body: {
+          appendChild(element) {
+            appendedElements.push(element);
+            return element;
+          },
+        },
+        createElement,
+        getElementById() {
+          return null;
+        },
+      },
       open() {
+        openedUrls.push("about:blank");
         return popup;
       },
       clearTimeout() {},
@@ -74,23 +120,25 @@ function createController(overrides = {}) {
     loadProjectRelatedNotices: async () => {},
     loadSelectedEntryDetail: async () => null,
   });
-  return { controller, openedUrls, apiCalls, renderedPayloads };
+  return { controller, openedUrls, apiCalls, renderedPayloads, appendedElements, createdIframes };
 }
 
-test("tracker entry notice viewer opens the local Synap embed route", async () => {
-  const { controller, openedUrls } = createController();
+test("tracker entry notice viewer opens the local Synap embed route in an app iframe", async () => {
+  const { controller, openedUrls, createdIframes } = createController();
 
   await controller.openTrackerEntryNoticeViewer("entry-1");
 
-  assert.deepEqual(openedUrls, ["/api/tracker-entries/entry-1/notice-file-view?embed=1"]);
+  assert.deepEqual(openedUrls, []);
+  assert.equal(createdIframes.at(-1)?.src, "/api/tracker-entries/entry-1/notice-file-view?embed=1");
 });
 
-test("project notice viewer uses the local notice API instead of opening the raw g2b link", async () => {
-  const { controller, openedUrls, apiCalls, renderedPayloads } = createController();
+test("project notice viewer uses the local notice API instead of opening a popup or raw g2b link", async () => {
+  const { controller, openedUrls, apiCalls, renderedPayloads, createdIframes } = createController();
 
   await controller.openProjectNoticeViewer({ id: "project-1", project_name: "Project One" });
 
   assert.deepEqual(openedUrls, []);
   assert.deepEqual(apiCalls, ["/api/projects/project-1/notice-view"]);
   assert.equal(renderedPayloads.length, 1);
+  assert.equal(createdIframes.length, 1);
 });

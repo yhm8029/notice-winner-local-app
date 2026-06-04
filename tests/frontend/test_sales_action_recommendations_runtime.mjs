@@ -84,6 +84,55 @@ function makeClickEvent() {
   };
 }
 
+function makeDocumentHarness() {
+  const createdIframes = [];
+  const appendedElements = [];
+  function createElement(tagName) {
+    const element = {
+      tagName: String(tagName || "").toUpperCase(),
+      className: "",
+      textContent: "",
+      attributes: {},
+      children: [],
+      src: "",
+      setAttribute(name, value) {
+        this.attributes[name] = String(value);
+      },
+      append(...children) {
+        this.children.push(...children);
+      },
+      appendChild(child) {
+        this.children.push(child);
+        return child;
+      },
+      addEventListener() {},
+      remove() {
+        this.removed = true;
+      },
+    };
+    if (element.tagName === "IFRAME") {
+      createdIframes.push(element);
+    }
+    return element;
+  }
+  return {
+    createdIframes,
+    appendedElements,
+    document: {
+      body: {
+        appendChild(element) {
+          appendedElements.push(element);
+          return element;
+        },
+      },
+      createElement,
+      getElementById() {
+        return null;
+      },
+    },
+  };
+}
+
 test("sales action recommendations render a notice viewer button for tracker entries", () => {
   const runtime = loadRuntime();
   const noticeButton = makeButton("data-sales-action-notice-view", "0");
@@ -124,6 +173,7 @@ test("sales action recommendations render a notice viewer button for tracker ent
   });
   const openedUrls = [];
   const flashMessages = [];
+  const documentHarness = makeDocumentHarness();
   const recommendations = runtime.createSalesActionRecommendationsRuntime({
     state,
     dom: {
@@ -132,6 +182,7 @@ test("sales action recommendations render a notice viewer button for tracker ent
       trackerSalesRecommendationRefreshButton: null,
     },
     window: {
+      document: documentHarness.document,
       localStorage: { getItem: () => "{}", setItem: () => {} },
       open(url) {
         openedUrls.push(url);
@@ -169,7 +220,8 @@ test("sales action recommendations render a notice viewer button for tracker ent
 
   noticeButton.click();
 
-  assert.deepEqual(openedUrls, ["/api/tracker-entries/entry-1/notice-file-view?embed=1"]);
+  assert.deepEqual(openedUrls, []);
+  assert.equal(documentHarness.createdIframes.at(-1)?.src, "/api/tracker-entries/entry-1/notice-file-view?embed=1");
   assert.deepEqual(flashMessages, []);
 });
 

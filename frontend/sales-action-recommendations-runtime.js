@@ -34,6 +34,47 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     event?.stopPropagation?.();
   }
 
+  function openNoticeViewerFrame(url, title = "공고문") {
+    const doc = appWindow?.document || null;
+    if (!doc?.body || typeof doc.createElement !== "function") {
+      if (url && appWindow?.location) {
+        if (typeof appWindow.location.assign === "function") {
+          appWindow.location.assign(url);
+        } else {
+          appWindow.location.href = url;
+        }
+        return true;
+      }
+      return false;
+    }
+    doc.getElementById?.("notice-viewer-overlay")?.remove?.();
+    const overlay = doc.createElement("div");
+    overlay.id = "notice-viewer-overlay";
+    overlay.className = "notice-viewer-overlay";
+    const panel = doc.createElement("section");
+    panel.className = "notice-viewer-overlay-panel";
+    const header = doc.createElement("header");
+    header.className = "notice-viewer-overlay-header";
+    const heading = doc.createElement("strong");
+    heading.className = "notice-viewer-overlay-title";
+    heading.textContent = String(title || "공고문");
+    const closeButton = doc.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "notice-viewer-overlay-close";
+    closeButton.setAttribute("aria-label", "닫기");
+    closeButton.textContent = "×";
+    const iframe = doc.createElement("iframe");
+    iframe.className = "notice-viewer-overlay-frame";
+    iframe.setAttribute("title", String(title || "공고문"));
+    iframe.src = url;
+    closeButton.addEventListener("click", () => overlay.remove?.());
+    header.append(heading, closeButton);
+    panel.append(header, iframe);
+    overlay.appendChild(panel);
+    doc.body.appendChild(overlay);
+    return true;
+  }
+
   function keepSalesRecommendationsTab({ historyMode = "replace" } = {}) {
     state.adminTab = SALES_RECOMMENDATIONS_ADMIN_TAB;
     if (typeof syncUrlState === "function") {
@@ -460,7 +501,10 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
           flash("공고문을 열 수 있는 트래커 항목 정보가 없습니다.", "warn");
           return;
         }
-        const opened = appWindow?.open?.(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?embed=1`, "_blank");
+        const opened = openNoticeViewerFrame(
+          `/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?embed=1`,
+          item?.project_name || "공고문",
+        );
         if (!opened) {
           flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
         }

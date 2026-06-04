@@ -156,7 +156,7 @@ test("index.html cache busts local console chrome runtimes", () => {
   const html = readHtmlSource();
   const appRuntimeBodySource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app-runtime-body.js"), "utf8");
 
-  assert.match(html, /\/styles\.css\?v=20260602d/);
+  assert.match(html, /\/styles\.css\?v=20260604b/);
   assert.match(html, /\/app-shell-runtime\.js\?v=20260602g/);
   assert.match(html, /\/app-event-bindings\.js\?v=20260602i/);
   assert.match(html, /\/download-controller\.js\?v=20260602g/);
