@@ -286,7 +286,7 @@ class NoticeFileViewBackendTests(unittest.TestCase):
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_opens_direct_synap_url(
+    def test_open_tracker_entry_notice_file_external_opens_g2b_notice_url_without_synap_resolution(
         self,
         load_notice_view_helpers,
         get_tracker_repository,
@@ -313,8 +313,8 @@ class NoticeFileViewBackendTests(unittest.TestCase):
                 ),
                 "file_name": "notice.hwp",
             },
-            "resolve_notice_viewer_url": lambda **_kwargs: (
-                "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=direct"
+            "resolve_notice_viewer_url": lambda **_kwargs: (_ for _ in ()).throw(
+                AssertionError("synap resolve should not run for external open")
             ),
             "open_external_browser_url": lambda url: opened_urls.append(url) or True,
         }
@@ -327,14 +327,17 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response["opened"], True)
         self.assertEqual(
             opened_urls,
-            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=direct"],
+            ["https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000"],
         )
-        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=direct")
+        self.assertEqual(
+            response["url"],
+            "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000",
+        )
 
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_uses_cached_synap_url_before_source_lookup(
+    def test_open_tracker_entry_notice_file_external_ignores_cached_synap_url_for_immediate_g2b_open(
         self,
         load_notice_view_helpers,
         get_tracker_repository,
@@ -358,7 +361,9 @@ class NoticeFileViewBackendTests(unittest.TestCase):
                 "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"
             ),
             "select_primary_notice_attachment": lambda _row: {},
-            "resolve_notice_viewer_url": lambda **_kwargs: "",
+            "resolve_notice_viewer_url": lambda **_kwargs: (_ for _ in ()).throw(
+                AssertionError("synap resolve should not run for external open")
+            ),
             "open_external_browser_url": lambda url: opened_urls.append(url) or True,
         }
 
@@ -370,9 +375,12 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response["opened"], True)
         self.assertEqual(
             opened_urls,
-            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"],
+            ["https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000"],
         )
-        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct")
+        self.assertEqual(
+            response["url"],
+            "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000",
+        )
 
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")

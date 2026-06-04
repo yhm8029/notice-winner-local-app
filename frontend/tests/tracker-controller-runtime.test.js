@@ -655,7 +655,7 @@ test("tracker controller sends notice year and region filters together", async (
   assert.equal(state.trackerFilters.noticeYear, "2025");
 });
 
-test("tracker controller warms visible notice viewers after loading entries", async () => {
+test("tracker controller does not prewarm notice viewers after loading entries", async () => {
   const apiCalls = [];
   const { controller } = createController({
     api: async (url, options = {}) => {
@@ -669,7 +669,7 @@ test("tracker controller warms visible notice viewers after loading entries", as
           total: 2,
         };
       }
-      return { ready: true, url: "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=warm" };
+      throw new Error(`unexpected url: ${url}`);
     },
     TRACKER_NOTICE_WARM_LIMIT: 10,
   });
@@ -683,8 +683,6 @@ test("tracker controller warms visible notice viewers after loading entries", as
 
   assert.deepEqual(apiCalls, [
     ["/api/tracker-entry-summaries?page=1&page_size=10&source_tracker_run_id=run-1", "GET"],
-    ["/api/tracker-entries/entry-1/notice-file-warm", "POST"],
-    ["/api/tracker-entries/entry-2/notice-file-warm", "POST"],
   ]);
 });
 

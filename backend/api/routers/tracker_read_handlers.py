@@ -232,12 +232,18 @@ def open_tracker_entry_notice_file_external(entry_id: UUID, *, base_url: str) ->
     if base.endswith("/app"):
         base = base[: -len("/app")]
     fallback_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view"
+
+    tracker_repository = support._get_tracker_repository()
+    try:
+        entry = tracker_repository.get_entry(entry_id)
+    except support.TrackerEntryRepositoryError as exc:
+        support._repository_error(str(exc))
+
+    if entry is None:
+        support._not_found(f"tracker_entry not found: {entry_id}")
+
     notice_view_helpers = support._load_notice_view_helpers()
-    target_url = _resolve_tracker_entry_synap_viewer_url(
-        entry_id,
-        notice_view_helpers=notice_view_helpers,
-        prefer_entry_bid=True,
-    ) or fallback_url
+    target_url = _build_tracker_entry_g2b_notice_url(entry) or fallback_url
     opened = bool(notice_view_helpers["open_external_browser_url"](target_url))
     return {"opened": opened, "url": target_url}
 
@@ -314,6 +320,17 @@ def _load_cached_tracker_entry_synap_viewer_url(
         return str(load_cached(bid_no=bid_no, bid_ord=bid_ord) or "").strip()
     except Exception:
         return ""
+
+
+def _build_tracker_entry_g2b_notice_url(entry: dict[str, Any]) -> str:
+    bid_no = str(entry.get("source_bid_no") or "").strip().upper()
+    if not bid_no:
+        return ""
+    bid_ord = str(entry.get("source_bid_ord") or "000").strip() or "000"
+    return (
+        "https://www.g2b.go.kr/link/PNPE027_01/single/"
+        f"?bidPbancNo={quote(bid_no, safe='')}&bidPbancOrd={quote(bid_ord, safe='')}"
+    )
 
 
 def _build_tracker_entry_notice_source_row(

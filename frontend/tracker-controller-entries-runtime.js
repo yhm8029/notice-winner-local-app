@@ -148,7 +148,6 @@
           void controller.loadTrackerChangeEventUnreadCount({ silent: true });
           void controller.loadTrackerChangeEvents({ silent: true });
           controller.prefetchVisibleProjectRelatedNotices(deps.state.trackerEntries);
-          controller.warmVisibleTrackerEntryNoticeFiles(deps.state.trackerEntries);
           if (deps.state.uiMode === "admin") {
             void deps.loadVisibleSalesClaims?.({ silent: true });
           }
@@ -267,44 +266,6 @@
         if (queued >= (deps.TRACKER_DETAIL_PREFETCH_LIMIT || 3)) {
           break;
         }
-      }
-    };
-
-    controller.warmVisibleTrackerEntryNoticeFiles = function warmVisibleTrackerEntryNoticeFiles(entries) {
-      const seen = new Set();
-      const queue = [];
-      const limit = Number(deps.TRACKER_NOTICE_WARM_LIMIT || 12);
-      for (const entry of entries || []) {
-        const entryId = String(entry?.id || "").trim();
-        if (!entryId || seen.has(entryId)) {
-          continue;
-        }
-        seen.add(entryId);
-        queue.push(entryId);
-        if (queue.length >= limit) {
-          break;
-        }
-      }
-      const concurrency = Math.max(1, Number(deps.TRACKER_NOTICE_WARM_CONCURRENCY || 2));
-      let cursor = 0;
-      const runNext = async () => {
-        const entryId = queue[cursor];
-        cursor += 1;
-        if (!entryId) {
-          return;
-        }
-        try {
-          await deps.api?.(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-warm`, {
-            method: "POST",
-            timeoutMs: 12000,
-          });
-        } catch (_err) {
-          // Notice warmup is opportunistic; clicks still resolve on demand.
-        }
-        await runNext();
-      };
-      for (let index = 0; index < Math.min(concurrency, queue.length); index += 1) {
-        void runNext();
       }
     };
 
