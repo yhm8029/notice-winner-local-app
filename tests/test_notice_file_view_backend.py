@@ -283,10 +283,27 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(viewer_url, "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached")
         post.assert_not_called()
 
+    def test_cached_notice_viewer_url_by_bid_ignores_synap_root_url(self) -> None:
+        from backend.services.notice_file_view_backend import load_cached_notice_viewer_url_by_bid
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_path = Path(temp_dir) / "notice_viewer_cache.json"
+            cache_path.write_text(
+                json.dumps({"R26BK01434430|000|1|": "https://www.g2b.go.kr/SynapDocViewServer/"}),
+                encoding="utf-8",
+            )
+            with patch.dict(os.environ, {"NOTICE_VIEWER_CACHE_PATH": str(cache_path)}):
+                viewer_url = load_cached_notice_viewer_url_by_bid(
+                    bid_no="R26BK01434430",
+                    bid_ord="000",
+                )
+
+        self.assertEqual(viewer_url, "")
+
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_falls_back_to_g2b_notice_url_without_synap_resolution(
+    def test_open_tracker_entry_notice_file_external_falls_back_to_local_resolver_without_synap_resolution(
         self,
         load_notice_view_helpers,
         get_tracker_repository,
@@ -328,11 +345,11 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response["opened"], True)
         self.assertEqual(
             opened_urls,
-            ["https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000"],
+            [f"http://127.0.0.1:8765/api/tracker-entries/{entry_id}/notice-file-view?desktop=true"],
         )
         self.assertEqual(
             response["url"],
-            "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000",
+            f"http://127.0.0.1:8765/api/tracker-entries/{entry_id}/notice-file-view?desktop=true",
         )
 
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")

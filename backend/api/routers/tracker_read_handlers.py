@@ -231,7 +231,7 @@ def open_tracker_entry_notice_file_external(entry_id: UUID, *, base_url: str) ->
     base = str(base_url or "").strip().rstrip("/")
     if base.endswith("/app"):
         base = base[: -len("/app")]
-    fallback_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view"
+    fallback_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view?desktop=true"
 
     tracker_repository = support._get_tracker_repository()
     try:
@@ -245,7 +245,6 @@ def open_tracker_entry_notice_file_external(entry_id: UUID, *, base_url: str) ->
     notice_view_helpers = support._load_notice_view_helpers()
     target_url = (
         _load_cached_tracker_entry_synap_viewer_url(entry, notice_view_helpers=notice_view_helpers)
-        or _build_tracker_entry_g2b_notice_url(entry)
         or fallback_url
     )
     opened = bool(notice_view_helpers["open_external_browser_url"](target_url))

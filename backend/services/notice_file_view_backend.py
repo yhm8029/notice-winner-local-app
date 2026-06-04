@@ -555,7 +555,7 @@ def load_cached_notice_viewer_url_by_bid(*, bid_no: str, bid_ord: str = "000") -
     for key, value in payload.items():
         if str(key).startswith(normalized_prefix):
             cached_url = str(value or "").strip()
-            if "SynapDocViewServer" in cached_url:
+            if "SynapDocViewServer/viewer/doc.html" in cached_url:
                 return cached_url
     return ""
 
