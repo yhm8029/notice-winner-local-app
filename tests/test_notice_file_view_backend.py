@@ -286,7 +286,7 @@ class NoticeFileViewBackendTests(unittest.TestCase):
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_opens_g2b_notice_url_without_synap_resolution(
+    def test_open_tracker_entry_notice_file_external_falls_back_to_g2b_notice_url_without_synap_resolution(
         self,
         load_notice_view_helpers,
         get_tracker_repository,
@@ -306,6 +306,7 @@ class NoticeFileViewBackendTests(unittest.TestCase):
             }
         )
         load_notice_view_helpers.return_value = {
+            "load_cached_notice_viewer_url_by_bid": lambda **_kwargs: "",
             "select_primary_notice_attachment": lambda _row: {
                 "url": (
                     "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
@@ -337,7 +338,7 @@ class NoticeFileViewBackendTests(unittest.TestCase):
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_ignores_cached_synap_url_for_immediate_g2b_open(
+    def test_open_tracker_entry_notice_file_external_opens_cached_synap_url_immediately(
         self,
         load_notice_view_helpers,
         get_tracker_repository,
@@ -360,7 +361,9 @@ class NoticeFileViewBackendTests(unittest.TestCase):
             "load_cached_notice_viewer_url_by_bid": lambda **_kwargs: (
                 "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"
             ),
-            "select_primary_notice_attachment": lambda _row: {},
+            "select_primary_notice_attachment": lambda _row: (_ for _ in ()).throw(
+                AssertionError("attachment lookup should not run when cached synap exists")
+            ),
             "resolve_notice_viewer_url": lambda **_kwargs: (_ for _ in ()).throw(
                 AssertionError("synap resolve should not run for external open")
             ),
@@ -375,12 +378,9 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response["opened"], True)
         self.assertEqual(
             opened_urls,
-            ["https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000"],
+            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"],
         )
-        self.assertEqual(
-            response["url"],
-            "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000",
-        )
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct")
 
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
