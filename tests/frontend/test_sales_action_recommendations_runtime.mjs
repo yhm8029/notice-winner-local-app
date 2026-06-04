@@ -229,7 +229,7 @@ test("sales action recommendations render a notice viewer button for tracker ent
   noticeButton.click();
 
   assert.deepEqual(openedUrls, []);
-  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view"]);
+  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view?desktop=1"]);
   assert.equal(documentHarness.createdIframes.length, 0);
   assert.deepEqual(flashMessages, []);
 });

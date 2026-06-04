@@ -119,7 +119,7 @@ def get_tracker_entry(request, *, entry_id: UUID) -> Any:
     return support._to_tracker_entry_model(detail_row)
 
 
-def view_tracker_entry_notice_file(entry_id: UUID, *, embed: bool = False):
+def view_tracker_entry_notice_file(entry_id: UUID, *, embed: bool = False, desktop: bool = False):
     notice_view_helpers = support._load_notice_view_helpers()
     tracker_repository = support._get_tracker_repository()
     try:
@@ -129,6 +129,16 @@ def view_tracker_entry_notice_file(entry_id: UUID, *, embed: bool = False):
 
     if entry is None:
         support._not_found(f"tracker_entry not found: {entry_id}")
+
+    title = str(entry.get("project_name") or "공고문").strip() or "공고문"
+    if desktop:
+        return HTMLResponse(
+            notice_view_helpers["build_desktop_notice_loading_html"](
+                title=title,
+                redirect_url=f"/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view",
+                app_url="/app/",
+            )
+        )
 
     source_row = support._select_tracker_entry_source_notice_row(entry)
     notice_source_row = _build_tracker_entry_notice_source_row(source_row=source_row, entry=entry)

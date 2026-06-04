@@ -145,6 +145,7 @@ def _load_run_execution_helpers():
 
 
 def _load_notice_view_helpers():
+    from backend.services.notice_file_view_backend import build_desktop_notice_loading_html
     from backend.services.notice_file_view_backend import build_notice_file_fallback_html
     from backend.services.notice_file_view_backend import build_synap_viewer_embed_html
     from backend.services.notice_file_view_backend import download_notice_attachment
@@ -155,6 +156,7 @@ def _load_notice_view_helpers():
     from backend.services.notice_view_backend import build_notice_view_payload
 
     return {
+        "build_desktop_notice_loading_html": build_desktop_notice_loading_html,
         "build_notice_file_fallback_html": build_notice_file_fallback_html,
         "build_synap_viewer_embed_html": build_synap_viewer_embed_html,
         "build_notice_view_payload": build_notice_view_payload,

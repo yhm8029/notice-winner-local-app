@@ -303,7 +303,7 @@ export function createProjectRelatedController(deps = {}) {
     if (!entryId) {
       return;
     }
-    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view`);
+    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?desktop=1`);
   }
 
   async function openProjectNoticeViewer(project) {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import os
 from pathlib import Path
 import re
@@ -248,6 +249,98 @@ def build_notice_file_fallback_html(*, title: str, message: str, file_url: str =
       <p>{safe_message}</p>
       {link_markup}
     </main>
+  </body>
+</html>"""
+
+
+def build_desktop_notice_loading_html(*, title: str, redirect_url: str, app_url: str = "/app/") -> str:
+    safe_title = html.escape(str(title or "공고문").strip() or "공고문")
+    safe_redirect_url = html.escape(str(redirect_url or "").strip(), quote=True)
+    safe_app_url = html.escape(str(app_url or "/app/").strip() or "/app/", quote=True)
+    redirect_url_json = json.dumps(str(redirect_url or "").strip(), ensure_ascii=False).replace("</", "<\\/")
+    return f"""<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{safe_title}</title>
+    <style>
+      :root {{
+        color-scheme: light;
+        font-family: "Malgun Gothic", "Apple SD Gothic Neo", Arial, sans-serif;
+      }}
+      body {{
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background: #eef4ff;
+        color: #10213f;
+      }}
+      main {{
+        width: min(560px, calc(100vw - 48px));
+        padding: 28px;
+        border: 1px solid #cdd8ea;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 0 18px 48px rgba(15, 23, 42, 0.14);
+      }}
+      a {{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid #1e3a8a;
+        border-radius: 8px;
+        color: #10213f;
+        background: #ffffff;
+        font-weight: 700;
+        text-decoration: none;
+      }}
+      h1 {{
+        margin: 22px 0 10px;
+        font-size: 20px;
+        line-height: 1.35;
+      }}
+      p {{
+        margin: 0 0 18px;
+        color: #52627a;
+      }}
+      .bar {{
+        height: 8px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #dbe6f6;
+      }}
+      .bar::before {{
+        content: "";
+        display: block;
+        width: 42%;
+        height: 100%;
+        border-radius: inherit;
+        background: #3157c7;
+        animation: loading 1.05s ease-in-out infinite;
+      }}
+      @keyframes loading {{
+        0% {{ transform: translateX(-110%); }}
+        100% {{ transform: translateX(250%); }}
+      }}
+    </style>
+  </head>
+  <body>
+    <main>
+      <a href="{safe_app_url}">앱으로 돌아가기</a>
+      <h1>{safe_title}</h1>
+      <p>공고문을 여는 중입니다.</p>
+      <div class="bar" role="progressbar" aria-label="공고문 열기 진행 중"></div>
+      <noscript><p><a href="{safe_redirect_url}">공고문 열기</a></p></noscript>
+    </main>
+    <script>
+      window.setTimeout(function () {{
+        window.location.replace({redirect_url_json});
+      }}, 50);
+    </script>
   </body>
 </html>"""
 

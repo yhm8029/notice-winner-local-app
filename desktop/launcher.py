@@ -70,7 +70,10 @@ def build_desktop_return_button_script(app_url: str) -> str:
     return f"""
 (function () {{
   var appUrl = {app_url_json};
-  if (!appUrl || String(location.href || "").indexOf(appUrl) === 0) {{
+  var href = String(location.href || "");
+  var isLocalApp = appUrl && href.indexOf(appUrl) === 0;
+  var isNoticeViewer = href.indexOf("SynapDocViewServer") !== -1;
+  if (!isNoticeViewer || isLocalApp) {{
     var localButton = document.getElementById("notice-winner-return-button");
     if (localButton) localButton.remove();
     return;

@@ -501,7 +501,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
           flash("공고문을 열 수 있는 트래커 항목 정보가 없습니다.", "warn");
           return;
         }
-        const noticeUrl = `/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view`;
+        const noticeUrl = `/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view?desktop=1`;
         const opened =
           typeof appWindow?.location?.assign === "function"
             ? (appWindow.location.assign(noticeUrl), true)

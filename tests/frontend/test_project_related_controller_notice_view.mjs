@@ -137,7 +137,7 @@ test("tracker entry notice viewer navigates the current WebView to the Synap rou
   await controller.openTrackerEntryNoticeViewer("entry-1");
 
   assert.deepEqual(openedUrls, []);
-  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view"]);
+  assert.deepEqual(assignedUrls, ["/api/tracker-entries/entry-1/notice-file-view?desktop=1"]);
   assert.equal(createdIframes.length, 0);
 });
 

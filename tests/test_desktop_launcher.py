@@ -58,6 +58,7 @@ def test_build_desktop_return_button_script_links_back_to_app() -> None:
     script = build_desktop_return_button_script("http://127.0.0.1:8765/app/")
 
     assert "앱으로 돌아가기" in script
+    assert "SynapDocViewServer" in script
     assert "http://127.0.0.1:8765/app/" in script
     assert "location.href" in script
     assert "notice-winner-return-button" in script

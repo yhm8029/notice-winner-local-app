@@ -195,6 +195,46 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response.media_type, "text/html")
         self.assertIn("synap-key", response.body.decode("utf-8"))
 
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row", return_value=None)
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_view_tracker_entry_notice_file_desktop_returns_immediate_loading_page(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        _select_tracker_entry_source_notice_row,
+    ) -> None:
+        entry_id = uuid4()
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Desktop notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+        resolve_calls: list[dict[str, object]] = []
+        load_notice_view_helpers.return_value = {
+            "build_notice_file_fallback_html": lambda **_kwargs: "<html>fallback</html>",
+            "build_desktop_notice_loading_html": lambda **kwargs: (
+                f"<html>{kwargs['title']}|{kwargs['redirect_url']}</html>"
+            ),
+            "download_notice_attachment": lambda **_kwargs: (b"", ""),
+            "infer_notice_attachment_suffix": lambda **_kwargs: "",
+            "render_hwp_notice_html": lambda **_kwargs: None,
+            "resolve_notice_viewer_url": lambda **kwargs: resolve_calls.append(kwargs) or "",
+            "select_primary_notice_attachment": lambda _row: {},
+        }
+
+        response = view_tracker_entry_notice_file(entry_id, desktop=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.media_type, "text/html")
+        body = response.body.decode("utf-8")
+        self.assertIn("Desktop notice", body)
+        self.assertIn(f"/api/tracker-entries/{entry_id}/notice-file-view", body)
+        self.assertEqual(resolve_calls, [])
+
 
 if __name__ == "__main__":
     unittest.main()
