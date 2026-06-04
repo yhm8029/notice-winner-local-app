@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import socket
@@ -62,6 +63,48 @@ def load_desktop_env_files(
 
 def build_app_url(host: str, port: int) -> str:
     return f"http://{host}:{port}/app/"
+
+
+def build_desktop_return_button_script(app_url: str) -> str:
+    app_url_json = json.dumps(str(app_url), ensure_ascii=False)
+    return f"""
+(function () {{
+  var appUrl = {app_url_json};
+  if (!appUrl || String(location.href || "").indexOf(appUrl) === 0) {{
+    var localButton = document.getElementById("notice-winner-return-button");
+    if (localButton) localButton.remove();
+    return;
+  }}
+  if (document.getElementById("notice-winner-return-button")) return;
+  var button = document.createElement("button");
+  button.id = "notice-winner-return-button";
+  button.type = "button";
+  button.textContent = "앱으로 돌아가기";
+  button.style.position = "fixed";
+  button.style.top = "14px";
+  button.style.left = "14px";
+  button.style.zIndex = "2147483647";
+  button.style.padding = "10px 14px";
+  button.style.border = "1px solid #1e3a8a";
+  button.style.borderRadius = "8px";
+  button.style.background = "#ffffff";
+  button.style.color = "#10213f";
+  button.style.font = "700 14px Malgun Gothic, Arial, sans-serif";
+  button.style.boxShadow = "0 10px 30px rgba(15, 23, 42, 0.24)";
+  button.style.cursor = "pointer";
+  button.addEventListener("click", function () {{
+    location.href = appUrl;
+  }});
+  document.body.appendChild(button);
+}})();
+"""
+
+
+def inject_desktop_return_button(window, app_url: str) -> None:
+    try:
+        window.evaluate_js(build_desktop_return_button_script(app_url))
+    except Exception:
+        logging.getLogger("desktop.launcher").exception("Failed to inject desktop return button")
 
 
 def ensure_runtime_directories(writable_root: Path) -> None:
@@ -204,6 +247,7 @@ def run_desktop_app(*, host: str, port: int | None, debug: bool = False) -> None
         server.should_exit = True
 
     window.events.closed += stop_server
+    window.events.loaded += lambda: inject_desktop_return_button(window, app_url)
     webview.start(debug=debug)
 
 

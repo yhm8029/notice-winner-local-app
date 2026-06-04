@@ -52,6 +52,32 @@ def test_build_app_url_points_to_frontend_app_root() -> None:
     assert build_app_url("127.0.0.1", 8765) == "http://127.0.0.1:8765/app/"
 
 
+def test_build_desktop_return_button_script_links_back_to_app() -> None:
+    from desktop.launcher import build_desktop_return_button_script
+
+    script = build_desktop_return_button_script("http://127.0.0.1:8765/app/")
+
+    assert "앱으로 돌아가기" in script
+    assert "http://127.0.0.1:8765/app/" in script
+    assert "location.href" in script
+    assert "notice-winner-return-button" in script
+
+
+def test_inject_desktop_return_button_uses_window_evaluate_js() -> None:
+    from desktop.launcher import inject_desktop_return_button
+
+    calls: list[str] = []
+
+    class FakeWindow:
+        def evaluate_js(self, script: str) -> None:
+            calls.append(script)
+
+    inject_desktop_return_button(FakeWindow(), "http://127.0.0.1:8765/app/")
+
+    assert len(calls) == 1
+    assert "앱으로 돌아가기" in calls[0]
+
+
 def test_build_desktop_environment_defaults_to_local_sqlite(tmp_path: Path) -> None:
     from desktop.launcher import build_desktop_environment
 
