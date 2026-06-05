@@ -303,7 +303,7 @@ class NoticeFileViewBackendTests(unittest.TestCase):
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_falls_back_to_g2b_detail_without_synap_resolution(
+    def test_open_tracker_entry_notice_file_external_opens_resolved_synap_url_before_g2b_detail(
         self,
         load_notice_view_helpers,
         get_tracker_repository,
@@ -331,8 +331,8 @@ class NoticeFileViewBackendTests(unittest.TestCase):
                 ),
                 "file_name": "notice.hwp",
             },
-            "resolve_notice_viewer_url": lambda **_kwargs: (_ for _ in ()).throw(
-                AssertionError("synap resolve should not run for external open")
+            "resolve_notice_viewer_url": lambda **_kwargs: (
+                "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=resolved-direct"
             ),
             "open_external_browser_url": lambda url: opened_urls.append(url) or True,
         }
@@ -345,9 +345,9 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response["opened"], True)
         self.assertEqual(
             opened_urls,
-            ["https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000"],
+            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=resolved-direct"],
         )
-        self.assertEqual(response["url"], "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000")
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=resolved-direct")
 
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
