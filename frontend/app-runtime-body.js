@@ -37,6 +37,22 @@ function loadAppRuntimeBodyConsoleRuntime() {
   return window.SPMSAppRuntimeBodyConsoleRuntime;
 }
 const APP_RUNTIME_BODY_CONSOLE_RUNTIME = loadAppRuntimeBodyConsoleRuntime();
+const DISABLED_PROJECT_RELATED_CONTROLLER = Object.freeze({
+  renderRelatedProjectNotices: () => "",
+  renderTrackerEntryRelatedNotices: () => "",
+  renderRelatedNoticePanel: () => "",
+  bindRelatedNoticeViewerButtons: () => {},
+  renderProjectRelatedHosts: () => "",
+  clearProjectRelatedRefresh: () => {},
+  maybeScheduleProjectRelatedRefresh: () => {},
+  canReuseProjectRelatedPayload: () => false,
+  cacheProjectRelatedPayload: () => {},
+  ensureTrackerEntryProjectId: async () => "",
+  openRelatedNoticeViewer: async () => {},
+  openProjectNoticeViewer: async () => {},
+  openTrackerEntryNoticeViewer: async () => {},
+  resolveTrackerEntryProjectId: () => "",
+});
 function loadAppRuntimeBodyAdminSalesRuntime() {
   if (window.SPMSAppRuntimeBodyAdminSalesRuntime) return window.SPMSAppRuntimeBodyAdminSalesRuntime;
   if (typeof XMLHttpRequest === "function" && typeof document !== "undefined") {
@@ -276,7 +292,7 @@ function getAdminGoogleSheetsController() { if (adminGoogleSheetsController) ret
 function getRuntimeEnhancements() { if (runtimeEnhancements) return runtimeEnhancements; runtimeEnhancements = createControllerWithWiringDeps({ createController: window.RUNTIME_ENHANCEMENTS?.createRuntimeEnhancements, wiringDepsFactoryName: "createRuntimeEnhancementsDeps", depsFactory: () => APP_SUPPORT.createRuntimeEnhancementsDepsHelpers({ dom, document, syncCollectModeOptions, RUN_VIEW_RUNTIME, renderOrganizationAdminPanel }).buildRuntimeEnhancementsDeps() }); return runtimeEnhancements; }
 function getOrgAdminController() { if (orgAdminController) return orgAdminController; orgAdminController = createControllerWithWiringDeps({ createController: window.ORG_ADMIN_CONTROLLER?.createOrgAdminController, wiringDepsFactoryName: "createOrgAdminControllerDeps", depsFactory: () => APP_SUPPORT.createOrgAdminControllerDepsHelpers({ sharedDeps: { state, dom, window, document, navigator, api, flash, setBusy }, formattingDeps: { escapeHtml, formatOrgRoleLabel, renderInvitationStatus, renderOrganizationAdminPanel, canUseAdminMode, formatDate, formatInvitationStatusLabel, formatAccountStatusLabel, formatMembershipStatusLabel, resolveStatusClass, formatDownloadScopeLabel, formatDownloadFormatLabel, formatDownloadSourcePageLabel }, actionDeps: { syncPlatformAdminAccountDraftFromForm, handlePlatformAdminAccountSubmit, renderOrgAdminRuntimeReloadFallback, canManagePlatformAdminAccounts, resetOrganizationMemberPassword, requireConsoleDataRuntime, getConsoleDataRuntimeDeps, loadSalesClaimSummaryByUser, loadClosedSalesClaims }, runtimeDeps: { membershipStatusOptions: MEMBERSHIP_STATUS_OPTIONS, platformAdminAccountRuntime: PLATFORM_ADMIN_ACCOUNT_RUNTIME, requireOrganizationAdminRuntime: getOrgAdminRuntime } }).buildOrgAdminControllerDeps() }); return orgAdminController; }
 function getTrackerRenderController() { if (trackerRenderController) return trackerRenderController; trackerRenderController = createControllerWithWiringDeps({ createController: window.TRACKER_RENDER_CONTROLLER?.createTrackerRenderController, wiringDepsFactoryName: "createTrackerRenderControllerDeps", depsFactory: () => APP_SUPPORT.createTrackerRenderControllerDepsHelpers({ sharedDeps: { dom, state, escapeHtml, formatKoreanDate, formatBuildingAutomationEstimateValue, TRACKER_ENTRY_RUNTIME, flash }, selectedEntryActions: { renderSalesClaimSection, renderTrackerEntryRelatedNotices, resetTrackerBoardEdit, renderSelectedEntry, buildTrackerEntrySummaryDetail, loadSelectedEntryDetail, toggleTrackerEntryRelated, openTrackerEntryNoticeViewer, bindRelatedNoticeViewerButtons, prefetchTrackerEntryDetails }, trackerSalesActions: { claimSalesProject, setSalesNoteDraft, saveSalesClaimNote, transferSalesClaim, openSalesCloseDialog, closeSalesClaim, releaseSalesClaim, syncUrlState, getSalesClaimForProject }, trackerBoardActions: { buildTrackerBoardEmptyStateView, buildTrackerBoardMarkup, buildTrackerEntryCardMarkupFallback, getSortedTrackerBoardEntries: sortTrackerBoardEntries, TRACKER_BOARD_COLUMNS, renderTrackerBoardHeaderCell, renderTrackerBoardCell, toggleTrackerBoardBlankPriority, beginTrackerBoardEdit, saveTrackerBoardEdit } }).buildTrackerRenderControllerDeps() }); return trackerRenderController; }
-function getProjectRelatedController() { if (projectRelatedController) return projectRelatedController; projectRelatedController = createControllerWithWiringDeps({ createController: window.PROJECT_RELATED_CONTROLLER?.createProjectRelatedController, wiringDepsFactoryName: "createProjectRelatedControllerDeps", depsFactory: () => APP_SUPPORT.createProjectRelatedControllerDepsHelpers({ sharedDeps: { state, window, api, flash, escapeHtml }, projectRelatedConfig: { RELATED_NOTICE_RUNTIME, PROJECT_RELATED_READY_CACHE_TTL_MS, PROJECT_RELATED_SEED_CACHE_TTL_MS, PROJECT_RELATED_STORAGE_KEY, PROJECT_RELATED_STORAGE_MAX_ITEMS }, noticeViewerRenderers: { renderNoticeViewerWindow, renderNoticeViewerPayload, renderNoticeViewerError, renderProjects, renderTrackerEntries }, projectRelatedActions: { loadProjectRelatedNotices, loadSelectedEntryDetail } }).buildProjectRelatedControllerDeps() }); return projectRelatedController; }
+function getProjectRelatedController() { return DISABLED_PROJECT_RELATED_CONTROLLER; }
 function getTrackerControllerBaseDeps() { return getTrackerControllerDepsHelpers().buildTrackerControllerBaseDeps(); }
 function getTrackerDiagnosticsScope(runSnapshot = state.selectedRun) { return getTrackerController().getTrackerDiagnosticsScope(runSnapshot); }
 function getTrackerControllerDepsHelpers() {
@@ -1012,23 +1028,21 @@ function renderProjects(errorMessage = "") {
   const controller = getConsolePanelsController();
   return controller.renderProjects(errorMessage);
 }
-function renderRelatedProjectNotices(project) { return getProjectRelatedController().renderRelatedProjectNotices(project); }
-function renderTrackerEntryRelatedNotices(entry) { return getProjectRelatedController().renderTrackerEntryRelatedNotices(entry); }
-function renderRelatedNoticePanel(projectId) { return getProjectRelatedController().renderRelatedNoticePanel(projectId); }
-function bindRelatedNoticeViewerButtons(container) { return getProjectRelatedController().bindRelatedNoticeViewerButtons(container); }
-function renderProjectRelatedHosts() { return getProjectRelatedController().renderProjectRelatedHosts(); }
-function clearProjectRelatedRefresh(projectId) { return getProjectRelatedController().clearProjectRelatedRefresh(projectId); }
-function maybeScheduleProjectRelatedRefresh(projectId) { return getProjectRelatedController().maybeScheduleProjectRelatedRefresh(projectId); }
-function canReuseProjectRelatedPayload(payload) { return getProjectRelatedController().canReuseProjectRelatedPayload(payload); }
-function cacheProjectRelatedPayload(projectId, payload) { return getProjectRelatedController().cacheProjectRelatedPayload(projectId, payload); }
-async function ensureTrackerEntryProjectId(entryId) { return getProjectRelatedController().ensureTrackerEntryProjectId(entryId); }
-function prefetchProjectRelatedNotices(projectIds) { return getTrackerController().prefetchProjectRelatedNotices(projectIds); }
-async function toggleProjectRelated(projectId) { return getTrackerController().toggleProjectRelated(projectId); }
-async function toggleTrackerEntryRelated(entryId) { return getTrackerController().toggleTrackerEntryRelated(entryId); }
-async function loadProjectRelatedNotices(projectId, { silent = false, force = false, prefetch = false } = {}) {
-  return getTrackerController().loadProjectRelatedNotices(projectId, { silent, force, prefetch });
-}
-function prefetchVisibleProjectRelatedNotices(entries) { prefetchProjectRelatedNotices(entries.map((entry) => entry?.project_id || "")); }
+function renderRelatedProjectNotices(_project) { return ""; }
+function renderTrackerEntryRelatedNotices(_entry) { return ""; }
+function renderRelatedNoticePanel(_projectId) { return ""; }
+function bindRelatedNoticeViewerButtons(_container) {}
+function renderProjectRelatedHosts() { return ""; }
+function clearProjectRelatedRefresh(_projectId) {}
+function maybeScheduleProjectRelatedRefresh(_projectId) {}
+function canReuseProjectRelatedPayload(_payload) { return false; }
+function cacheProjectRelatedPayload(_projectId, _payload) {}
+async function ensureTrackerEntryProjectId(_entryId) { return ""; }
+function prefetchProjectRelatedNotices(_projectIds) {}
+async function toggleProjectRelated(_projectId) {}
+async function toggleTrackerEntryRelated(_entryId) {}
+async function loadProjectRelatedNotices(_projectId, _options = {}) { return null; }
+function prefetchVisibleProjectRelatedNotices(_entries) {}
 function changeProjectsPage(delta) {
   return APP_SUPPORT.changeProjectsPage({
     state,
@@ -1341,7 +1355,7 @@ async function resolveBackfillConflict({ conflictId, resolution } = {}) { return
 async function markTrackerChangeEventsRead({ eventIds = [], trackerEntryId = null, silent = false } = {}) { return getTrackerController().markTrackerChangeEventsRead({ eventIds, trackerEntryId, silent }); }
 async function loadSelectedEntryChangeEvents({ entryId = state.selectedEntryId, silent = false } = {}) { return getTrackerController().loadSelectedEntryChangeEvents({ entryId, silent }); }
 async function loadSelectedEntryDetail({ entryId = state.selectedEntryId, silent = false, background = false, force = false } = {}) { return getTrackerController().loadSelectedEntryDetail({ entryId, silent, background, force }); }
-function resolveTrackerEntryProjectId(entryId) { return getProjectRelatedController().resolveTrackerEntryProjectId(entryId); }
+function resolveTrackerEntryProjectId(_entryId) { return ""; }
 function renderSalesClaimSection(entry) {
   const controller = getSalesPanelController();
   return controller.renderSalesClaimSection(entry);
