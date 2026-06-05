@@ -213,4 +213,4 @@ class NativeLlmCorrectionTests(unittest.TestCase):
         self.assertEqual(rows[0]["gross_area_scale"], "2,450㎡")
         self.assertEqual(rows[0]["notice_construction_cost"], "547,520,000원")
         self.assertEqual(rows[0]["demand_contact"], "")
-        self.assertIn("llm_corrected=area,cost", rows[0]["hub_check_note"])
+        self.assertNotIn("llm_corrected=", rows[0]["hub_check_note"])
