@@ -84,7 +84,7 @@ test("buildTrackerEntryCardMarkup renders shell, number badge, and action select
   assert.match(html, /data-entry-id="entry-1"/);
   assert.match(html, /entry-no-badge/);
   assert.match(html, /No\./);
-  assert.doesNotMatch(html, /data-entry-related-toggle/);
+  assert.match(html, /data-entry-related-toggle="entry-1"/);
   assert.match(html, /data-entry-notice-view="entry-1"/);
 });
 
@@ -169,7 +169,7 @@ test("app-side fallback exists and returns non-empty card markup when runtime he
 
   assert.notEqual(html, "");
   assert.match(html, /data-entry-id="entry-3"/);
-  assert.doesNotMatch(html, /data-entry-related-toggle/);
+  assert.match(html, /data-entry-related-toggle="entry-3"/);
   assert.match(html, /data-entry-notice-view="entry-3"/);
 });
 
@@ -450,10 +450,10 @@ test("tracker-entry card runtime and app fallback stay aligned on key selectors 
   const fallbackHtml = fallbackRuntime.buildTrackerEntryCardMarkupFallback(payload, helpers);
   for (const html of [runtimeHtml, fallbackHtml]) {
     assert.match(html, /data-entry-id="entry-6"/);
-    assert.doesNotMatch(html, /data-entry-related-toggle/);
+    assert.match(html, /data-entry-related-toggle="entry-6"/);
     assert.match(html, /data-entry-notice-view="entry-6"/);
     assert.match(html, /<section data-test="sales">sales<\/section>/);
     assert.match(html, /<p data-test="override">override<\/p>/);
-    assert.doesNotMatch(html, /<section data-test="related">related<\/section>/);
+    assert.match(html, /<section data-test="related">related<\/section>/);
   }
 });

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 import threading
 import time
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 from fastapi import FastAPI
 from fastapi import Request
@@ -38,6 +42,7 @@ from backend.api.support import app_runtime_support
 from backend.api.support import auth_app_support
 from backend.api.support import dashboard_app_support
 from backend.api.support import project_aggregate_support
+from backend.api.support import projects_related_notice_support
 from backend.api.support import run_support
 from backend.api.support import runtime_common
 from backend.api.support import sales_support
@@ -48,19 +53,30 @@ from backend.perf_runtime import HTTP_PERF_LOGGER
 from backend.perf_runtime import measure_stage
 from backend.perf_runtime import SLOW_HTTP_REQUEST_SEC
 from backend.phase1_defaults import load_phase1_identity
+from backend.repositories import RelatedNoticePublicationRepositoryConfigError
 from backend.repositories import describe_repository_backends
 from backend.repositories import get_home_bootstrap_snapshot_repository
+from backend.repositories import get_related_notice_cache_repository
+from backend.repositories import get_related_notice_publication_repository
 from backend.repositories.tracker_entries import tracker_entry_matches_region
 from backend.repositories.tracker_entries import tracker_entry_matches_title_visibility
+from backend.services import related_notice_read_model_backend as _related_notice_read_model_backend
 from backend.services.notice_file_view_backend import load_notice_seed_row_by_bid
 from backend.services.project_dashboard_backend import build_project_aggregates as _build_project_aggregates_impl
 from backend.services.project_dashboard_backend import coerce_uuid_or_none as _coerce_uuid_or_none_impl
 from backend.services.project_dashboard_backend import derive_tracker_entry_bid_identity as _derive_tracker_entry_bid_identity_dashboard_impl
 from backend.services.project_dashboard_backend import normalize_tracker_bid_ord as _normalize_tracker_bid_ord_dashboard_impl
+from backend.services.related_notice_response_cache import clear_related_notice_response_cache as _clear_related_notice_response_cache
+from backend.services.related_notice_response_cache import get_related_notice_response_cache as _get_related_notice_response_cache
+from backend.services.related_notice_response_cache import set_related_notice_response_cache as _set_related_notice_response_cache
+from backend.services.related_notice_refresh_worker import ensure_related_notice_refresh_worker_started
+from backend.services.related_notice_refresh_worker import wake_related_notice_refresh_worker
 from backend.services.report_job_store import get_report_job as get_stored_report_job
 from backend.services.report_job_store import list_report_jobs as list_stored_report_jobs
 from backend.services.report_job_store import store_report_job
 from backend.services.report_job_store import to_report_job_item
+from backend.services.run_execution import queue_related_notice_precompute_for_run
+from backend.services.run_execution import safely_precompute_related_notices_for_run
 from backend.services.run_preset_store import list_run_presets as list_stored_run_presets
 from backend.services.run_preset_store import store_run_preset
 from backend.services.run_preset_store import to_run_preset_item
@@ -76,6 +92,7 @@ APP_ROOT = FRONTEND_DIR.parents[0]
 TRACKER_DOWNLOAD_JOB_ROOT = Path(
     str(os.getenv("TRACKER_DOWNLOAD_JOB_ROOT") or (APP_ROOT / ".tmp-tracker-download-jobs"))
 ).resolve()
+RELATED_NOTICE_TRACE_LOG_PATH = APP_ROOT / "output" / "debug" / "related_notice_trace.jsonl"
 BACKFILL_CONFLICT_RESOLUTIONS = tracker_support.BACKFILL_CONFLICT_RESOLUTIONS
 PROJECT_NAMESPACE = tracker_read_support_module.PROJECT_NAMESPACE
 _HOME_BOOTSTRAP_SNAPSHOT_VERSION = 3
@@ -156,6 +173,10 @@ def _load_notice_view_helpers():
     }
 
 
+def _load_related_notice_precompute_helper():
+    return queue_related_notice_precompute_for_run
+
+
 def _load_artifact_file_helpers():
     from backend.services.artifact_files import apply_standard_download_workbook_formatting
     from backend.services.artifact_files import build_tracking_download_workbook_bytes
@@ -189,8 +210,32 @@ def _tracker_download_job_output_path(job_id: UUID) -> Path:
     return TRACKER_DOWNLOAD_JOB_ROOT / f"{job_id}.xlsx"
 
 
+def _append_related_notice_trace(
+    *,
+    trace_id: str,
+    event: str,
+    project_id: UUID | None = None,
+    project: dict[str, Any] | None = None,
+    payload: dict[str, Any] | None = None,
+) -> None:
+    return app_runtime_support._append_related_notice_trace(
+        trace_id=trace_id,
+        event=event,
+        project_id=project_id,
+        project=project,
+        payload=payload,
+    )
+
+
 def _auth_error_response(*, status_code: int, code: str, message: str) -> JSONResponse:
     return app_http_support._auth_error_response(status_code=status_code, code=code, message=message)
+
+
+def _get_related_notice_publication_repository():
+    try:
+        return get_related_notice_publication_repository()
+    except RelatedNoticePublicationRepositoryConfigError as exc:
+        runtime_common._repository_error(str(exc))
 
 
 @app.middleware("http")
@@ -223,6 +268,14 @@ def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.on_event("startup")
+def start_related_notice_refresh_worker() -> None:
+    ensure_related_notice_refresh_worker_started(
+        get_related_notice_cache_repository_fn=get_related_notice_cache_repository,
+        safely_precompute_related_notices_for_run_fn=safely_precompute_related_notices_for_run,
+    )
+
+
 @app.get("/", include_in_schema=False)
 def frontend_root() -> RedirectResponse:
     return RedirectResponse(url="/app/", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
@@ -246,6 +299,7 @@ _ATTRIBUTE_MODULES = (
     catalog_handlers,
     project_aggregate_handlers,
     project_aggregate_support,
+    projects_related_notice_support,
     dashboard_handlers,
     dashboard_app_support,
     auth_app_support,

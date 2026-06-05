@@ -309,6 +309,7 @@ def execute_project_tracker(deps: Any, run_id: UUID) -> None:
             ),
             "post_collect_csv_path": deps._to_storage_path(export_output.post_collect_csv_path),
             "winner_csv_path": written_csv.storage_path,
+            "related_notices_path": "",
         },
         "notice_search_backend": export_output.stage_backend,
     }
@@ -361,6 +362,15 @@ def execute_project_tracker(deps: Any, run_id: UUID) -> None:
             "primary_bid_no": export_output.primary_bid_no,
             "winner_csv_file_name": written_csv.file_name,
             "execution_manifest_file_name": execution_manifest_artifact.file_name,
+            "related_notice_file_name": "",
+            "related_notice_projects": 0,
+            "related_notice_items": 0,
+            "related_notice_precomputed": False,
+            "related_notice_precompute_enabled": True,
+            "related_notice_precompute_status": "queued",
+            "related_notice_precompute_error": "",
+            "related_notice_project_statuses": {},
+            "related_notice_snapshot_set_id": "",
             "stage_backends": stage_backends,
             "notice_search_backend": export_output.stage_backend,
         }
@@ -398,6 +408,7 @@ def execute_project_tracker(deps: Any, run_id: UUID) -> None:
                 "auto_tracker_export_created": created,
             }
         )
+        summary_json = deps._summary_json_preserving_related_notice_state(run_id, summary_json)
         deps._best_effort_update_run(
             run_id,
             {"summary_json": summary_json},
@@ -419,6 +430,7 @@ def execute_project_tracker(deps: Any, run_id: UUID) -> None:
                 "auto_tracker_export_error": str(exc),
             }
         )
+        summary_json = deps._summary_json_preserving_related_notice_state(run_id, summary_json)
         deps._best_effort_update_run(
             run_id,
             {"summary_json": summary_json},
@@ -428,5 +440,45 @@ def execute_project_tracker(deps: Any, run_id: UUID) -> None:
             run_id=run_id,
             stage="finalize",
             message="auto tracker_export queue failed",
+            meta={"error_message": str(exc)},
+        )
+    try:
+        queued = deps.queue_related_notice_precompute_for_run(run_id)
+        summary_json["output"].update(
+            {
+                "related_notice_precompute_enabled": True,
+                "related_notice_precompute_status": "queued" if queued else "skipped",
+            }
+        )
+        summary_json = deps._summary_json_preserving_related_notice_state(run_id, summary_json)
+        deps._best_effort_update_run(
+            run_id,
+            {"summary_json": summary_json},
+            context="related_notice_queue_summary_success",
+        )
+        deps._log_info(
+            run_id=run_id,
+            stage="finalize",
+            message="related notice precompute queued",
+            meta={"queued": queued},
+        )
+    except Exception as exc:
+        summary_json["output"].update(
+            {
+                "related_notice_precompute_enabled": True,
+                "related_notice_precompute_status": "failed",
+                "related_notice_precompute_error": str(exc),
+            }
+        )
+        summary_json = deps._summary_json_preserving_related_notice_state(run_id, summary_json)
+        deps._best_effort_update_run(
+            run_id,
+            {"summary_json": summary_json},
+            context="related_notice_queue_summary_error",
+        )
+        deps._log_warning(
+            run_id=run_id,
+            stage="finalize",
+            message="related notice precompute queue failed",
             meta={"error_message": str(exc)},
         )

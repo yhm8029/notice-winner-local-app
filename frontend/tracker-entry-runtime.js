@@ -315,6 +315,8 @@
       uiMode = "admin",
       formatOpeningScheduledDate = (value) => String(value || "-"),
       formatEstimateValue = () => "-",
+      relatedButtonOpenLabel = "\uC5F0\uAD00 \uACF5\uACE0 \uC5F4\uAE30",
+      relatedButtonCloseLabel = "\uC5F0\uAD00 \uACF5\uACE0 \uB2EB\uAE30",
       noticeViewButtonLabel = "\uACF5\uACE0\uBB38 \uBCF4\uAE30",
       grossAreaLabel = "\uC5F0\uBA74\uC801",
       constructionCostLabel = "\uACF5\uC0AC\uBE44",
@@ -325,6 +327,7 @@
       demandContactLabel = "\uB2F4\uB2F9",
       siteLocationLabel = "\uD604\uC7A5",
       salesSectionHtml = "",
+      relatedNoticeHtml = "",
     } = options;
 
     const currentEntry = entry && typeof entry === "object" ? entry : {};
@@ -349,10 +352,14 @@
         currentEntry.site_location_1,
         currentEntry.site_location_2,
       ),
+      relatedButtonLabel: entryId === String(trackerRelatedEntryId || "")
+        ? String(relatedButtonCloseLabel)
+        : String(relatedButtonOpenLabel),
       noticeViewButtonLabel: String(noticeViewButtonLabel),
       overrideMetaText: "",
       overrideMetaHtml: "",
       salesSectionHtml: "",
+      relatedNoticeHtml: String(relatedNoticeHtml || ""),
       grossAreaLabel: String(grossAreaLabel),
       constructionCostLabel: String(constructionCostLabel),
       estimateLabel: String(estimateLabel),
@@ -369,9 +376,11 @@
       entry = {},
       displayNo = "",
       isSelected = false,
+      relatedButtonLabel = "\uC5F0\uAD00 \uACF5\uACE0 \uC5F4\uAE30",
       noticeViewButtonLabel = "\uACF5\uACE0\uBB38 \uBCF4\uAE30",
       overrideMarkup = "",
       salesMarkup = "",
+      relatedMarkup = "",
     } = payload;
     const {
       formatBuildingAutomationEstimateValue: estimateFormatter =
@@ -385,8 +394,11 @@
       formatOpeningScheduledDate: formatKoreanDate,
       formatEstimateValue: (currentEntry) =>
         estimateFormatter(currentEntry, currentEntry.building_automation_estimated_amount || "-"),
+      relatedButtonOpenLabel: relatedButtonLabel,
+      relatedButtonCloseLabel: relatedButtonLabel,
       noticeViewButtonLabel,
       salesSectionHtml: salesMarkup,
+      relatedNoticeHtml: relatedMarkup,
     });
 
     return {
@@ -425,10 +437,12 @@
         view.siteLocationText
         || buildTrackerSiteLocationText(view.site_location_1, view.site_location_2)
       ),
+      relatedButtonLabel: String(view.relatedButtonLabel || "\uC5F0\uAD00 \uACF5\uACE0 \uC5F4\uAE30"),
       noticeViewButtonLabel: String(view.noticeViewButtonLabel || "\uACF5\uACE0\uBB38 \uBCF4\uAE30"),
       overrideMetaText: String(view.overrideMetaText || ""),
       overrideMetaHtml: String(view.overrideMetaHtml || ""),
       salesSectionHtml: String(view.salesSectionHtml || ""),
+      relatedNoticeHtml: String(view.relatedNoticeHtml || ""),
       grossAreaLabel: String(view.grossAreaLabel || "\uC5F0\uBA74\uC801"),
       constructionCostLabel: String(view.constructionCostLabel || "\uACF5\uC0AC\uBE44"),
       estimateLabel: String(view.estimateLabel || "\uBE4C\uB529\uC790\uB3D9\uC81C\uC5B4 \uCD94\uC815\uAE08\uC561(\uACF5\uC0AC\uBE44\uC758 1.5~2%)"),
@@ -456,6 +470,9 @@
                 <strong>${escapeHtml(view.projectNameText)}</strong>
               </div>
               <div class="entry-head-actions">
+                <button class="ghost-button tracker-related-toggle" type="button" data-entry-related-toggle="${escapeHtml(view.id)}">
+                  ${escapeHtml(view.relatedButtonLabel)}
+                </button>
                 <button class="ghost-button tracker-related-toggle" type="button" data-entry-notice-view="${escapeHtml(view.id)}">
                   ${escapeHtml(view.noticeViewButtonLabel)}
                 </button>
@@ -482,6 +499,7 @@
               <span><strong>${escapeHtml(view.demandContactLabel)}</strong> ${escapeHtml(view.demandContactText)}</span>
               <span><strong>${escapeHtml(view.siteLocationLabel)}</strong> ${escapeHtml(view.siteLocationText)}</span>
             </p>
+            ${view.relatedNoticeHtml}
           </div>
         </div>
       </article>

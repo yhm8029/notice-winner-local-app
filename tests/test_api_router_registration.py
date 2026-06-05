@@ -14,6 +14,7 @@ class ApiRouterRegistrationTests(unittest.TestCase):
         from backend.api.routers import reports
         from backend.api.routers import runs
         from backend.api.routers import backfill_conflicts
+        from backend.api.routers import related_notice
         from backend.api.routers import sales_claims
         from backend.api.routers import tracker
 
@@ -24,6 +25,7 @@ class ApiRouterRegistrationTests(unittest.TestCase):
         self.assertIsInstance(core.router, APIRouter)
         self.assertIsInstance(reports.router, APIRouter)
         self.assertIsInstance(runs.router, APIRouter)
+        self.assertIsInstance(related_notice.router, APIRouter)
         self.assertIsInstance(sales_claims.router, APIRouter)
         self.assertIsInstance(tracker.router, APIRouter)
 
@@ -67,6 +69,9 @@ class ApiRouterRegistrationTests(unittest.TestCase):
         self.assertIn("/api/tracker-entries", paths)
         self.assertIn("/api/tracker-entries/{entry_id}", paths)
         self.assertIn("/api/tracker-change-events", paths)
+        self.assertIn("/api/projects/{project_id}/related-notices", paths)
+        self.assertIn("/api/projects/{project_id}/notice-view", paths)
+        self.assertIn("/api/notices/view", paths)
         self.assertIn("/health", paths)
         self.assertIn("/", paths)
         self.assertIn("/app", paths)
@@ -132,16 +137,22 @@ class ApiRouterRegistrationTests(unittest.TestCase):
         for method, path in expected_routes:
             self._assert_route_is_owned_by_module(app.routes, method, path, "backend.api.routers.backfill_conflicts")
 
-    def test_related_notice_routes_are_removed(self) -> None:
+    def test_related_notice_router_owns_related_notice_paths(self) -> None:
         from backend.api.app import app
+        from backend.api.routers import related_notice
 
-        paths = {route.path for route in app.routes}
+        related_notice_paths = {route.path for route in related_notice.router.routes}
 
-        self.assertNotIn("/api/projects/{project_id}/related-notices", paths)
-        self.assertNotIn("/api/projects/{project_id}/related-notices/progress", paths)
-        self.assertNotIn("/api/projects/{project_id}/related-notices/recompute", paths)
-        self.assertNotIn("/api/projects/{project_id}/notice-view", paths)
-        self.assertNotIn("/api/notices/view", paths)
+        self.assertIn("/api/projects/{project_id}/related-notices", related_notice_paths)
+        self.assertIn("/api/projects/{project_id}/related-notices/progress", related_notice_paths)
+        self.assertIn("/api/projects/{project_id}/related-notices/recompute", related_notice_paths)
+        self.assertIn("/api/projects/{project_id}/notice-view", related_notice_paths)
+        self.assertIn("/api/notices/view", related_notice_paths)
+        self._assert_route_is_owned_by_module(app.routes, "GET", "/api/projects/{project_id}/related-notices", "backend.api.routers.related_notice")
+        self._assert_route_is_owned_by_module(app.routes, "GET", "/api/projects/{project_id}/related-notices/progress", "backend.api.routers.related_notice")
+        self._assert_route_is_owned_by_module(app.routes, "POST", "/api/projects/{project_id}/related-notices/recompute", "backend.api.routers.related_notice")
+        self._assert_route_is_owned_by_module(app.routes, "GET", "/api/projects/{project_id}/notice-view", "backend.api.routers.related_notice")
+        self._assert_route_is_owned_by_module(app.routes, "GET", "/api/notices/view", "backend.api.routers.related_notice")
 
     def test_core_router_owns_dashboard_and_project_paths(self) -> None:
         from backend.api.app import app

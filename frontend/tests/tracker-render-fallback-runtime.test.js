@@ -91,7 +91,7 @@ test("buildTrackerEntryCardMarkupFallback preserves the entry card selectors", (
 
   assert.match(html, /<article class="entry-item"/);
   assert.match(html, /data-entry-id="entry-1"/);
-  assert.doesNotMatch(html, /data-entry-related-toggle/);
+  assert.match(html, /data-entry-related-toggle="entry-1"/);
   assert.match(html, /data-entry-notice-view="entry-1"/);
   assert.match(html, /entry-metrics entry-metrics-single/);
   assert.match(html, /estimate:3000/);

@@ -104,6 +104,7 @@ export function createTrackerRenderControllerDeps(context = {}) {
     loadSelectedEntryDetail,
     toggleTrackerEntryRelated,
     openTrackerEntryNoticeViewer,
+    bindRelatedNoticeViewerButtons,
     claimSalesProject,
     setSalesNoteDraft,
     saveSalesClaimNote,
@@ -167,6 +168,8 @@ export function createTrackerRenderControllerDeps(context = {}) {
       adminEmptyHtml: '<div class="empty-state">No tracker rows loaded.</div>',
     },
     trackerEntryCardLabels: {
+      relatedButtonOpenLabel: "연관 공고 보기",
+      relatedButtonCloseLabel: "연관 공고 닫기",
       noticeViewButtonLabel: "공고문 보기",
       grossAreaLabel: "연면적",
       constructionCostLabel: "공사비",

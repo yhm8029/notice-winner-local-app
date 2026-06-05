@@ -10,6 +10,7 @@ from backend.api.routers.artifacts import router as artifacts_router
 from backend.api.routers.auth import router as auth_router
 from backend.api.routers.backfill_conflicts import router as backfill_conflicts_router
 from backend.api.routers.core import router as core_router
+from backend.api.routers.related_notice import router as related_notice_router
 from backend.api.routers.reports import router as reports_router
 from backend.api.routers.runs import router as runs_router
 from backend.api.routers.sales_claims import router as sales_claims_router
@@ -22,6 +23,7 @@ _ROUTERS = (
     admin_router,
     backfill_conflicts_router,
     core_router,
+    related_notice_router,
     sales_claims_router,
     reports_router,
     runs_router,
