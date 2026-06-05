@@ -108,7 +108,6 @@ def list_tracker_entry_summaries(
                 organization_id=request_organization_id,
             )
         ]
-        total = len(items)
         items = support._hydrate_tracker_entry_summary_rows(
             organization_id=request_organization_id,
             rows=items,
@@ -349,7 +348,6 @@ def list_tracker_entries(
             organization_id=request_organization_id,
         )
     ]
-    total = len(items)
     items = support._annotate_tracker_entries_with_project_refs(items)
     items = support._annotate_tracker_entries_with_opening_dates(items)
     items = support._normalize_tracker_rows_for_presentation(items)
