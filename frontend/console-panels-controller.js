@@ -1,4 +1,4 @@
-function isOutOfRangePageError(error) {
+﻿function isOutOfRangePageError(error) {
   const message = String(error && error.message ? error.message : error || "").toLowerCase();
   return message.includes("requested range not satisfiable") || message.includes("offset of");
 }
@@ -17,7 +17,7 @@ function handleOutOfRangePageErrorImpl(deps, error, filterState, scopeLabel) {
   const pageSize = Math.max(1, Number(filterState.pageSize || 20));
   const fallbackPage = totalRows > 0 ? Math.max(1, Math.ceil(totalRows / pageSize)) : 1;
   filterState.page = fallbackPage;
-  deps.flash?.(`${scopeLabel} 목록 페이지를 ${fallbackPage}로 보정했습니다.`, "warn");
+  deps.flash?.(`${scopeLabel} 紐⑸줉 ?섏씠吏瑜?${fallbackPage}濡?蹂댁젙?덉뒿?덈떎.`, "warn");
   return true;
 }
 
@@ -38,9 +38,6 @@ export function createConsolePanelsController(deps = {}) {
     trackerExecutionMessage,
     progressPercent,
     trackerExportStageLabel,
-    renderRelatedProjectNotices,
-    bindRelatedNoticeViewerButtons,
-    toggleProjectRelated,
     openProjectNoticeViewer,
     applyPresetParams,
     api,
@@ -138,7 +135,7 @@ export function createConsolePanelsController(deps = {}) {
     const downloadMarkup = previewArtifact
       ? `
       <div class="artifact-actions">
-        <a class="artifact-link" href="${escapeHtml(previewArtifact.download_url)}">트래커 엑셀 다운로드</a>
+        <a class="artifact-link" href="${escapeHtml(previewArtifact.download_url)}">?몃옒而??묒? ?ㅼ슫濡쒕뱶</a>
       </div>
     `
       : "";
@@ -149,8 +146,8 @@ export function createConsolePanelsController(deps = {}) {
         <div class="tracker-export-inline-preview">
           <div class="runtime-card-head">
             <div>
-              <strong>워크북 미리보기</strong>
-              <p>완료 즉시 같은 화면에서 결과를 확인합니다.</p>
+              <strong>?뚰겕遺?誘몃━蹂닿린</strong>
+              <p>?꾨즺 利됱떆 媛숈? ?붾㈃?먯꽌 寃곌낵瑜??뺤씤?⑸땲??</p>
             </div>
           </div>
           ${renderArtifactPreviewMarkup(state.selectedTrackerWorkbookArtifactId)}
@@ -158,7 +155,7 @@ export function createConsolePanelsController(deps = {}) {
         </div>
       `;
       } else {
-        previewMarkup = '<div class="empty-state">tracking_excel 산출물 메타데이터를 확인하는 중입니다.</div>';
+        previewMarkup = '<div class="empty-state">tracking_excel ?곗텧臾?硫뷀??곗씠?곕? ?뺤씤?섎뒗 以묒엯?덈떎.</div>';
       }
     }
     dom.runExecutionContext.className = "runtime-card tracker-execution-context";
@@ -184,10 +181,10 @@ export function createConsolePanelsController(deps = {}) {
       ${statusBadge(context.status || "queued")}
     </div>
     <div class="metric-grid tracker-execution-metric-grid">
-      ${metricCard("상태", context.status || "-")}
-      ${metricCard("현재 단계", trackerExportStageLabel(context.progressStage || "waiting"))}
-      ${metricCard("예상 row 수", context.estimatedRows)}
-      ${metricCard("확정 row 수", context.trackerEntryRows)}
+      ${metricCard("?곹깭", context.status || "-")}
+      ${metricCard("?꾩옱 ?④퀎", trackerExportStageLabel(context.progressStage || "waiting"))}
+      ${metricCard("?덉긽 row ??, context.estimatedRows)}
+      ${metricCard("?뺤젙 row ??, context.trackerEntryRows)}
     </div>
     <div class="progress-block tracker-execution-progress">
       <div class="progress-head">
@@ -198,7 +195,7 @@ export function createConsolePanelsController(deps = {}) {
         <div class="progress-bar" style="width:${progressPercent({ progress_current: context.progressCurrent, progress_total: context.progressTotal })}%"></div>
       </div>
     </div>
-    ${context.errorMessage ? `<div class="empty-state">오류: ${escapeHtml(context.errorMessage)}</div>` : ""}
+    ${context.errorMessage ? `<div class="empty-state">?ㅻ쪟: ${escapeHtml(context.errorMessage)}</div>` : ""}
     ${previewMarkup}
   `;
     dom.runExecutionContext.classList.remove("hidden");
@@ -217,11 +214,11 @@ export function createConsolePanelsController(deps = {}) {
     dom.projectPrevButton.disabled = state.projectFilters.page <= 1;
     dom.projectNextButton.disabled = state.projectFilters.page >= totalPages;
     if (errorMessage) {
-      dom.projectList.innerHTML = `<div class="empty-state">프로젝트를 불러오지 못했습니다: ${escapeHtml(errorMessage)}</div>`;
+      dom.projectList.innerHTML = `<div class="empty-state">?꾨줈?앺듃瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲?? ${escapeHtml(errorMessage)}</div>`;
       return;
     }
     if (!state.projects.length) {
-      dom.projectList.innerHTML = '<div class="empty-state">집계된 프로젝트가 없습니다.</div>';
+      dom.projectList.innerHTML = '<div class="empty-state">吏묎퀎???꾨줈?앺듃媛 ?놁뒿?덈떎.</div>';
       return;
     }
     dom.projectList.innerHTML = PROJECT_RUNTIME?.buildProjectListMarkup(
@@ -231,45 +228,15 @@ export function createConsolePanelsController(deps = {}) {
       },
       {
         escapeHtml,
-        renderRelatedProjectNotices,
       },
     ) || "";
-    for (const button of dom.projectList.querySelectorAll("[data-project-title]")) {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const projectId = button.getAttribute("data-project-title");
-        if (projectId) {
-          void toggleProjectRelated(projectId);
-        }
-      });
-    }
-    for (const article of dom.projectList.querySelectorAll("[data-project-id]")) {
-      article.addEventListener("click", (event) => {
-        if (event.target.closest("button, a")) {
-          return;
-        }
-        const projectId = article.getAttribute("data-project-id");
-        if (projectId) {
-          void toggleProjectRelated(projectId);
-        }
-      });
-    }
-    for (const button of dom.projectList.querySelectorAll("[data-project-toggle]")) {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const projectId = button.getAttribute("data-project-toggle");
-        if (projectId) {
-          void toggleProjectRelated(projectId);
-        }
-      });
-    }
     for (const button of dom.projectList.querySelectorAll("[data-project-notice-view]")) {
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         const projectId = button.getAttribute("data-project-notice-view");
         const project = state.projects.find((item) => item.id === projectId);
         if (!project) {
-          flash("원공고 정보를 찾지 못했습니다.", "warn");
+          flash("?먭났怨??뺣낫瑜?李얠? 紐삵뻽?듬땲??", "warn");
           return;
         }
         void openProjectNoticeViewer(project);
@@ -288,10 +255,9 @@ export function createConsolePanelsController(deps = {}) {
           demand_org: project.issuer_name || "",
           bid_no: "",
         });
-        flash(`프로젝트 조건 적용: ${project.project_name}`);
+        flash(`?꾨줈?앺듃 議곌굔 ?곸슜: ${project.project_name}`);
       });
     }
-    bindRelatedNoticeViewerButtons(dom.projectList);
   }
 
   controller.handleOutOfRangePageError = function handleOutOfRangePageError(error, filterState, scopeLabel) {
@@ -342,7 +308,7 @@ export function createConsolePanelsController(deps = {}) {
       renderProjects();
       touchSyncMeta(`projects synced ${new Date().toLocaleTimeString()}`);
     } catch (err) {
-      if (controller.handleOutOfRangePageError?.(err, state.projectFilters, "프로젝트")) {
+      if (controller.handleOutOfRangePageError?.(err, state.projectFilters, "?꾨줈?앺듃")) {
         syncUrlState();
         void loadProjects({ silent });
         return;

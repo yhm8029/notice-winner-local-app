@@ -4,8 +4,6 @@
       entry = {},
       displayNo = "",
       isSelected = false,
-      relatedButtonLabel = "open related notices",
-      relatedMarkup = "",
     } = payload;
     const {
       escapeHtml: fallbackEscapeHtml = (value) => String(value ?? ""),
@@ -35,9 +33,6 @@
                 <strong>${fallbackEscapeHtml(entry.project_name)}</strong>
               </div>
               <div class="entry-head-actions">
-                <button class="ghost-button tracker-related-toggle" type="button" data-entry-related-toggle="${fallbackEscapeHtml(entry.id)}">
-                  ${fallbackEscapeHtml(relatedButtonLabel)}
-                </button>
                 <button class="ghost-button tracker-related-toggle" type="button" data-entry-notice-view="${fallbackEscapeHtml(entry.id)}">
                   notice viewer
                 </button>
@@ -62,7 +57,6 @@
               <span><strong>demand contact</strong> ${fallbackEscapeHtml(entry.demand_contact || "-")}</span>
               <span><strong>site location</strong> ${fallbackEscapeHtml(siteLocationText)}</span>
             </p>
-            ${relatedMarkup}
           </div>
         </div>
       </article>
@@ -107,12 +101,10 @@
       buildTrackerEntryCardView = null,
       buildTrackerEntriesListMarkup = buildTrackerEntriesListMarkupFallback,
       renderSalesClaimSection = () => "",
-      renderTrackerEntryRelatedNotices = () => "",
       formatKoreanDate = (value) => String(value ?? ""),
       formatBuildingAutomationEstimateValue = (_entry, fallbackValue = "") => String(fallbackValue || "-"),
       getSalesClaimForProject = () => null,
       syncUrlState = () => {},
-      toggleTrackerEntryRelated = () => {},
       openTrackerEntryNoticeViewer = () => {},
       bindRelatedNoticeViewerButtons = () => {},
       claimSalesProject = () => {},
@@ -178,8 +170,6 @@
           uiMode: state.uiMode,
           formatOpeningScheduledDate: formatKoreanDate,
           formatEstimateValue: (item) => formatBuildingAutomationEstimateValue(item, item.building_automation_estimated_amount || "-"),
-          relatedButtonOpenLabel: "open related notices",
-          relatedButtonCloseLabel: "close related notices",
           noticeViewButtonLabel: "notice viewer",
           grossAreaLabel: "gross area",
           constructionCostLabel: "construction cost",
@@ -190,7 +180,6 @@
           demandContactLabel: "demand contact",
           siteLocationLabel: "site location",
           salesSectionHtml: renderSalesClaimSection(entry),
-          relatedNoticeHtml: renderTrackerEntryRelatedNotices(entry),
         });
       }
       return {
@@ -199,12 +188,10 @@
             entry,
             displayNo,
             isSelected: entry.id === state.selectedEntryId,
-            relatedButtonLabel: state.trackerRelatedEntryId === entry.id ? "close related notices" : "open related notices",
             overrideMarkup: state.uiMode === "admin"
               ? `<p>${escapeHtml(entry.overridden_fields?.length ? `override ${entry.overridden_fields.join(", ")}` : "no overrides")}</p>`
               : "",
             salesMarkup: renderSalesClaimSection(entry),
-            relatedMarkup: renderTrackerEntryRelatedNotices(entry),
           },
           {
             escapeHtml,
@@ -233,26 +220,6 @@
       });
     }
 
-    for (const button of dom.trackerEntriesList.querySelectorAll("[data-entry-related-toggle]")) {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const entryId = button.getAttribute("data-entry-related-toggle");
-        if (!entryId) {
-          return;
-        }
-        const entry = displayEntries.find((item) => item.id === entryId);
-        if (!entry) {
-          return;
-        }
-        state.selectedEntryId = entryId;
-        if (state.uiMode === "admin" && buildTrackerEntrySummaryDetail) {
-          renderSelectedEntry(buildTrackerEntrySummaryDetail(entry), { summaryOnly: true });
-          void loadSelectedEntryDetail({ entryId, silent: true, background: true });
-        }
-        void toggleTrackerEntryRelated(entryId);
-      });
-    }
-
     for (const button of dom.trackerEntriesList.querySelectorAll("[data-entry-notice-view]")) {
       button.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -263,8 +230,6 @@
         void openTrackerEntryNoticeViewer(entryId, entries);
       });
     }
-
-    bindRelatedNoticeViewerButtons(dom.trackerEntriesList);
 
     for (const button of dom.trackerEntriesList.querySelectorAll("[data-sales-claim]")) {
       button.addEventListener("click", (event) => {

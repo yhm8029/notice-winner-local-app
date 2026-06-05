@@ -1,4 +1,4 @@
-export function createTrackerRenderController(deps = {}) {
+﻿export function createTrackerRenderController(deps = {}) {
   const {
     dom,
     state,
@@ -8,14 +8,11 @@ export function createTrackerRenderController(deps = {}) {
     TRACKER_ENTRY_RUNTIME,
     buildTrackerEntryCardMarkupFallback,
     renderSalesClaimSection,
-    renderTrackerEntryRelatedNotices,
     resetTrackerBoardEdit,
     renderSelectedEntry,
     buildTrackerEntrySummaryDetail,
     loadSelectedEntryDetail,
-    toggleTrackerEntryRelated,
     openTrackerEntryNoticeViewer,
-    bindRelatedNoticeViewerButtons,
     claimSalesProject,
     setSalesNoteDraft,
     saveSalesClaimNote,
@@ -48,10 +45,10 @@ export function createTrackerRenderController(deps = {}) {
       return;
     }
     if (!button.dataset.originalLabel) {
-      button.dataset.originalLabel = String(button.textContent || "공고문 보기").trim() || "공고문 보기";
+      button.dataset.originalLabel = String(button.textContent || "怨듦퀬臾?蹂닿린").trim() || "怨듦퀬臾?蹂닿린";
     }
     button.disabled = Boolean(busy);
-    button.textContent = busy ? "공고문 여는 중..." : button.dataset.originalLabel;
+    button.textContent = busy ? "怨듦퀬臾??щ뒗 以?.." : button.dataset.originalLabel;
   }
 
   function renderTrackerEntries(entries, { refreshSelectedEntry = true } = {}) {
@@ -61,12 +58,10 @@ export function createTrackerRenderController(deps = {}) {
 
     if (!displayEntries.length) {
       resetTrackerBoardEdit();
-      state.trackerRelatedEntryId = null;
-      state.trackerRelatedResolvingEntryId = null;
       dom.trackerEntriesList.innerHTML = state.trackerEntriesError
-        ? `<div class="empty-state">프로젝트 현황을 불러오지 못했습니다: ${escapeHtml(state.trackerEntriesError)}</div>`
+        ? `<div class="empty-state">?꾨줈?앺듃 ?꾪솴??遺덈윭?ㅼ? 紐삵뻽?듬땲?? ${escapeHtml(state.trackerEntriesError)}</div>`
         : state.uiMode === "user"
-          ? '<div class="empty-state">현재 영업 대상으로 바로 가져올 수 있는 프로젝트가 없습니다.</div>'
+          ? '<div class="empty-state">?꾩옱 ?곸뾽 ??곸쑝濡?諛붾줈 媛?몄삱 ???덈뒗 ?꾨줈?앺듃媛 ?놁뒿?덈떎.</div>'
           : '<div class="empty-state">No tracker rows loaded.</div>';
       renderTrackerBoard([]);
       if (refreshSelectedEntry) {
@@ -78,8 +73,6 @@ export function createTrackerRenderController(deps = {}) {
     if (!displayEntries.some((entry) => entry.id === state.selectedEntryId)) {
       state.selectedEntryId = displayEntries[0].id;
     }
-    if (!displayEntries.some((entry) => entry.id === state.trackerRelatedEntryId)) {
-      state.trackerRelatedEntryId = null;
     }
 
     dom.trackerEntriesList.innerHTML = displayEntries
@@ -92,16 +85,13 @@ export function createTrackerRenderController(deps = {}) {
         const overrideMetaHtml = state.uiMode === "admin"
           ? `<p>${escapeHtml(overridden)}</p>`
           : "";
-        const relatedButtonLabel = entry.id === state.trackerRelatedEntryId ? "연관 공고 닫기" : "연관 공고 열기";
         return TRACKER_ENTRY_RUNTIME?.buildTrackerEntryCardMarkup?.(
           {
             entry,
             displayNo,
             isSelected,
-            relatedButtonLabel,
             salesMarkup: renderSalesClaimSection(entry),
             overrideMarkup: overrideMetaHtml,
-            relatedMarkup: renderTrackerEntryRelatedNotices(entry),
           },
           {
             escapeHtml,
@@ -113,10 +103,8 @@ export function createTrackerRenderController(deps = {}) {
             entry,
             displayNo,
             isSelected,
-            relatedButtonLabel,
             salesMarkup: renderSalesClaimSection(entry),
             overrideMarkup: overrideMetaHtml,
-            relatedMarkup: renderTrackerEntryRelatedNotices(entry),
           },
           {
             escapeHtml,
@@ -141,25 +129,6 @@ export function createTrackerRenderController(deps = {}) {
         renderTrackerEntries(state.trackerEntries, { refreshSelectedEntry: state.uiMode === "admin" });
       });
     }
-    for (const button of dom.trackerEntriesList.querySelectorAll("[data-entry-related-toggle]")) {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const entryId = button.getAttribute("data-entry-related-toggle");
-        if (!entryId) {
-          return;
-        }
-        const entry = displayEntries.find((item) => item.id === entryId);
-        if (!entry) {
-          return;
-        }
-        state.selectedEntryId = entryId;
-        if (state.uiMode === "admin") {
-          renderSelectedEntry(buildTrackerEntrySummaryDetail(entry), { summaryOnly: true });
-          void loadSelectedEntryDetail({ entryId, silent: true, background: true });
-        }
-        void toggleTrackerEntryRelated(entryId);
-      });
-    }
     for (const button of dom.trackerEntriesList.querySelectorAll("[data-entry-notice-view]")) {
       button.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -173,7 +142,6 @@ export function createTrackerRenderController(deps = {}) {
           .finally(() => setNoticeViewButtonBusy(button, false));
       });
     }
-    bindRelatedNoticeViewerButtons(dom.trackerEntriesList);
     for (const button of dom.trackerEntriesList.querySelectorAll("[data-sales-claim]")) {
       button.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -225,7 +193,7 @@ export function createTrackerRenderController(deps = {}) {
         const select = button.closest(".entry-sales-transfer")?.querySelector("[data-sales-transfer-select]");
         const targetUserId = select ? select.value : "";
         if (!targetUserId) {
-          flash("이관 대상 사용자를 선택해라.", "warn");
+          flash("?닿? ????ъ슜?먮? ?좏깮?대씪.", "warn");
           return;
         }
         void transferSalesClaim(projectId, targetUserId);
@@ -291,7 +259,7 @@ export function createTrackerRenderController(deps = {}) {
       return;
     }
     if (!entries.length) {
-      dom.trackerBoard.innerHTML = "트래커 행을 불러오면 여기에 표로 표시됩니다.";
+      dom.trackerBoard.innerHTML = "?몃옒而??됱쓣 遺덈윭?ㅻ㈃ ?ш린???쒕줈 ?쒖떆?⑸땲??";
       dom.trackerBoard.className = "tracker-board-content empty-state";
       return;
     }

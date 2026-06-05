@@ -1,4 +1,4 @@
-(function attachProjectRuntime(global) {
+﻿(function attachProjectRuntime(global) {
   function buildProjectPageMeta(page, totalPages, totalProjects) {
     return `Page ${page} / ${totalPages} | ${totalProjects} project(s)`;
   }
@@ -6,7 +6,6 @@
   function buildProjectItemMarkup(project, options = {}, helpers = {}) {
     const {
       projectOpenId = "",
-      relatedNoticesMarkup = "",
     } = options;
     const {
       escapeHtml = (value) => String(value || ""),
@@ -22,26 +21,21 @@
             <p class="mono">${escapeHtml(project.latest_notice_date || "-")} | ${escapeHtml(project.latest_notice_title || "-")}</p>
             ${
               project.project_search_name
-                ? `<p class="mono runtime-project-search">프로젝트 검색명 | ${escapeHtml(project.project_search_name)}</p>`
+                ? `<p class="mono runtime-project-search">?꾨줈?앺듃 寃?됰챸 | ${escapeHtml(project.project_search_name)}</p>`
                 : ""
             }
           </div>
           <div class="runtime-project-actions">
-            <button class="ghost-button" type="button" data-project-notice-view="${escapeHtml(project.id)}">공고문 보기</button>
-            <button class="ghost-button" type="button" data-project-toggle="${escapeHtml(project.id)}">
-              ${project.id === projectOpenId ? "연관 공고 닫기" : "연관 공고 보기"}
-            </button>
-            <button class="ghost-button" type="button" data-project-apply="${escapeHtml(project.id)}">조건 적용</button>
+            <button class="ghost-button" type="button" data-project-notice-view="${escapeHtml(project.id)}">怨듦퀬臾?蹂닿린</button>
+            <button class="ghost-button" type="button" data-project-apply="${escapeHtml(project.id)}">議곌굔 ?곸슜</button>
           </div>
         </div>
-        ${relatedNoticesMarkup}
       </article>
     `;
   }
 
   function buildProjectListMarkup(projects, options = {}, helpers = {}) {
     const {
-      renderRelatedProjectNotices = () => "",
     } = helpers;
     return (projects || [])
       .map((project) =>
@@ -49,7 +43,6 @@
           project,
           {
             ...options,
-            relatedNoticesMarkup: renderRelatedProjectNotices(project),
           },
           helpers,
         ),

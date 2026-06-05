@@ -1,4 +1,4 @@
-const SALES_ACTION_RECOMMENDATION_SEEN_STORAGE_KEY = "notice-winner-pipeline-web.salesActionRecommendations.seen.v1";
+﻿const SALES_ACTION_RECOMMENDATION_SEEN_STORAGE_KEY = "notice-winner-pipeline-web.salesActionRecommendations.seen.v1";
 const SALES_RECOMMENDATIONS_ADMIN_TAB = "sales-recommendations";
 
 export function createSalesActionRecommendationsRuntime(deps = {}) {
@@ -34,7 +34,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     event?.stopPropagation?.();
   }
 
-  function openNoticeViewerFrame(url, title = "공고문") {
+  function openNoticeViewerFrame(url, title = "怨듦퀬臾?) {
     const doc = appWindow?.document || null;
     if (!doc?.body || typeof doc.createElement !== "function") {
       if (url && appWindow?.location) {
@@ -57,15 +57,15 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     header.className = "notice-viewer-overlay-header";
     const heading = doc.createElement("strong");
     heading.className = "notice-viewer-overlay-title";
-    heading.textContent = String(title || "공고문");
+    heading.textContent = String(title || "怨듦퀬臾?);
     const closeButton = doc.createElement("button");
     closeButton.type = "button";
     closeButton.className = "notice-viewer-overlay-close";
-    closeButton.setAttribute("aria-label", "닫기");
-    closeButton.textContent = "×";
+    closeButton.setAttribute("aria-label", "?リ린");
+    closeButton.textContent = "횞";
     const iframe = doc.createElement("iframe");
     iframe.className = "notice-viewer-overlay-frame";
-    iframe.setAttribute("title", String(title || "공고문"));
+    iframe.setAttribute("title", String(title || "怨듦퀬臾?));
     iframe.src = url;
     closeButton.addEventListener("click", () => overlay.remove?.());
     header.append(heading, closeButton);
@@ -155,9 +155,9 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
   function formatRecommendationElapsed(item) {
     const elapsed = Number(item?.elapsed_days || 0);
     if (elapsed > 0) {
-      return `${elapsed}일 전`;
+      return `${elapsed}????;
     }
-    return "오늘";
+    return "?ㅻ뒛";
   }
 
   function formatRecommendationDate(value) {
@@ -167,7 +167,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     }
     const compact = raw.replace(/[^0-9]/g, "");
     if (compact.length >= 8) {
-      return `${compact.slice(0, 4)}년 ${compact.slice(4, 6)}월 ${compact.slice(6, 8)}일`;
+      return `${compact.slice(0, 4)}??${compact.slice(4, 6)}??${compact.slice(6, 8)}??;
     }
     return raw;
   }
@@ -176,7 +176,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     if (!canShowInternalScore() || item?.internal_sort_score === null || item?.internal_sort_score === undefined) {
       return "";
     }
-    return `<span class="sales-action-score">내부 정렬 점수 ${escapeHtml(String(item.internal_sort_score))}</span>`;
+    return `<span class="sales-action-score">?대? ?뺣젹 ?먯닔 ${escapeHtml(String(item.internal_sort_score))}</span>`;
   }
 
   function salesRecommendationEntryId(item) {
@@ -193,7 +193,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
       id: salesRecommendationEntryId(item),
       project_id: salesRecommendationProjectId(item),
       project_name: String(source.project_name || item?.project_name || "-"),
-      demand_org_name: String(source.demand_org_name || "(수요기관 없음)"),
+      demand_org_name: String(source.demand_org_name || "(?섏슂湲곌? ?놁쓬)"),
       gross_area_scale: String(source.gross_area_scale || "-"),
       construction_cost: String(source.construction_cost || "-"),
       building_automation_estimated_amount: String(source.building_automation_estimated_amount || item?.automation_amount_text || "-"),
@@ -213,120 +213,6 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     return parts.length ? [...new Set(parts)].join(" ") : "-";
   }
 
-  function ensureSalesRecommendationRelatedState() {
-    state.salesRecommendationRelatedPayloads = state.salesRecommendationRelatedPayloads && typeof state.salesRecommendationRelatedPayloads === "object"
-      ? state.salesRecommendationRelatedPayloads
-      : {};
-    state.salesRecommendationRelatedItems = state.salesRecommendationRelatedItems && typeof state.salesRecommendationRelatedItems === "object"
-      ? state.salesRecommendationRelatedItems
-      : {};
-    state.salesRecommendationRelatedErrors = state.salesRecommendationRelatedErrors && typeof state.salesRecommendationRelatedErrors === "object"
-      ? state.salesRecommendationRelatedErrors
-      : {};
-    state.salesRecommendationRelatedAutoRecomputed = state.salesRecommendationRelatedAutoRecomputed && typeof state.salesRecommendationRelatedAutoRecomputed === "object"
-      ? state.salesRecommendationRelatedAutoRecomputed
-      : {};
-    state.salesRecommendationRelatedPollState = state.salesRecommendationRelatedPollState && typeof state.salesRecommendationRelatedPollState === "object"
-      ? state.salesRecommendationRelatedPollState
-      : {};
-  }
-
-  function renderSalesRecommendationRelatedNoticeItem(item, projectId) {
-    const noticeHref = String(item?.notice_detail_url || item?.notice_url || "").trim();
-    const titleMarkup = noticeHref
-      ? `<a class="runtime-project-related-link" href="${escapeHtml(noticeHref)}" target="_blank" rel="noreferrer">${escapeHtml(item?.project_name || "-")}</a>`
-      : `<strong>${escapeHtml(item?.project_name || "-")}</strong>`;
-    const viewButtonMarkup = noticeHref
-      ? `<button class="ghost-button runtime-project-related-view-button" type="button" data-related-notice-project="${escapeHtml(projectId)}" data-related-notice-id="${escapeHtml(item?.id || "")}">연관 공고문</button>`
-      : "";
-    const adminMeta = state.uiMode === "admin"
-      ? [
-          item?.notice_stage ? `stage ${item.notice_stage}` : "",
-          item?.sales_relevance ? `bucket ${item.sales_relevance}` : "",
-          item?.exclusion_reason || "",
-          ...(Array.isArray(item?.reason_codes) ? item.reason_codes : []),
-        ].filter(Boolean)
-      : [];
-    return `
-      <article class="runtime-project-related-item">
-        <div class="runtime-project-related-main">
-          <div>
-            ${titleMarkup}
-            <p>${escapeHtml(item?.issuer_name || "-")}</p>
-          </div>
-          ${viewButtonMarkup ? `<div class="runtime-project-related-actions">${viewButtonMarkup}</div>` : ""}
-        </div>
-        <div class="runtime-project-related-meta mono">
-          <span>${escapeHtml(item?.announce_date || "-")}</span>
-          <span>${escapeHtml(item?.bid_no || "-")} / ${escapeHtml(item?.bid_ord || "-")}</span>
-          ${adminMeta.map((value) => `<span>${escapeHtml(value)}</span>`).join("")}
-        </div>
-      </article>
-    `;
-  }
-
-  function visibleSalesRecommendationRelatedItems(items) {
-    const list = Array.isArray(items) ? items : [];
-    if (state.uiMode === "admin") {
-      return list;
-    }
-    const salesRelevant = list.filter((item) => String(item?.sales_relevance || "").trim() === "sales_relevant");
-    if (salesRelevant.length) {
-      return salesRelevant;
-    }
-    return list.filter((item) => !["excluded", "reference"].includes(String(item?.sales_relevance || "").trim()));
-  }
-
-  function renderSalesRecommendationRelatedItems(projectId, items, message = "") {
-    const visibleItems = visibleSalesRecommendationRelatedItems(items);
-    return `
-      <div class="runtime-project-related">
-        <div class="runtime-project-related-head">
-          <strong>연관 공고</strong>
-          <span class="mono">${escapeHtml(String(visibleItems.length))}건</span>
-        </div>
-        ${message ? `<div class="empty-state">${escapeHtml(message)}</div>` : ""}
-        <div class="runtime-project-related-list">
-          ${visibleItems.map((item) => renderSalesRecommendationRelatedNoticeItem(item, projectId)).join("")}
-        </div>
-      </div>
-    `;
-  }
-
-  function renderSalesRecommendationRelatedPanel(projectId) {
-    ensureSalesRecommendationRelatedState();
-    if (!projectId || state.salesRecommendationRelatedOpenProjectId !== projectId) {
-      return "";
-    }
-    const payload = state.salesRecommendationRelatedPayloads[projectId] || null;
-    const items = state.salesRecommendationRelatedItems[projectId] || [];
-    const errorMessage = state.salesRecommendationRelatedErrors[projectId] || "";
-    const recomputeButton = `<button class="ghost-button sales-action-related-toggle" type="button" data-sales-action-related-recompute="${escapeHtml(projectId)}">연관공고 재계산</button>`;
-    if (items.length) {
-      const status = String(payload?.status || "").trim();
-      const message = ["queued", "running", "pending"].includes(status)
-        ? (payload?.message || "연관 공고를 검색하는 중입니다.")
-        : "";
-      return renderSalesRecommendationRelatedItems(projectId, items, message);
-    }
-    if (state.salesRecommendationRelatedLoadingProjectId === projectId) {
-      return `<div class="runtime-project-related"><div class="empty-state">연관 공고를 확인하는 중입니다. ${recomputeButton}</div></div>`;
-    }
-    if (errorMessage && !payload && !items.length) {
-      return `<div class="runtime-project-related"><div class="empty-state">연관 공고를 불러오지 못했습니다: ${escapeHtml(errorMessage)} ${recomputeButton}</div></div>`;
-    }
-    if (payload && ["queued", "running", "pending"].includes(String(payload.status || ""))) {
-      return `<div class="runtime-project-related"><div class="empty-state">${escapeHtml(payload.message || "연관 공고 재계산이 진행 중입니다. 잠시 후 다시 열어주세요.")} ${recomputeButton}</div></div>`;
-    }
-    if (payload && payload.status === "missing") {
-      return `<div class="runtime-project-related"><div class="empty-state">${escapeHtml(payload.message || "연관 공고 저장본이 아직 없습니다.")} ${recomputeButton}</div></div>`;
-    }
-    if (!items.length) {
-      return `<div class="runtime-project-related"><div class="empty-state">같이 수집된 연관 공고가 없습니다. ${recomputeButton}</div></div>`;
-    }
-    return renderSalesRecommendationRelatedItems(projectId, items);
-  }
-
   function renderRecommendationProjectStatus(entry, index) {
     return `
       <div class="sales-recommendation-entry">
@@ -341,32 +227,30 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
                 <strong>${escapeHtml(entry.project_name)}</strong>
               </div>
               <div class="entry-head-actions">
-                <button class="ghost-button sales-action-related-toggle" type="button" data-sales-action-related-open="${escapeHtml(String(index))}">연관 공고 열기</button>
-                <button class="ghost-button sales-action-notice-view" type="button" data-sales-action-notice-view="${escapeHtml(String(index))}">공고문 보기</button>
+                <button class="ghost-button sales-action-notice-view" type="button" data-sales-action-notice-view="${escapeHtml(String(index))}">怨듦퀬臾?蹂닿린</button>
               </div>
             </div>
             <p class="entry-metrics entry-metrics-single">
-              <span><strong>발주처</strong> ${escapeHtml(entry.demand_org_name)}</span>
+              <span><strong>諛쒖＜泥?/strong> ${escapeHtml(entry.demand_org_name)}</span>
             </p>
             <p class="entry-metrics">
-              <span><strong>연면적</strong> ${escapeHtml(entry.gross_area_scale)}</span>
-              <span><strong>공사비</strong> ${escapeHtml(entry.construction_cost)}</span>
+              <span><strong>?곕㈃??/strong> ${escapeHtml(entry.gross_area_scale)}</span>
+              <span><strong>怨듭궗鍮?/strong> ${escapeHtml(entry.construction_cost)}</span>
             </p>
             <p class="entry-metrics entry-metrics-single">
-              <span><strong>빌딩자동제어 추정금액(공사비의 1.5~2%)</strong> ${escapeHtml(entry.building_automation_estimated_amount)}</span>
+              <span><strong>鍮뚮뵫?먮룞?쒖뼱 異붿젙湲덉븸(怨듭궗鍮꾩쓽 1.5~2%)</strong> ${escapeHtml(entry.building_automation_estimated_amount)}</span>
             </p>
             <p class="entry-metrics">
-              <span><strong>설계사무소</strong> ${escapeHtml(entry.architect_office)}</span>
-              <span><strong>착공</strong> ${escapeHtml(entry.construction_start_date)}</span>
+              <span><strong>?ㅺ퀎?щТ??/strong> ${escapeHtml(entry.architect_office)}</span>
+              <span><strong>李⑷났</strong> ${escapeHtml(entry.construction_start_date)}</span>
             </p>
             <p class="entry-metrics entry-metrics-single">
-              <span><strong>개찰예정일</strong> ${escapeHtml(formatRecommendationDate(entry.opening_scheduled_date))}</span>
+              <span><strong>媛쒖같?덉젙??/strong> ${escapeHtml(formatRecommendationDate(entry.opening_scheduled_date))}</span>
             </p>
             <p class="entry-metrics">
-              <span><strong>담당</strong> ${escapeHtml(entry.demand_contact)}</span>
-              <span><strong>현장</strong> ${escapeHtml(formatRecommendationSiteLocation(entry))}</span>
+              <span><strong>?대떦</strong> ${escapeHtml(entry.demand_contact)}</span>
+              <span><strong>?꾩옣</strong> ${escapeHtml(formatRecommendationSiteLocation(entry))}</span>
             </p>
-            ${renderSalesRecommendationRelatedPanel(entry.project_id)}
           </div>
         </div>
       </div>
@@ -387,28 +271,28 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     const trackerEntry = salesRecommendationTrackerEntry(item);
     return `
       <article class="sales-action-card" data-sales-action-index="${escapeHtml(String(index))}">
-        <p class="sales-recommendation-eyebrow">영업 추천 리스트</p>
+        <p class="sales-recommendation-eyebrow">?곸뾽 異붿쿇 由ъ뒪??/p>
         ${renderRecommendationProjectStatus(trackerEntry, index)}
         <div class="sales-action-labels">
-          <strong>영업</strong>
-          ${labelMarkup || `<span class="sales-action-label">${escapeHtml(item.primary_label || "추천")}</span>`}
+          <strong>?곸뾽</strong>
+          ${labelMarkup || `<span class="sales-action-label">${escapeHtml(item.primary_label || "異붿쿇")}</span>`}
           ${renderInternalScore(item)}
-          <span class="sales-action-label">최근 공고 ${escapeHtml(item.latest_meaningful_notice_type || "-")}</span>
+          <span class="sales-action-label">理쒓렐 怨듦퀬 ${escapeHtml(item.latest_meaningful_notice_type || "-")}</span>
           <span class="sales-action-label">${escapeHtml(formatRecommendationElapsed(item))}</span>
         </div>
         <div class="sales-action-reasons">
-          <strong>추천 이유</strong>
-          ${reasonMarkup || `<p>${escapeHtml("추천 이유를 확인 중입니다.")}</p>`}
+          <strong>異붿쿇 ?댁쑀</strong>
+          ${reasonMarkup || `<p>${escapeHtml("異붿쿇 ?댁쑀瑜??뺤씤 以묒엯?덈떎.")}</p>`}
         </div>
         <div class="sales-action-next">
-          <strong>추천 액션</strong>
-          <p>${escapeHtml(actionText || "프로젝트 상태를 확인하세요.")}</p>
+          <strong>異붿쿇 ?≪뀡</strong>
+          <p>${escapeHtml(actionText || "?꾨줈?앺듃 ?곹깭瑜??뺤씤?섏꽭??")}</p>
         </div>
         <div class="sales-action-buttons">
-          <button class="ghost-button" type="button" data-sales-action-interest="${escapeHtml(String(index))}">관심 등록</button>
-          <button class="ghost-button" type="button" data-sales-action-claim="${escapeHtml(String(index))}">담당자 배정</button>
-          <button class="ghost-button" type="button" data-sales-action-done="${escapeHtml(String(index))}">확인 완료</button>
-          <button class="ghost-button" type="button" data-sales-action-hold="${escapeHtml(String(index))}">보류</button>
+          <button class="ghost-button" type="button" data-sales-action-interest="${escapeHtml(String(index))}">愿???깅줉</button>
+          <button class="ghost-button" type="button" data-sales-action-claim="${escapeHtml(String(index))}">?대떦??諛곗젙</button>
+          <button class="ghost-button" type="button" data-sales-action-done="${escapeHtml(String(index))}">?뺤씤 ?꾨즺</button>
+          <button class="ghost-button" type="button" data-sales-action-hold="${escapeHtml(String(index))}">蹂대쪟</button>
         </div>
       </article>
     `;
@@ -428,7 +312,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
       return;
     }
     if (state.salesActionRecommendationsLoading) {
-      replaceSalesListHtmlIfChanged(dom.trackerSalesRecommendationList, '<div class="empty-state">영업 추천 리스트를 불러오는 중입니다.</div>');
+      replaceSalesListHtmlIfChanged(dom.trackerSalesRecommendationList, '<div class="empty-state">?곸뾽 異붿쿇 由ъ뒪?몃? 遺덈윭?ㅻ뒗 以묒엯?덈떎.</div>');
       return;
     }
     if (state.salesActionRecommendationsError) {
@@ -438,7 +322,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
     const items = visibleSalesActionRecommendations();
     const html = items.length
       ? items.map((item, index) => renderSalesActionRecommendationCard(item, index)).join("")
-      : '<div class="empty-state">현재 노출할 영업 추천 리스트가 없습니다.</div>';
+      : '<div class="empty-state">?꾩옱 ?몄텧???곸뾽 異붿쿇 由ъ뒪?멸? ?놁뒿?덈떎.</div>';
     dom.trackerSalesRecommendationList.className = "runtime-list sales-action-recommendation-list";
     replaceSalesListHtmlIfChanged(dom.trackerSalesRecommendationList, html);
     bindSalesActionRecommendationEvents(items);
@@ -453,7 +337,6 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
       dom.trackerSalesRecommendationList.addEventListener("click", (event) => {
         const target = event?.target || null;
         const actionTarget = target && typeof target.closest === "function"
-          ? target.closest("[data-sales-action-related-open], [data-sales-action-related-recompute], [data-sales-action-notice-view], [data-sales-action-interest], [data-sales-action-claim], [data-sales-action-done], [data-sales-action-hold]")
           : null;
         if (!actionTarget) {
           return;
@@ -472,7 +355,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
           return;
         }
         markSalesRecommendationSeen(item);
-        flash(button.hasAttribute("data-sales-action-hold") ? "추천을 보류했습니다." : "추천을 확인 처리했습니다.");
+        flash(button.hasAttribute("data-sales-action-hold") ? "異붿쿇??蹂대쪟?덉뒿?덈떎." : "異붿쿇???뺤씤 泥섎━?덉뒿?덈떎.");
       });
     }
     for (const button of dom.trackerSalesRecommendationList.querySelectorAll("[data-sales-action-claim]")) {
@@ -483,7 +366,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
         const item = items[index];
         const claimPayload = item?.claim_payload || null;
         if (!claimPayload || !claimPayload.project_id) {
-          flash("담당자 배정에 필요한 프로젝트 정보가 없습니다.", "error");
+          flash("?대떦??諛곗젙???꾩슂???꾨줈?앺듃 ?뺣낫媛 ?놁뒿?덈떎.", "error");
           return;
         }
         markSalesRecommendationSeen(item);
@@ -498,7 +381,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
         const item = items[index];
         const entryId = salesRecommendationEntryId(item);
         if (!entryId) {
-          flash("공고문을 열 수 있는 트래커 항목 정보가 없습니다.", "warn");
+          flash("怨듦퀬臾몄쓣 ?????덈뒗 ?몃옒而???ぉ ?뺣낫媛 ?놁뒿?덈떎.", "warn");
           return;
         }
         void api(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-open-external`, {
@@ -507,175 +390,17 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
         })
           .then((payload) => {
             if (!payload?.opened) {
-              flash("공고문을 외부 브라우저로 열지 못했습니다.", "warn");
+              flash("怨듦퀬臾몄쓣 ?몃? 釉뚮씪?곗?濡??댁? 紐삵뻽?듬땲??", "warn");
             }
           })
           .catch((err) => {
-            flash(err?.message || "공고문을 외부 브라우저로 열지 못했습니다.", "warn");
+            flash(err?.message || "怨듦퀬臾몄쓣 ?몃? 釉뚮씪?곗?濡??댁? 紐삵뻽?듬땲??", "warn");
           });
-      });
-    }
-    for (const button of dom.trackerSalesRecommendationList.querySelectorAll("[data-sales-action-related-open]")) {
-      bindSalesActionButtonOnce(button, "related-open", (event) => {
-        containSalesActionClick(event);
-        keepSalesRecommendationsTab();
-        const index = Number(button.getAttribute("data-sales-action-related-open") || -1);
-        const item = items[index];
-        const projectId = salesRecommendationProjectId(item);
-        if (!projectId) {
-          flash("연관 공고를 열 수 있는 프로젝트 정보가 없습니다.", "warn");
-          return;
-        }
-        void toggleSalesRecommendationRelatedNotices(projectId);
-      });
-    }
-    for (const button of dom.trackerSalesRecommendationList.querySelectorAll("[data-sales-action-related-recompute]")) {
-      bindSalesActionButtonOnce(button, "related-recompute", (event) => {
-        containSalesActionClick(event);
-        keepSalesRecommendationsTab();
-        const projectId = String(button.getAttribute("data-sales-action-related-recompute") || "").trim();
-        void recomputeSalesRecommendationRelatedNotices(projectId);
       });
     }
     dom.trackerSalesRecommendationRefreshButton?.addEventListener("click", () => {
       void loadSalesActionRecommendations({ force: true });
     }, { once: true });
-  }
-
-  async function loadSalesRecommendationRelatedNotices(projectId, { cacheBust = false, refresh = false, quick = false } = {}) {
-    const key = String(projectId || "").trim();
-    if (!key) {
-      return null;
-    }
-    keepSalesRecommendationsTab();
-    state.salesRecommendationRelatedLoadingProjectId = key;
-    state.salesRecommendationRelatedErrors[key] = "";
-    renderSalesActionRecommendationsPanel();
-    const request = (async () => {
-      try {
-        const params = new URLSearchParams();
-        if (refresh) params.set("refresh", "true");
-        if (quick) params.set("quick", "true");
-        const query = params.toString() ? `?${params.toString()}` : "";
-        const payload = await api(`/api/projects/${encodeURIComponent(key)}/related-notices${query}`, {
-          timeoutMs: quick ? 8000 : 30000,
-          cacheBust,
-        });
-        keepSalesRecommendationsTab();
-        state.salesRecommendationRelatedPayloads[key] = payload && typeof payload === "object" ? payload : {};
-        state.salesRecommendationRelatedItems[key] = Array.isArray(payload?.items) ? payload.items : [];
-        return payload;
-      } catch (err) {
-        keepSalesRecommendationsTab();
-        state.salesRecommendationRelatedPayloads[key] = null;
-        state.salesRecommendationRelatedItems[key] = [];
-        state.salesRecommendationRelatedErrors[key] = err.message || "연관 공고를 불러오지 못했습니다.";
-        return null;
-      } finally {
-        keepSalesRecommendationsTab();
-        if (state.salesRecommendationRelatedLoadingProjectId === key) {
-          state.salesRecommendationRelatedLoadingProjectId = "";
-        }
-        state.salesRecommendationRelatedRequest = null;
-        renderSalesActionRecommendationsPanel();
-      }
-    })();
-    state.salesRecommendationRelatedRequest = request;
-    return request;
-  }
-
-  function scheduleSalesRecommendationRelatedRefresh(projectId, { attempt = 1 } = {}) {
-    const key = String(projectId || "").trim();
-    const setTimeoutFn = appWindow?.setTimeout;
-    if (!key || typeof setTimeoutFn !== "function") {
-      return;
-    }
-    const nextAttempt = Number(attempt || 1);
-    const delayMs = nextAttempt <= 1 ? 1500 : 2500;
-    setTimeoutFn(async () => {
-      if (state.salesRecommendationRelatedOpenProjectId === key && !state.salesRecommendationRelatedLoadingProjectId) {
-        const payload = await loadSalesRecommendationRelatedNotices(key, { cacheBust: true, refresh: true });
-        const status = String(payload?.status || "").trim();
-        if (nextAttempt < 4 && ["queued", "running", "pending", "missing"].includes(status)) {
-          scheduleSalesRecommendationRelatedRefresh(key, { attempt: nextAttempt + 1 });
-        }
-      }
-    }, delayMs);
-  }
-
-  function clearSalesRecommendationRelatedProgressPoll(projectId) {
-    ensureSalesRecommendationRelatedState();
-    const key = String(projectId || "").trim();
-    if (!key) {
-      return;
-    }
-    const pollState = state.salesRecommendationRelatedPollState[key] || null;
-    const clearTimeoutFn = appWindow?.clearTimeout;
-    if (pollState?.timerId && typeof clearTimeoutFn === "function") {
-      clearTimeoutFn(pollState.timerId);
-    }
-    delete state.salesRecommendationRelatedPollState[key];
-  }
-
-  function scheduleSalesRecommendationRelatedProgressPoll(projectId, { attempt = 1, generation = "" } = {}) {
-    const key = String(projectId || "").trim();
-    const setTimeoutFn = appWindow?.setTimeout;
-    if (!key || typeof setTimeoutFn !== "function") {
-      return;
-    }
-    ensureSalesRecommendationRelatedState();
-    const maxAttempts = 120;
-    const nextAttempt = Number(attempt || 1);
-    const nextGeneration = generation || `${Date.now()}-${Math.random()}`;
-    const previous = state.salesRecommendationRelatedPollState[key] || {};
-    const clearTimeoutFn = appWindow?.clearTimeout;
-    if (previous.timerId && typeof clearTimeoutFn === "function") {
-      clearTimeoutFn(previous.timerId);
-    }
-    const timerId = setTimeoutFn(async () => {
-      const current = state.salesRecommendationRelatedPollState?.[key] || {};
-      if (current.generation !== nextGeneration || state.salesRecommendationRelatedOpenProjectId !== key) {
-        return;
-      }
-      try {
-        const payload = await api(`/api/projects/${encodeURIComponent(key)}/related-notices/progress`, {
-          timeoutMs: 15000,
-          cacheBust: true,
-        });
-        keepSalesRecommendationsTab();
-        state.salesRecommendationRelatedPayloads[key] = payload && typeof payload === "object" ? payload : {};
-        state.salesRecommendationRelatedItems[key] = Array.isArray(payload?.items) ? payload.items : [];
-        const status = String(payload?.status || "").trim();
-        renderSalesActionRecommendationsPanel();
-        if (status === "ready") {
-          clearSalesRecommendationRelatedProgressPoll(key);
-          await loadSalesRecommendationRelatedNotices(key, { cacheBust: true, refresh: true });
-          return;
-        }
-        if (["failed", "missing"].includes(status)) {
-          clearSalesRecommendationRelatedProgressPoll(key);
-          return;
-        }
-        if (nextAttempt < maxAttempts) {
-          scheduleSalesRecommendationRelatedProgressPoll(key, { attempt: nextAttempt + 1, generation: nextGeneration });
-          return;
-        }
-        clearSalesRecommendationRelatedProgressPoll(key);
-      } catch (err) {
-        if (nextAttempt < maxAttempts) {
-          scheduleSalesRecommendationRelatedProgressPoll(key, { attempt: nextAttempt + 1, generation: nextGeneration });
-          return;
-        }
-        state.salesRecommendationRelatedErrors[key] = err.message || "연관 공고 진행 상태를 확인하지 못했습니다.";
-        clearSalesRecommendationRelatedProgressPoll(key);
-        renderSalesActionRecommendationsPanel();
-      }
-    }, nextAttempt <= 1 ? 800 : 1200);
-    state.salesRecommendationRelatedPollState[key] = {
-      timerId,
-      attempt: nextAttempt,
-      generation: nextGeneration,
-    };
   }
 
   async function loadSalesActionRecommendations({ silent = false, force = false } = {}) {
@@ -717,7 +442,7 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
         state.salesActionRecommendationsFilterKey = filterKey;
       } catch (err) {
         state.salesActionRecommendations = [];
-        state.salesActionRecommendationsError = err.message || "영업 추천 리스트를 불러오지 못했습니다.";
+        state.salesActionRecommendationsError = err.message || "?곸뾽 異붿쿇 由ъ뒪?몃? 遺덈윭?ㅼ? 紐삵뻽?듬땲??";
         if (!silent) {
           flash(state.salesActionRecommendationsError, "error");
         }
@@ -728,93 +453,6 @@ export function createSalesActionRecommendationsRuntime(deps = {}) {
       }
     })();
     state.salesActionRecommendationsRequest = request;
-    return request;
-  }
-
-  async function toggleSalesRecommendationRelatedNotices(projectId) {
-    const key = String(projectId || "").trim();
-    if (!key) {
-      return;
-    }
-    ensureSalesRecommendationRelatedState();
-    keepSalesRecommendationsTab();
-    if (state.salesRecommendationRelatedOpenProjectId === key) {
-      state.salesRecommendationRelatedOpenProjectId = "";
-      clearSalesRecommendationRelatedProgressPoll(key);
-      renderSalesActionRecommendationsPanel();
-      return;
-    }
-    if (state.salesRecommendationRelatedOpenProjectId) {
-      clearSalesRecommendationRelatedProgressPoll(state.salesRecommendationRelatedOpenProjectId);
-    }
-    state.salesRecommendationRelatedOpenProjectId = key;
-    const existingPayload = state.salesRecommendationRelatedPayloads[key] || null;
-    const existingStatus = String(existingPayload?.status || "").trim();
-    if (existingPayload && !["missing", "queued", "running", "pending", "failed"].includes(existingStatus)) {
-      renderSalesActionRecommendationsPanel();
-      return;
-    }
-    renderSalesActionRecommendationsPanel();
-    const request = loadSalesRecommendationRelatedNotices(key, { cacheBust: true, quick: true });
-    void request.then(() => {
-      if (state.salesRecommendationRelatedOpenProjectId === key) {
-        void recomputeSalesRecommendationRelatedNotices(key);
-      }
-    });
-    return request;
-  }
-
-  async function recomputeSalesRecommendationRelatedNotices(projectId) {
-    const key = String(projectId || "").trim();
-    if (!key) {
-      return;
-    }
-    ensureSalesRecommendationRelatedState();
-    keepSalesRecommendationsTab();
-    if (
-      state.salesRecommendationRelatedRecomputeRequest
-      && state.salesRecommendationRelatedRecomputeProjectId === key
-    ) {
-      return state.salesRecommendationRelatedRecomputeRequest;
-    }
-    state.salesRecommendationRelatedLoadingProjectId = key;
-    state.salesRecommendationRelatedRecomputeProjectId = key;
-    state.salesRecommendationRelatedErrors[key] = "";
-    renderSalesActionRecommendationsPanel();
-    const request = (async () => {
-      try {
-        const payload = await api(`/api/projects/${encodeURIComponent(key)}/related-notices/recompute`, {
-          method: "POST",
-          timeoutMs: 30000,
-          cacheBust: false,
-        });
-        keepSalesRecommendationsTab();
-        const previousItems = Array.isArray(state.salesRecommendationRelatedItems[key])
-          ? state.salesRecommendationRelatedItems[key]
-          : [];
-        const nextPayload = payload && typeof payload === "object" ? { ...payload } : {};
-        if (previousItems.length && !Array.isArray(nextPayload.items)) {
-          nextPayload.items = previousItems;
-        }
-        state.salesRecommendationRelatedPayloads[key] = nextPayload;
-        state.salesRecommendationRelatedItems[key] = Array.isArray(nextPayload.items) ? nextPayload.items : previousItems;
-        scheduleSalesRecommendationRelatedProgressPoll(key);
-      } catch (err) {
-        keepSalesRecommendationsTab();
-        state.salesRecommendationRelatedErrors[key] = err.message || "연관 공고 재계산을 시작하지 못했습니다.";
-      } finally {
-        keepSalesRecommendationsTab();
-        if (state.salesRecommendationRelatedLoadingProjectId === key) {
-          state.salesRecommendationRelatedLoadingProjectId = "";
-        }
-        state.salesRecommendationRelatedRecomputeRequest = null;
-        if (state.salesRecommendationRelatedRecomputeProjectId === key) {
-          state.salesRecommendationRelatedRecomputeProjectId = "";
-        }
-        renderSalesActionRecommendationsPanel();
-      }
-    })();
-    state.salesRecommendationRelatedRecomputeRequest = request;
     return request;
   }
 

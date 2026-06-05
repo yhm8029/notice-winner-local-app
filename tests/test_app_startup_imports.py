@@ -56,39 +56,6 @@ class AppStartupImportTests(unittest.TestCase):
         self.assertEqual(helpers["download_notice_attachment"].__name__, "download_notice_attachment")
         self.assertEqual(helpers["render_hwp_notice_html"].__name__, "render_hwp_notice_html")
 
-    def test_app_exposes_lazy_related_notice_precompute_loader(self) -> None:
-        from backend.api import app as app_module
-
-        helper = app_module._load_related_notice_precompute_helper()
-
-        self.assertEqual(helper.__name__, "queue_related_notice_precompute_for_run")
-
-    def test_related_notice_router_import_does_not_eagerly_load_app_or_notice_backends(self) -> None:
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-c",
-                (
-                    "import json, sys; "
-                    "from backend.api.routers import related_notice; "
-                    "print(json.dumps({"
-                    '"backend.api.app": "backend.api.app" in sys.modules, '
-                    '"backend.services.notice_view_backend": "backend.services.notice_view_backend" in sys.modules, '
-                    '"backend.services.notice_file_view_backend": "backend.services.notice_file_view_backend" in sys.modules'
-                    "}))"
-                ),
-            ],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-
-        loaded_modules = json.loads(result.stdout)
-
-        self.assertFalse(loaded_modules["backend.api.app"])
-        self.assertFalse(loaded_modules["backend.services.notice_view_backend"])
-        self.assertFalse(loaded_modules["backend.services.notice_file_view_backend"])
-
     def test_backfill_conflicts_router_import_does_not_eagerly_load_app(self) -> None:
         result = subprocess.run(
             [
@@ -216,13 +183,8 @@ class AppStartupImportTests(unittest.TestCase):
         from backend.api import app as app_module
 
         expected_exports = (
-            "_build_related_notice_primary_queries",
-            "_build_related_notice_primary_scopes",
             "_build_tracker_download_job_cache_key",
-            "_get_published_related_notice_snapshot_set_id",
-            "_get_related_notice_cache_repository",
             "_get_snapshot_project_aggregate",
-            "_is_related_notice_precompute_stale",
             "_json_safe_copy",
         )
 
