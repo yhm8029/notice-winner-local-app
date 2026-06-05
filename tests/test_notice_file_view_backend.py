@@ -303,7 +303,7 @@ class NoticeFileViewBackendTests(unittest.TestCase):
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
     @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
-    def test_open_tracker_entry_notice_file_external_falls_back_to_local_resolver_without_synap_resolution(
+    def test_open_tracker_entry_notice_file_external_falls_back_to_g2b_detail_without_synap_resolution(
         self,
         load_notice_view_helpers,
         get_tracker_repository,
@@ -345,12 +345,9 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         self.assertEqual(response["opened"], True)
         self.assertEqual(
             opened_urls,
-            [f"http://127.0.0.1:8765/api/tracker-entries/{entry_id}/notice-file-view?desktop=true"],
+            ["https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000"],
         )
-        self.assertEqual(
-            response["url"],
-            f"http://127.0.0.1:8765/api/tracker-entries/{entry_id}/notice-file-view?desktop=true",
-        )
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01434430&bidPbancOrd=000")
 
     @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
     @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
