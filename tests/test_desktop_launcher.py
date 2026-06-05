@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import inspect
 import os
 from pathlib import Path
+
+import pytest
 
 
 def test_load_desktop_env_files_reads_writable_root_env(tmp_path: Path) -> None:
@@ -142,3 +145,39 @@ def test_configure_desktop_logging_writes_to_server_log(tmp_path: Path, monkeypa
     assert log_path.parent.is_dir()
     assert log_path.exists()
     assert os.environ["DESKTOP_SERVER_LOG_PATH"] == str(log_path)
+
+
+def test_wait_for_server_allows_slow_packaged_startup() -> None:
+    from desktop.launcher import wait_for_server
+
+    timeout_default = inspect.signature(wait_for_server).parameters["timeout_seconds"].default
+
+    assert timeout_default >= 90.0
+
+
+def test_run_desktop_app_stops_server_when_startup_wait_fails(monkeypatch) -> None:
+    import sys
+    import types
+
+    from desktop import launcher
+
+    class FakeServer:
+        should_exit = False
+
+    fake_server = FakeServer()
+
+    fake_webview = types.SimpleNamespace()
+    monkeypatch.setitem(sys.modules, "webview", fake_webview)
+    monkeypatch.setattr(launcher, "configure_desktop_environment", lambda: None)
+    monkeypatch.setattr(launcher, "find_free_port", lambda host: 12345)
+    monkeypatch.setattr(launcher, "start_api_server", lambda host, port: (fake_server, object()))
+
+    def fail_wait(_url: str) -> None:
+        raise RuntimeError("server timeout")
+
+    monkeypatch.setattr(launcher, "wait_for_server", fail_wait)
+
+    with pytest.raises(RuntimeError, match="server timeout"):
+        launcher.run_desktop_app(host="127.0.0.1", port=None)
+
+    assert fake_server.should_exit is True

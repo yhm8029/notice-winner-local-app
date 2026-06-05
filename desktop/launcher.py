@@ -178,7 +178,7 @@ def find_free_port(host: str = "127.0.0.1") -> int:
         return int(sock.getsockname()[1])
 
 
-def wait_for_server(url: str, *, timeout_seconds: float = 15.0) -> None:
+def wait_for_server(url: str, *, timeout_seconds: float = 120.0) -> None:
     deadline = time.monotonic() + timeout_seconds
     last_error: Exception | None = None
     while time.monotonic() < deadline:
@@ -241,7 +241,11 @@ def run_desktop_app(*, host: str, port: int | None, debug: bool = False) -> None
     selected_port = port or find_free_port(host)
     server, _thread = start_api_server(host, selected_port)
     app_url = build_app_url(host, selected_port)
-    wait_for_server(app_url)
+    try:
+        wait_for_server(app_url)
+    except Exception:
+        server.should_exit = True
+        raise
 
     window = webview.create_window(
         "공고 추적",
