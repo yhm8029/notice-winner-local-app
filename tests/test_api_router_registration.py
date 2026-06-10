@@ -214,6 +214,7 @@ class ApiRouterRegistrationTests(unittest.TestCase):
             ("GET", "/api/home-bootstrap"),
             ("GET", "/api/tracker-entry-summaries"),
             ("GET", "/api/tracker-entry-summaries/download"),
+            ("POST", "/api/tracker-entry-summaries/download-local"),
             ("POST", "/api/tracker-entry-summaries/download-jobs"),
             ("GET", "/api/tracker-entry-summaries/download-jobs/{job_id}"),
             ("GET", "/api/tracker-entry-summaries/download-jobs/{job_id}/file"),

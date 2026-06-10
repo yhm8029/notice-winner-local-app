@@ -163,6 +163,54 @@ def test_direct_tracker_download_bypasses_workbook_cache(monkeypatch) -> None:
     assert audit_file_names and audit_file_names[0].startswith("SPMS_")
 
 
+def test_local_tracker_download_saves_workbook_to_downloads(tmp_path, monkeypatch) -> None:
+    listed_rows: list[dict[str, object]] = [{"project_name": "A"}]
+    audit_file_names: list[str] = []
+    downloads_dir = tmp_path / "Downloads"
+
+    class FixedDateTime:
+        @classmethod
+        def now(cls, tz=None) -> datetime:
+            assert getattr(tz, "key", "") == "Asia/Seoul"
+            return datetime(2026, 5, 1, 12, 34, 56)
+
+    monkeypatch.setenv("SPMS_DOWNLOADS_DIR", str(downloads_dir))
+    monkeypatch.setattr(tracker_export_handlers, "datetime", FixedDateTime)
+    monkeypatch.setattr(tracker_export_handlers.support, "_resolve_sales_actor", lambda _request: None)
+    monkeypatch.setattr(
+        tracker_export_handlers,
+        "_list_tracker_entries_for_export",
+        lambda **_kwargs: listed_rows,
+    )
+    monkeypatch.setattr(
+        tracker_export_handlers.support,
+        "build_tracking_download_workbook_bytes",
+        lambda *, rows, selected_regions=None: b"xlsx-bytes",
+    )
+
+    def record_download_audit_log(**kwargs: object) -> None:
+        audit_file_names.append(str(kwargs["file_name"]))
+
+    monkeypatch.setattr(
+        tracker_export_handlers.support,
+        "_record_download_audit_log",
+        record_download_audit_log,
+    )
+
+    payload = tracker_export_handlers.save_tracker_entry_summaries_to_downloads(
+        object(),
+        format="xlsx",
+        region="부산",
+    )
+
+    output_path = downloads_dir / "SPMS_20260501.xlsx"
+    assert output_path.read_bytes() == b"xlsx-bytes"
+    assert payload["file_name"] == "SPMS_20260501.xlsx"
+    assert payload["path"] == str(output_path)
+    assert payload["row_count"] == 1
+    assert audit_file_names == ["SPMS_20260501.xlsx"]
+
+
 def test_export_rows_bypass_global_cache_loader_for_global_scope(monkeypatch) -> None:
     raw_rows = [{"project_name": "A", "notice_date": "2026-01-02"}]
     collapsed_rows = [{"project_name": "A", "notice_date": "2026-01-02", "collapsed": True}]

@@ -168,6 +168,38 @@ def download_tracker_entry_summaries(
     )
 
 
+@router.post("/api/tracker-entry-summaries/download-local")
+def save_tracker_entry_summaries_to_downloads(
+    request: Request,
+    format: str = Query(default="xlsx"),
+    q: str = "",
+    region: str = "",
+    notice_year: str = "",
+    exclude_auxiliary_titles: bool = False,
+    edited_only: bool = False,
+    blank_progress_note: bool = False,
+    source_run_id: UUID | None = None,
+    source_tracker_run_id: UUID | None = None,
+    sheet_name: str = "",
+    section_name: str = "",
+) -> dict[str, object]:
+    tracker_app = _app_module()
+    return tracker_app.save_tracker_entry_summaries_to_downloads(
+        request=request,
+        format=format,
+        q=q,
+        region=region,
+        notice_year=notice_year,
+        exclude_auxiliary_titles=exclude_auxiliary_titles,
+        edited_only=edited_only,
+        blank_progress_note=blank_progress_note,
+        source_run_id=source_run_id,
+        source_tracker_run_id=source_tracker_run_id,
+        sheet_name=sheet_name,
+        section_name=section_name,
+    )
+
+
 @router.post(
     "/api/tracker-entry-summaries/download-jobs",
     status_code=status.HTTP_202_ACCEPTED,

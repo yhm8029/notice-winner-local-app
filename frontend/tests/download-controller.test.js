@@ -65,11 +65,13 @@ function createFakeDocument() {
   };
 }
 
-test("tracker xlsx download uses direct file endpoint instead of download job polling", async () => {
+test("tracker xlsx download saves directly to local downloads folder", async () => {
   const { createDownloadController } = await loadDownloadController();
   const fetchedUrls = [];
+  const fetchMethods = [];
   const apiCalls = [];
   const document = createFakeDocument();
+  const flashes = [];
   const controller = createDownloadController({
     state: {
       trackerFilters: { q: "", region: "", noticeYear: "2026", editedOnly: false },
@@ -98,26 +100,29 @@ test("tracker xlsx download uses direct file endpoint instead of download job po
       clearTimeout() {},
     },
     setBusy() {},
-    flash(message) {
-      throw new Error(message);
+    flash(message, kind) {
+      flashes.push([message, kind]);
     },
     api(url) {
       apiCalls.push(url);
       throw new Error("download job API must not be called");
     },
-    fetch(url) {
+    fetch(url, options = {}) {
       fetchedUrls.push(url);
+      fetchMethods.push(options.method || "GET");
       return Promise.resolve({
         ok: true,
         headers: {
           get(name) {
-            return String(name).toLowerCase() === "content-disposition"
-              ? 'attachment; filename="SPMS_20260610.xlsx"'
-              : "";
+            return String(name).toLowerCase() === "content-type" ? "application/json" : "";
           },
         },
-        blob() {
-          return Promise.resolve(new Blob(["xlsx"]));
+        json() {
+          return Promise.resolve({
+            file_name: "SPMS_20260610.xlsx",
+            path: "C:\\Users\\user\\Downloads\\SPMS_20260610.xlsx",
+            row_count: 1,
+          });
         },
       });
     },
@@ -131,7 +136,10 @@ test("tracker xlsx download uses direct file endpoint instead of download job po
 
   assert.equal(apiCalls.length, 0);
   assert.equal(fetchedUrls.length, 1);
-  assert.match(fetchedUrls[0], /^\/api\/tracker-entry-summaries\/download\?/);
+  assert.equal(fetchMethods[0], "POST");
+  assert.match(fetchedUrls[0], /^\/api\/tracker-entry-summaries\/download-local\?/);
   assert.match(fetchedUrls[0], /notice_year=2026/);
-  assert.equal(document.getAnchors().at(-1).download, "SPMS_20260610.xlsx");
+  assert.equal(document.getAnchors().length, 0);
+  assert.equal(flashes.at(-1)[1], "success");
+  assert.match(flashes.at(-1)[0], /SPMS_20260610\.xlsx/);
 });

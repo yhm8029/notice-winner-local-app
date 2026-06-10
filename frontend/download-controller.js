@@ -184,6 +184,46 @@ export function createDownloadController(deps = {}) {
     }
   }
 
+  async function triggerLocalTrackerWorkbookSave(url, { button = null } = {}) {
+    const originalLabel = button ? button.textContent || "" : "";
+    const fetchFn = typeof deps.fetch === "function" ? deps.fetch : fetch;
+    if (button) {
+      setBusy(button, true, "엑셀 저장 중...");
+    }
+    showDownloadProgressOverlay(undefined, "프로젝트 현황 엑셀을 저장하고 있습니다.");
+    try {
+      updateDownloadProgressOverlay("다운로드 폴더에 저장할 파일을 생성하고 있습니다.");
+      const response = await fetchFn(url, {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}`;
+        const contentType = String(response.headers.get("content-type") || "");
+        if (contentType.includes("application/json")) {
+          const payload = await response.json().catch(() => null);
+          errorMessage = payload?.error?.message || payload?.message || errorMessage;
+        } else {
+          const text = await response.text().catch(() => "");
+          if (text) {
+            errorMessage = text;
+          }
+        }
+        throw new Error(errorMessage);
+      }
+      const payload = await response.json();
+      updateDownloadProgressOverlay(`저장 완료: ${payload.path || payload.file_name || buildSpmsDownloadFallbackName()}`);
+      flash(`엑셀 저장 완료: ${payload.path || payload.file_name || ""}`, "success");
+    } catch (err) {
+      flash(err.message || "엑셀 저장에 실패했습니다.", "error");
+    } finally {
+      hideDownloadProgressOverlay();
+      if (button) {
+        setBusy(button, false, originalLabel);
+      }
+    }
+  }
+
   function downloadSalesWorkbook(scope, button = null) {
     const normalizedScope = scope === "company" ? "company" : "my";
     return triggerFileDownload(
@@ -285,6 +325,12 @@ export function createDownloadController(deps = {}) {
   async function triggerTrackerEntriesXlsxDownload(button = null) {
     const directUrl = buildTrackerEntriesDownloadUrl("xlsx");
     if (directUrl) {
+      if (directUrl.startsWith("/api/tracker-entry-summaries/download?")) {
+        return triggerLocalTrackerWorkbookSave(
+          directUrl.replace("/api/tracker-entry-summaries/download?", "/api/tracker-entry-summaries/download-local?"),
+          { button },
+        );
+      }
       return triggerFileDownload(directUrl, {
         button,
         busyLabel: "엑셀 준비 중...",
