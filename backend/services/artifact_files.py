@@ -15,7 +15,7 @@ from typing import Any
 from uuid import UUID
 from uuid import uuid4
 
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Border
 from openpyxl.styles import Color
 from openpyxl.styles import Side
@@ -215,10 +215,102 @@ def build_tracking_workbook_bytes(*, rows: list[dict[str, Any]]) -> bytes:
 
 
 def build_tracking_download_workbook_bytes(*, rows: list[dict[str, Any]]) -> bytes:
-    wb = _build_tracking_workbook(rows=rows, split_region_sheets=True)
+    sanitized_rows = [{**row, "progress_note": ""} for row in rows]
+    wb = _build_fast_tracking_download_workbook(rows=sanitized_rows)
     buffer = BytesIO()
     wb.save(buffer)
     return buffer.getvalue()
+
+
+TRACKING_DOWNLOAD_HEADERS = [
+    "NO.",
+    "프로젝트명(시설비)",
+    "연면적/\n규모",
+    "공사비",
+    "수요기관명",
+    "수요기관(부서 및 담당자)",
+    "발주처\n위치",
+    "현장위치(시도)",
+    "현장위치(시군구)",
+    "설계사무소(건축)",
+    "공사기간\n(착공일)",
+    "최종\n점검일자",
+    "주요진행사항",
+    "공고일",
+    "담당자",
+    "빌딩자동제어 추정 금액",
+    "설계사무소(전기)",
+    "설계사무소(기계)",
+]
+
+TRACKING_DOWNLOAD_COLUMN_WIDTHS = {
+    "A": 9.75,
+    "B": 15.25,
+    "C": 9.0,
+    "D": 5.625,
+    "E": 8.375,
+    "F": 18.0,
+    "G": 8.375,
+    "H": 7.0,
+    "I": 13.0,
+    "J": 12.375,
+    "K": 13.0,
+    "L": 9.75,
+    "M": 13.0,
+    "N": 5.625,
+    "O": 13.0,
+    "P": 21.375,
+    "Q": 15.0,
+    "R": 15.0,
+}
+
+
+def _build_fast_tracking_download_workbook(*, rows: list[dict[str, Any]]):
+    wb = Workbook(write_only=True)
+    ordinary_grouped, education_grouped = _group_tracking_rows_for_download_sheets(rows)
+    _append_tracking_download_sheet(wb, title="전체", rows=rows)
+    for region_name, region_rows in ordinary_grouped.items():
+        _append_tracking_download_sheet(
+            wb,
+            title=_short_tracking_region_name(region_name),
+            rows=region_rows,
+        )
+    for sheet_name, sheet_rows in education_grouped.items():
+        _append_tracking_download_sheet(wb, title=sheet_name, rows=sheet_rows)
+    return wb
+
+
+def _append_tracking_download_sheet(wb: Any, *, title: str, rows: list[dict[str, Any]]) -> None:
+    ws = wb.create_sheet(title=title)
+    for column, width in TRACKING_DOWNLOAD_COLUMN_WIDTHS.items():
+        ws.column_dimensions[column].width = width
+    for column in TRACKING_DOWNLOAD_HIDDEN_COLUMNS:
+        ws.column_dimensions[column].hidden = True
+    ws.append(["일반관급", *[""] * 14, "=TODAY()", "", ""])
+    ws.append(TRACKING_DOWNLOAD_HEADERS)
+    for seq, row in enumerate(rows, start=1):
+        ws.append(
+            [
+                seq,
+                str(row.get("project_name", "") or ""),
+                str(row.get("gross_area_scale", "") or ""),
+                str(row.get("construction_cost", "") or ""),
+                str(row.get("demand_org_name", "") or ""),
+                str(row.get("demand_contact", "") or ""),
+                str(row.get("client_location", "") or ""),
+                str(row.get("site_location_1", "") or ""),
+                _resolve_tracking_site_city(row),
+                str(row.get("architect_office", "") or ""),
+                str(row.get("construction_start_date", "") or ""),
+                str(row.get("last_checked_date", "") or ""),
+                "",
+                format_tracker_display_date(row.get("notice_date", "")),
+                str(row.get("manager_name", "") or ""),
+                str(row.get("building_automation_estimated_amount", "") or ""),
+                "",
+                "",
+            ]
+        )
 
 
 def read_tracking_workbook_rows(workbook_path: Path) -> list[dict[str, str]]:
@@ -266,8 +358,8 @@ def _build_tracking_workbook(*, rows: list[dict[str, Any]], split_region_sheets:
     template_path = resolve_tracker_template_path()
     wb = load_workbook(template_path)
     base_ws = wb[wb.sheetnames[0]]
-    _populate_tracking_sheet(base_ws, rows=rows)
     if not split_region_sheets:
+        _populate_tracking_sheet(base_ws, rows=rows)
         apply_standard_download_workbook_formatting(wb)
         _apply_tracking_workbook_filters(wb)
         _apply_tracking_workbook_borders(wb)
@@ -278,21 +370,26 @@ def _build_tracking_workbook(*, rows: list[dict[str, Any]], split_region_sheets:
     _apply_tracking_download_sheet_layout(base_ws)
     ordinary_grouped, education_grouped = _group_tracking_rows_for_download_sheets(rows)
     if not ordinary_grouped and not education_grouped:
+        _populate_tracking_sheet(base_ws, rows=rows)
         apply_standard_download_workbook_formatting(wb)
         _apply_tracking_workbook_filters(wb)
         _apply_tracking_workbook_borders(wb)
         return wb
 
+    sheet_jobs: list[tuple[Any, list[dict[str, Any]]]] = []
     for region_name, region_rows in ordinary_grouped.items():
         ws = wb.copy_worksheet(base_ws)
         ws.title = _make_tracking_sheet_title(_short_tracking_region_name(region_name), used_titles)
-        _populate_tracking_sheet(ws, rows=region_rows)
         _apply_tracking_download_sheet_layout(ws)
+        sheet_jobs.append((ws, region_rows))
     for sheet_name, sheet_rows in education_grouped.items():
         ws = wb.copy_worksheet(base_ws)
         ws.title = _make_tracking_sheet_title(sheet_name, used_titles)
-        _populate_tracking_sheet(ws, rows=sheet_rows)
         _apply_tracking_download_sheet_layout(ws)
+        sheet_jobs.append((ws, sheet_rows))
+    _populate_tracking_sheet(base_ws, rows=rows)
+    for ws, sheet_rows in sheet_jobs:
+        _populate_tracking_sheet(ws, rows=sheet_rows)
     apply_standard_download_workbook_formatting(wb)
     _apply_tracking_workbook_filters(wb)
     _apply_tracking_workbook_borders(wb)

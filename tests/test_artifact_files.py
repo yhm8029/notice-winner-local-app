@@ -39,6 +39,51 @@ def test_write_json_artifact_preserves_existing_file_when_serialization_fails(mo
     assert not list(written.absolute_path.parent.glob(".related_notices.json.*.tmp"))
 
 
+def test_tracking_download_workbook_uses_split_sheets_and_blanks_progress(monkeypatch, tmp_path) -> None:
+    template_path = tmp_path / "template.xlsx"
+    _write_template(template_path)
+    monkeypatch.setenv("TRACKER_TEMPLATE_PATH", str(template_path))
+
+    payload = artifact_files.build_tracking_download_workbook_bytes(
+        rows=[
+            {
+                "project_name": "서울 프로젝트",
+                "gross_area_scale": "1,000㎡",
+                "construction_cost": "10억원",
+                "client_location": "서울특별시",
+                "site_location_1": "서울특별시",
+                "demand_org_name": "서울특별시",
+                "progress_note": "Native web match",
+                "notice_date": "20260102",
+            },
+            {
+                "project_name": "서울교육청 프로젝트",
+                "gross_area_scale": "2,000㎡",
+                "construction_cost": "20억원",
+                "client_location": "서울특별시교육청",
+                "site_location_1": "서울특별시",
+                "demand_org_name": "서울특별시교육청",
+                "progress_note": "Native web match",
+                "notice_date": "20260103",
+            },
+        ]
+    )
+
+    workbook_path = tmp_path / "download.xlsx"
+    workbook_path.write_bytes(payload)
+    wb = load_workbook(workbook_path, data_only=True)
+    try:
+        assert wb.sheetnames[:3] == ["전체", "서울", "서울교육청"]
+        assert wb["전체"].cell(3, 2).value == "서울 프로젝트"
+        assert wb["전체"].cell(4, 2).value == "서울교육청 프로젝트"
+        assert wb["서울"].cell(3, 2).value == "서울 프로젝트"
+        assert wb["서울교육청"].cell(3, 2).value == "서울교육청 프로젝트"
+        assert wb["전체"].cell(3, 13).value in (None, "")
+        assert wb["전체"].cell(4, 13).value in (None, "")
+    finally:
+        wb.close()
+
+
 def _write_template(path: Path, *, site_headers: tuple[str, str] | None = None) -> None:
     wb = Workbook()
     ws = wb.active

@@ -276,7 +276,7 @@ export function createDownloadController(deps = {}) {
 
   async function triggerTrackerEntriesXlsxDownload(button = null) {
     const directUrl = buildTrackerEntriesDownloadUrl("xlsx");
-    if (directUrl.startsWith("/api/artifacts/")) {
+    if (directUrl) {
       return triggerFileDownload(directUrl, {
         button,
         busyLabel: "엑셀 준비 중...",
