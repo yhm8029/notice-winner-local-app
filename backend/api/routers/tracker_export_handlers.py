@@ -306,7 +306,7 @@ def _run_tracker_download_job(job_id: UUID) -> None:
             if blank_progress_note:
                 rows = [{**item, "progress_note": ""} for item in rows]
             row_count = len(rows)
-            workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows)
+            workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows, selected_regions=region)
 
         output_path = Path(str(row["output_path"]))
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -455,7 +455,7 @@ def download_tracker_entry_summaries(
     )
     if blank_progress_note:
         rows = [{**row, "progress_note": ""} for row in rows]
-    workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows)
+    workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows, selected_regions=region)
     payload = BytesIO(workbook_bytes)
     file_name = _spms_xlsx_file_name()
     support._record_download_audit_log(

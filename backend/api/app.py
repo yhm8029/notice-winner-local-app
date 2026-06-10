@@ -201,8 +201,11 @@ def resolve_artifact_path(storage_path: str):
     return _load_artifact_file_helpers()["resolve_artifact_path"](storage_path)
 
 
-def build_tracking_download_workbook_bytes(*, rows):
-    return _load_artifact_file_helpers()["build_tracking_download_workbook_bytes"](rows=rows)
+def build_tracking_download_workbook_bytes(*, rows, selected_regions=None):
+    return _load_artifact_file_helpers()["build_tracking_download_workbook_bytes"](
+        rows=rows,
+        selected_regions=selected_regions,
+    )
 
 
 def _tracker_download_job_output_path(job_id: UUID) -> Path:

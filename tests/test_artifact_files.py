@@ -84,6 +84,112 @@ def test_tracking_download_workbook_uses_split_sheets_and_blanks_progress(monkey
         wb.close()
 
 
+def test_tracking_download_workbook_limits_sheets_to_selected_regions(tmp_path) -> None:
+    payload = artifact_files.build_tracking_download_workbook_bytes(
+        selected_regions="부산",
+        rows=[
+            {
+                "project_name": "서울 프로젝트",
+                "client_location": "서울특별시",
+                "site_location_1": "서울특별시",
+                "demand_org_name": "서울특별시",
+            },
+            {
+                "project_name": "부산 프로젝트",
+                "client_location": "부산광역시",
+                "site_location_1": "부산광역시",
+                "demand_org_name": "부산광역시",
+            },
+            {
+                "project_name": "부산교육청 프로젝트",
+                "client_location": "부산광역시교육청",
+                "site_location_1": "부산광역시",
+                "demand_org_name": "부산광역시교육청",
+            },
+            {
+                "project_name": "대구 프로젝트",
+                "client_location": "대구광역시",
+                "site_location_1": "대구광역시",
+                "demand_org_name": "대구광역시",
+            },
+        ],
+    )
+
+    workbook_path = tmp_path / "busan-only.xlsx"
+    workbook_path.write_bytes(payload)
+    wb = load_workbook(workbook_path, data_only=True)
+    try:
+        assert wb.sheetnames == ["전체", "부산", "부산교육청"]
+        assert [wb["전체"].cell(row, 2).value for row in range(3, wb["전체"].max_row + 1)] == [
+            "부산 프로젝트",
+            "부산교육청 프로젝트",
+        ]
+    finally:
+        wb.close()
+
+
+def test_tracking_download_workbook_pairs_selected_region_and_education_sheets(tmp_path) -> None:
+    payload = artifact_files.build_tracking_download_workbook_bytes(
+        selected_regions="부산,대구,인천",
+        rows=[
+            {
+                "project_name": "부산 프로젝트",
+                "client_location": "부산광역시",
+                "site_location_1": "부산광역시",
+                "demand_org_name": "부산광역시",
+            },
+            {
+                "project_name": "부산교육청 프로젝트",
+                "client_location": "부산광역시교육청",
+                "site_location_1": "부산광역시",
+                "demand_org_name": "부산광역시교육청",
+            },
+            {
+                "project_name": "대구 프로젝트",
+                "client_location": "대구광역시",
+                "site_location_1": "대구광역시",
+                "demand_org_name": "대구광역시",
+            },
+            {
+                "project_name": "대구교육청 프로젝트",
+                "client_location": "대구광역시교육청",
+                "site_location_1": "대구광역시",
+                "demand_org_name": "대구광역시교육청",
+            },
+            {
+                "project_name": "인천 프로젝트",
+                "client_location": "인천광역시",
+                "site_location_1": "인천광역시",
+                "demand_org_name": "인천광역시",
+            },
+            {
+                "project_name": "인천교육청 프로젝트",
+                "client_location": "인천광역시교육청",
+                "site_location_1": "인천광역시",
+                "demand_org_name": "인천광역시교육청",
+            },
+            {
+                "project_name": "서울 프로젝트",
+                "client_location": "서울특별시",
+                "site_location_1": "서울특별시",
+                "demand_org_name": "서울특별시",
+            },
+        ],
+    )
+
+    workbook_path = tmp_path / "multi-region.xlsx"
+    workbook_path.write_bytes(payload)
+    wb = load_workbook(workbook_path, data_only=True)
+    try:
+        assert wb.sheetnames == ["전체", "부산", "부산교육청", "대구", "대구교육청", "인천", "인천교육청"]
+        assert "서울 프로젝트" not in [
+            wb["전체"].cell(row, 2).value
+            for row in range(3, wb["전체"].max_row + 1)
+        ]
+    finally:
+        wb.close()
+
+
 def _write_template(path: Path, *, site_headers: tuple[str, str] | None = None) -> None:
     wb = Workbook()
     ws = wb.active

@@ -18,6 +18,7 @@ async function loadDownloadController() {
 
 function createFakeDocument() {
   const bodyChildren = [];
+  const anchors = [];
   const overlay = {
     id: "download-progress-overlay",
     className: "download-progress-overlay hidden",
@@ -46,7 +47,7 @@ function createFakeDocument() {
       if (tagName === "div") {
         return overlay;
       }
-      return {
+      const anchor = {
         href: "",
         download: "",
         clickCalled: false,
@@ -55,6 +56,11 @@ function createFakeDocument() {
         },
         remove() {},
       };
+      anchors.push(anchor);
+      return anchor;
+    },
+    getAnchors() {
+      return anchors;
     },
   };
 }
@@ -63,13 +69,14 @@ test("tracker xlsx download uses direct file endpoint instead of download job po
   const { createDownloadController } = await loadDownloadController();
   const fetchedUrls = [];
   const apiCalls = [];
+  const document = createFakeDocument();
   const controller = createDownloadController({
     state: {
       trackerFilters: { q: "", region: "", noticeYear: "2026", editedOnly: false },
       uiMode: "admin",
     },
     dom: {},
-    document: createFakeDocument(),
+    document,
     window: {
       URL: {
         createObjectURL() {
@@ -105,7 +112,7 @@ test("tracker xlsx download uses direct file endpoint instead of download job po
         headers: {
           get(name) {
             return String(name).toLowerCase() === "content-disposition"
-              ? 'attachment; filename="project_status.xlsx"'
+              ? 'attachment; filename="SPMS_20260610.xlsx"'
               : "";
           },
         },
@@ -126,4 +133,5 @@ test("tracker xlsx download uses direct file endpoint instead of download job po
   assert.equal(fetchedUrls.length, 1);
   assert.match(fetchedUrls[0], /^\/api\/tracker-entry-summaries\/download\?/);
   assert.match(fetchedUrls[0], /notice_year=2026/);
+  assert.equal(document.getAnchors().at(-1).download, "SPMS_20260610.xlsx");
 });

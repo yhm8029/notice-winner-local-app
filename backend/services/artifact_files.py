@@ -22,8 +22,10 @@ from openpyxl.styles import Side
 from openpyxl.utils import get_column_letter
 
 from backend.repositories.tracker_entries import format_tracker_display_date
+from backend.repositories.tracker_entries import parse_tracker_regions
 from backend.repositories.tracker_entries import TRACKER_REGION_ALIASES
 from backend.repositories.tracker_entries import TRACKER_REGION_TOKEN_ONLY_CANONICALS
+from backend.repositories.tracker_entries import tracker_entry_matches_region
 from backend.services import artifact_template_runtime
 from backend.services.artifact_file_runtime import build_written_artifact
 from backend.services.artifact_file_runtime import count_csv_rows
@@ -214,9 +216,24 @@ def build_tracking_workbook_bytes(*, rows: list[dict[str, Any]]) -> bytes:
     return buffer.getvalue()
 
 
-def build_tracking_download_workbook_bytes(*, rows: list[dict[str, Any]]) -> bytes:
+def build_tracking_download_workbook_bytes(
+    *,
+    rows: list[dict[str, Any]],
+    selected_regions: Any = None,
+) -> bytes:
     sanitized_rows = [{**row, "progress_note": ""} for row in rows]
-    wb = _build_fast_tracking_download_workbook(rows=sanitized_rows)
+    normalized_regions = parse_tracker_regions(selected_regions)
+    if normalized_regions:
+        selected_region_filter = ",".join(normalized_regions)
+        sanitized_rows = [
+            row
+            for row in sanitized_rows
+            if tracker_entry_matches_region(row, selected_region_filter)
+        ]
+    wb = _build_fast_tracking_download_workbook(
+        rows=sanitized_rows,
+        selected_regions=normalized_regions,
+    )
     buffer = BytesIO()
     wb.save(buffer)
     return buffer.getvalue()
@@ -265,10 +282,33 @@ TRACKING_DOWNLOAD_COLUMN_WIDTHS = {
 }
 
 
-def _build_fast_tracking_download_workbook(*, rows: list[dict[str, Any]]):
+def _build_fast_tracking_download_workbook(
+    *,
+    rows: list[dict[str, Any]],
+    selected_regions: tuple[str, ...] = (),
+):
     wb = Workbook(write_only=True)
     ordinary_grouped, education_grouped = _group_tracking_rows_for_download_sheets(rows)
     _append_tracking_download_sheet(wb, title="전체", rows=rows)
+    if selected_regions:
+        for region_name in selected_regions:
+            _append_tracking_download_sheet(
+                wb,
+                title=_short_tracking_region_name(region_name),
+                rows=ordinary_grouped.get(region_name, []),
+            )
+            education_sheet_title = _education_sheet_title_for_tracking_region(region_name)
+            education_rows = education_grouped.get(education_sheet_title, [])
+            if education_sheet_title:
+                _append_tracking_download_sheet(wb, title=education_sheet_title, rows=education_rows)
+            for sheet_name, sheet_rows in education_grouped.items():
+                if _canonical_tracking_region_name_from_education_sheet_name(sheet_name) != region_name:
+                    continue
+                if sheet_name == education_sheet_title:
+                    continue
+                _append_tracking_download_sheet(wb, title=sheet_name, rows=sheet_rows)
+        return wb
+
     for region_name, region_rows in ordinary_grouped.items():
         _append_tracking_download_sheet(
             wb,
@@ -588,6 +628,11 @@ def _canonical_tracking_region_name_from_education_sheet_name(sheet_name: str) -
         if _short_tracking_region_name(canonical) == short_region:
             return canonical
     return normalized
+
+
+def _education_sheet_title_for_tracking_region(region_name: str) -> str:
+    short_region = _short_tracking_region_name(region_name)
+    return f"{short_region}교육청" if short_region else ""
 
 
 def _derive_tracking_education_office_sheet_name(row: dict[str, Any]) -> str:

@@ -144,7 +144,7 @@ def test_direct_tracker_download_bypasses_workbook_cache(monkeypatch) -> None:
     monkeypatch.setattr(
         tracker_export_handlers.support,
         "build_tracking_download_workbook_bytes",
-        lambda *, rows: b"xlsx-bytes",
+        lambda *, rows, selected_regions=None: b"xlsx-bytes",
     )
 
     def record_download_audit_log(**kwargs: object) -> None:

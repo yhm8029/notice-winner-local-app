@@ -29,6 +29,14 @@ export function createDownloadController(deps = {}) {
     return fallbackName;
   }
 
+  function buildSpmsDownloadFallbackName() {
+    const now = new Date();
+    const year = String(now.getFullYear()).padStart(4, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `SPMS_${year}${month}${day}.xlsx`;
+  }
+
   function ensureDownloadProgressOverlay() {
     let overlay = appDocument.querySelector("#download-progress-overlay");
     if (overlay) {
@@ -280,7 +288,7 @@ export function createDownloadController(deps = {}) {
       return triggerFileDownload(directUrl, {
         button,
         busyLabel: "엑셀 준비 중...",
-        fallbackName: "project_tracking.xlsx",
+        fallbackName: buildSpmsDownloadFallbackName(),
         showProgressOverlay: true,
         progressTitle: "프로젝트 현황 엑셀을 준비하고 있습니다.",
       });

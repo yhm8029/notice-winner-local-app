@@ -68,10 +68,14 @@ def queue_related_notice_precompute_for_run(run_id: UUID, *, project_key: str = 
     return _load_related_notice_precompute_helper()(run_id, project_key=project_key)
 
 
-def build_tracking_download_workbook_bytes(*, rows: list[dict[str, Any]]) -> bytes:
+def build_tracking_download_workbook_bytes(
+    *,
+    rows: list[dict[str, Any]],
+    selected_regions: Any = None,
+) -> bytes:
     from backend.services.artifact_files import build_tracking_download_workbook_bytes as impl
 
-    return impl(rows=rows)
+    return impl(rows=rows, selected_regions=selected_regions)
 
 
 def _load_artifact_file_helpers(
