@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+import os
 import time
 
 from fastapi import Request
@@ -9,6 +11,8 @@ from fastapi.responses import JSONResponse
 
 from backend.api.support.runtime_common import ApiError
 
+
+API_ERROR_LOGGER = logging.getLogger("backend.api.errors")
 
 AUTH_EXEMPT_API_PATHS = frozenset(
     {
@@ -112,4 +116,29 @@ def handle_api_error(_request: Request, exc: ApiError) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,
         content={"error": {"code": exc.code, "message": exc.message}},
+    )
+
+
+def _should_expose_internal_errors() -> bool:
+    return str(os.getenv("LOCAL_APP_EXPOSE_INTERNAL_ERRORS") or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def handle_unhandled_error(request: Request, exc: Exception) -> JSONResponse:
+    API_ERROR_LOGGER.error(
+        "Unhandled API error %s %s",
+        request.method,
+        request.url.path,
+        exc_info=(type(exc), exc, exc.__traceback__),
+    )
+    message = "Internal Server Error"
+    if _should_expose_internal_errors() and str(exc):
+        message = str(exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"error": {"code": "internal_server_error", "message": message}},
     )

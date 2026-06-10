@@ -119,7 +119,7 @@ def get_tracker_entry(request, *, entry_id: UUID) -> Any:
     return support._to_tracker_entry_model(detail_row)
 
 
-def view_tracker_entry_notice_file(entry_id: UUID):
+def view_tracker_entry_notice_file(entry_id: UUID, *, embed: bool = False, desktop: bool = False):
     notice_view_helpers = support._load_notice_view_helpers()
     tracker_repository = support._get_tracker_repository()
     try:
@@ -129,6 +129,16 @@ def view_tracker_entry_notice_file(entry_id: UUID):
 
     if entry is None:
         support._not_found(f"tracker_entry not found: {entry_id}")
+
+    title = str(entry.get("project_name") or "공고문").strip() or "공고문"
+    if desktop:
+        return HTMLResponse(
+            notice_view_helpers["build_desktop_notice_loading_html"](
+                title=title,
+                redirect_url=f"/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view",
+                app_url="/app/",
+            )
+        )
 
     source_row = support._select_tracker_entry_source_notice_row(entry)
     notice_source_row = _build_tracker_entry_notice_source_row(source_row=source_row, entry=entry)
@@ -162,6 +172,14 @@ def view_tracker_entry_notice_file(entry_id: UUID):
     except Exception:
         viewer_url = ""
     if viewer_url:
+        if embed:
+            return HTMLResponse(
+                notice_view_helpers["build_synap_viewer_embed_html"](
+                    title=title,
+                    viewer_url=viewer_url,
+                    file_url=attachment_url,
+                )
+            )
         return RedirectResponse(url=viewer_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
     try:
@@ -206,6 +224,121 @@ def view_tracker_entry_notice_file(entry_id: UUID):
             file_url=attachment_url,
         ),
         status_code=status.HTTP_200_OK,
+    )
+
+
+def open_tracker_entry_notice_file_external(entry_id: UUID, *, base_url: str) -> dict[str, Any]:
+    base = str(base_url or "").strip().rstrip("/")
+    if base.endswith("/app"):
+        base = base[: -len("/app")]
+    fallback_url = f"{base}/api/tracker-entries/{quote(str(entry_id), safe='')}/notice-file-view?desktop=true"
+
+    tracker_repository = support._get_tracker_repository()
+    try:
+        entry = tracker_repository.get_entry(entry_id)
+    except support.TrackerEntryRepositoryError as exc:
+        support._repository_error(str(exc))
+
+    if entry is None:
+        support._not_found(f"tracker_entry not found: {entry_id}")
+
+    notice_view_helpers = support._load_notice_view_helpers()
+    target_url = (
+        _load_cached_tracker_entry_synap_viewer_url(entry, notice_view_helpers=notice_view_helpers)
+        or _resolve_tracker_entry_synap_viewer_url(
+            entry_id,
+            notice_view_helpers=notice_view_helpers,
+            prefer_entry_bid=True,
+        )
+        or _build_tracker_entry_g2b_notice_url(entry)
+        or fallback_url
+    )
+    opened = bool(notice_view_helpers["open_external_browser_url"](target_url))
+    return {"opened": opened, "url": target_url}
+
+
+def warm_tracker_entry_notice_file(entry_id: UUID) -> dict[str, Any]:
+    notice_view_helpers = support._load_notice_view_helpers()
+    viewer_url = _resolve_tracker_entry_synap_viewer_url(
+        entry_id,
+        notice_view_helpers=notice_view_helpers,
+        prefer_entry_bid=True,
+    )
+    return {"ready": bool(viewer_url), "url": viewer_url}
+
+
+def _resolve_tracker_entry_synap_viewer_url(
+    entry_id: UUID,
+    *,
+    notice_view_helpers: dict[str, Any],
+    prefer_entry_bid: bool = False,
+) -> str:
+    tracker_repository = support._get_tracker_repository()
+    try:
+        entry = tracker_repository.get_entry(entry_id)
+    except support.TrackerEntryRepositoryError as exc:
+        support._repository_error(str(exc))
+
+    if entry is None:
+        support._not_found(f"tracker_entry not found: {entry_id}")
+
+    cached_viewer_url = _load_cached_tracker_entry_synap_viewer_url(entry, notice_view_helpers=notice_view_helpers)
+    if cached_viewer_url:
+        return cached_viewer_url
+
+    source_row = None if prefer_entry_bid else support._select_tracker_entry_source_notice_row(entry)
+    notice_source_row = _build_tracker_entry_notice_source_row(source_row=source_row, entry=entry)
+    attachment = notice_view_helpers["select_primary_notice_attachment"](notice_source_row)
+    attachment_url = str(attachment.get("url") or "").strip()
+    if not attachment_url:
+        return ""
+    bid_no = str((notice_source_row or {}).get("bid_no") or entry.get("source_bid_no") or "").strip().upper()
+    bid_ord = str((notice_source_row or {}).get("bid_ord") or entry.get("source_bid_ord") or "000").strip() or "000"
+    unty_atch_file_no = str(
+        (notice_source_row or {}).get("item_pbanc_unty_atch_file_no")
+        or (notice_source_row or {}).get("itemPbancUntyAtchFileNo")
+        or ""
+    ).strip()
+    try:
+        return str(
+            notice_view_helpers["resolve_notice_viewer_url"](
+                bid_no=bid_no,
+                bid_ord=bid_ord,
+                attachment_url=attachment_url,
+                unty_atch_file_no=unty_atch_file_no,
+            )
+            or ""
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _load_cached_tracker_entry_synap_viewer_url(
+    entry: dict[str, Any],
+    *,
+    notice_view_helpers: dict[str, Any],
+) -> str:
+    load_cached = notice_view_helpers.get("load_cached_notice_viewer_url_by_bid")
+    if not callable(load_cached):
+        return ""
+    bid_no = str(entry.get("source_bid_no") or "").strip().upper()
+    if not bid_no:
+        return ""
+    bid_ord = str(entry.get("source_bid_ord") or "000").strip() or "000"
+    try:
+        return str(load_cached(bid_no=bid_no, bid_ord=bid_ord) or "").strip()
+    except Exception:
+        return ""
+
+
+def _build_tracker_entry_g2b_notice_url(entry: dict[str, Any]) -> str:
+    bid_no = str(entry.get("source_bid_no") or "").strip().upper()
+    if not bid_no:
+        return ""
+    bid_ord = str(entry.get("source_bid_ord") or "000").strip() or "000"
+    return (
+        "https://www.g2b.go.kr/link/PNPE027_01/single/"
+        f"?bidPbancNo={quote(bid_no, safe='')}&bidPbancOrd={quote(bid_ord, safe='')}"
     )
 
 

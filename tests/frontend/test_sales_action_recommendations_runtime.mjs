@@ -84,7 +84,56 @@ function makeClickEvent() {
   };
 }
 
-test("sales action recommendations render a notice viewer button for tracker entries", () => {
+function makeDocumentHarness() {
+  const createdIframes = [];
+  const appendedElements = [];
+  function createElement(tagName) {
+    const element = {
+      tagName: String(tagName || "").toUpperCase(),
+      className: "",
+      textContent: "",
+      attributes: {},
+      children: [],
+      src: "",
+      setAttribute(name, value) {
+        this.attributes[name] = String(value);
+      },
+      append(...children) {
+        this.children.push(...children);
+      },
+      appendChild(child) {
+        this.children.push(child);
+        return child;
+      },
+      addEventListener() {},
+      remove() {
+        this.removed = true;
+      },
+    };
+    if (element.tagName === "IFRAME") {
+      createdIframes.push(element);
+    }
+    return element;
+  }
+  return {
+    createdIframes,
+    appendedElements,
+    document: {
+      body: {
+        appendChild(element) {
+          appendedElements.push(element);
+          return element;
+        },
+      },
+      createElement,
+      getElementById() {
+        return null;
+      },
+    },
+  };
+}
+
+test("sales action recommendations render a notice viewer button for tracker entries", async () => {
   const runtime = loadRuntime();
   const noticeButton = makeButton("data-sales-action-notice-view", "0");
   const relatedButton = makeButton("data-sales-action-related-open", "0");
@@ -123,7 +172,10 @@ test("sales action recommendations render a notice viewer button for tracker ent
     "data-sales-action-related-open": [relatedButton],
   });
   const openedUrls = [];
+  const assignedUrls = [];
   const flashMessages = [];
+  const apiCalls = [];
+  const documentHarness = makeDocumentHarness();
   const recommendations = runtime.createSalesActionRecommendationsRuntime({
     state,
     dom: {
@@ -132,6 +184,14 @@ test("sales action recommendations render a notice viewer button for tracker ent
       trackerSalesRecommendationRefreshButton: null,
     },
     window: {
+      document: documentHarness.document,
+      location: {
+        href: "",
+        assign(url) {
+          assignedUrls.push(url);
+          this.href = url;
+        },
+      },
       localStorage: { getItem: () => "{}", setItem: () => {} },
       open(url) {
         openedUrls.push(url);
@@ -141,7 +201,10 @@ test("sales action recommendations render a notice viewer button for tracker ent
     flash(message) {
       flashMessages.push(message);
     },
-    api: async () => ({}),
+    api: async (url) => {
+      apiCalls.push(url);
+      return { opened: true };
+    },
     escapeHtml: (value) => String(value ?? ""),
     replaceSalesListHtmlIfChanged(element, html) {
       element.innerHTML = html;
@@ -168,8 +231,12 @@ test("sales action recommendations render a notice viewer button for tracker ent
   assert.match(list.innerHTML, />공고문 보기<\/button>/);
 
   noticeButton.click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
 
-  assert.deepEqual(openedUrls, ["/api/tracker-entries/entry-1/notice-file-view"]);
+  assert.deepEqual(openedUrls, []);
+  assert.deepEqual(assignedUrls, []);
+  assert.deepEqual(apiCalls, ["/api/tracker-entries/entry-1/notice-file-open-external"]);
+  assert.equal(documentHarness.createdIframes.length, 0);
   assert.deepEqual(flashMessages, []);
 });
 

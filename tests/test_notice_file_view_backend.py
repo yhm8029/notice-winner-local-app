@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import os
+from pathlib import Path
+import tempfile
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -9,6 +13,7 @@ from backend.api.app import _select_project_source_notice_row
 from backend.api.app import _select_tracker_entry_source_notice_row
 from backend.api.routers.tracker_read_handlers import view_tracker_entry_notice_file
 from backend.services.notice_file_view_backend import load_notice_seed_row_by_bid
+from backend.services.notice_file_view_backend import resolve_notice_viewer_url
 
 
 class _EmptyArtifactRepository:
@@ -150,6 +155,317 @@ class NoticeFileViewBackendTests(unittest.TestCase):
         )
         self.assertEqual(seen_rows[0]["bid_no"], "R26BK01434430")
         self.assertIn("bidPbancNo=R26BK01434430", seen_rows[0]["notice_url"])
+
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_view_tracker_entry_notice_file_can_embed_synap_viewer_locally(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        select_tracker_entry_source_notice_row,
+    ) -> None:
+        entry_id = uuid4()
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Synap embedded notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+
+        def _select_primary_notice_attachment(_row):  # type: ignore[no-untyped-def]
+            return {
+                "url": (
+                    "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                    "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                ),
+                "file_name": "notice.hwp",
+            }
+
+        load_notice_view_helpers.return_value = {
+            "build_notice_file_fallback_html": lambda **_kwargs: "<html>fallback</html>",
+            "download_notice_attachment": lambda **_kwargs: (b"", ""),
+            "infer_notice_attachment_suffix": lambda **_kwargs: "",
+            "render_hwp_notice_html": lambda **_kwargs: None,
+            "resolve_notice_viewer_url": lambda **_kwargs: "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=synap-key",
+            "select_primary_notice_attachment": _select_primary_notice_attachment,
+            "build_synap_viewer_embed_html": lambda **kwargs: f"<html><iframe src=\"{kwargs['viewer_url']}\"></iframe></html>",
+        }
+
+        response = view_tracker_entry_notice_file(entry_id, embed=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.media_type, "text/html")
+        self.assertIn("synap-key", response.body.decode("utf-8"))
+
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_view_tracker_entry_notice_file_desktop_returns_immediate_loading_page(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        select_tracker_entry_source_notice_row,
+    ) -> None:
+        entry_id = uuid4()
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Desktop notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+        resolve_calls: list[dict[str, object]] = []
+        load_notice_view_helpers.return_value = {
+            "build_notice_file_fallback_html": lambda **_kwargs: "<html>fallback</html>",
+            "build_desktop_notice_loading_html": lambda **kwargs: (
+                f"<html>{kwargs['title']}|{kwargs['redirect_url']}</html>"
+            ),
+            "download_notice_attachment": lambda **_kwargs: (b"", ""),
+            "infer_notice_attachment_suffix": lambda **_kwargs: "",
+            "render_hwp_notice_html": lambda **_kwargs: None,
+            "resolve_notice_viewer_url": lambda **kwargs: resolve_calls.append(kwargs) or "",
+            "select_primary_notice_attachment": lambda _row: {},
+        }
+
+        response = view_tracker_entry_notice_file(entry_id, desktop=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.media_type, "text/html")
+        body = response.body.decode("utf-8")
+        self.assertIn("Desktop notice", body)
+        self.assertIn(f"/api/tracker-entries/{entry_id}/notice-file-view", body)
+        self.assertEqual(resolve_calls, [])
+
+    def test_build_desktop_notice_loading_html_returns_with_browser_history(self) -> None:
+        from backend.services.notice_file_view_backend import build_desktop_notice_loading_html
+
+        body = build_desktop_notice_loading_html(
+            title="Desktop notice",
+            redirect_url="/api/tracker-entries/entry-1/notice-file-view",
+            app_url="/app/",
+        )
+
+        self.assertIn("앱으로 돌아가기", body)
+        self.assertIn("history.back()", body)
+        self.assertIn("window.location.replace", body)
+        self.assertIn("/api/tracker-entries/entry-1/notice-file-view", body)
+
+    def test_resolve_notice_viewer_url_uses_local_cache_without_g2b_request(self) -> None:
+        from backend.services.notice_file_view_backend import resolve_notice_viewer_url
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_path = Path(temp_dir) / "notice_viewer_cache.json"
+            cache_path.write_text(
+                json.dumps(
+                    {
+                        "R26BK01434430|000|1|": (
+                            "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached"
+                        )
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch.dict(os.environ, {"NOTICE_VIEWER_CACHE_PATH": str(cache_path)}):
+                with patch("backend.services.notice_file_view_backend.requests.post") as post:
+                    viewer_url = resolve_notice_viewer_url(
+                        bid_no="R26BK01434430",
+                        bid_ord="000",
+                        attachment_url=(
+                            "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                            "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                        ),
+                    )
+
+        self.assertEqual(viewer_url, "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached")
+        post.assert_not_called()
+
+    def test_cached_notice_viewer_url_by_bid_ignores_synap_root_url(self) -> None:
+        from backend.services.notice_file_view_backend import load_cached_notice_viewer_url_by_bid
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_path = Path(temp_dir) / "notice_viewer_cache.json"
+            cache_path.write_text(
+                json.dumps({"R26BK01434430|000|1|": "https://www.g2b.go.kr/SynapDocViewServer/"}),
+                encoding="utf-8",
+            )
+            with patch.dict(os.environ, {"NOTICE_VIEWER_CACHE_PATH": str(cache_path)}):
+                viewer_url = load_cached_notice_viewer_url_by_bid(
+                    bid_no="R26BK01434430",
+                    bid_ord="000",
+                )
+
+        self.assertEqual(viewer_url, "")
+
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_open_tracker_entry_notice_file_external_opens_resolved_synap_url_before_g2b_detail(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        select_tracker_entry_source_notice_row,
+    ) -> None:
+        from backend.api.routers.tracker_read_handlers import open_tracker_entry_notice_file_external
+
+        entry_id = uuid4()
+        opened_urls: list[str] = []
+        select_tracker_entry_source_notice_row.side_effect = AssertionError("source lookup should not run")
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Desktop notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+        load_notice_view_helpers.return_value = {
+            "load_cached_notice_viewer_url_by_bid": lambda **_kwargs: "",
+            "select_primary_notice_attachment": lambda _row: {
+                "url": (
+                    "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                    "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                ),
+                "file_name": "notice.hwp",
+            },
+            "resolve_notice_viewer_url": lambda **_kwargs: (
+                "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=resolved-direct"
+            ),
+            "open_external_browser_url": lambda url: opened_urls.append(url) or True,
+        }
+
+        response = open_tracker_entry_notice_file_external(
+            entry_id,
+            base_url="http://127.0.0.1:8765/app/",
+        )
+
+        self.assertEqual(response["opened"], True)
+        self.assertEqual(
+            opened_urls,
+            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=resolved-direct"],
+        )
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=resolved-direct")
+
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_open_tracker_entry_notice_file_external_opens_cached_synap_url_immediately(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        select_tracker_entry_source_notice_row,
+    ) -> None:
+        from backend.api.routers.tracker_read_handlers import open_tracker_entry_notice_file_external
+
+        entry_id = uuid4()
+        opened_urls: list[str] = []
+        select_tracker_entry_source_notice_row.side_effect = AssertionError("source lookup should not run")
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Cached desktop notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+        load_notice_view_helpers.return_value = {
+            "load_cached_notice_viewer_url_by_bid": lambda **_kwargs: (
+                "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"
+            ),
+            "select_primary_notice_attachment": lambda _row: (_ for _ in ()).throw(
+                AssertionError("attachment lookup should not run when cached synap exists")
+            ),
+            "resolve_notice_viewer_url": lambda **_kwargs: (_ for _ in ()).throw(
+                AssertionError("synap resolve should not run for external open")
+            ),
+            "open_external_browser_url": lambda url: opened_urls.append(url) or True,
+        }
+
+        response = open_tracker_entry_notice_file_external(
+            entry_id,
+            base_url="http://127.0.0.1:8765/app/",
+        )
+
+        self.assertEqual(response["opened"], True)
+        self.assertEqual(
+            opened_urls,
+            ["https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct"],
+        )
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=cached-direct")
+
+    @patch("backend.api.routers.tracker_read_handlers.support._select_tracker_entry_source_notice_row")
+    @patch("backend.api.routers.tracker_read_handlers.support._get_tracker_repository")
+    @patch("backend.api.routers.tracker_read_handlers.support._load_notice_view_helpers")
+    def test_warm_tracker_entry_notice_file_resolves_without_opening_browser(
+        self,
+        load_notice_view_helpers,
+        get_tracker_repository,
+        select_tracker_entry_source_notice_row,
+    ) -> None:
+        from backend.api.routers.tracker_read_handlers import warm_tracker_entry_notice_file
+
+        entry_id = uuid4()
+        opened_urls: list[str] = []
+        select_tracker_entry_source_notice_row.side_effect = AssertionError("source lookup should not run")
+        get_tracker_repository.return_value = _SingleEntryRepository(
+            {
+                "id": str(entry_id),
+                "project_name": "Warm notice",
+                "source_bid_no": "R26BK01434430",
+                "source_bid_ord": "000",
+            }
+        )
+        load_notice_view_helpers.return_value = {
+            "load_cached_notice_viewer_url_by_bid": lambda **_kwargs: "",
+            "select_primary_notice_attachment": lambda _row: {
+                "url": (
+                    "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                    "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+                ),
+                "file_name": "notice.hwp",
+            },
+            "resolve_notice_viewer_url": lambda **_kwargs: (
+                "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=warm"
+            ),
+            "open_external_browser_url": lambda url: opened_urls.append(url) or True,
+        }
+
+        response = warm_tracker_entry_notice_file(entry_id)
+
+        self.assertEqual(response["ready"], True)
+        self.assertEqual(response["url"], "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=warm")
+        self.assertEqual(opened_urls, [])
+
+    @patch("backend.services.notice_file_view_backend._load_notice_viewer_url_from_cache", return_value="")
+    @patch("backend.services.notice_file_view_backend._fetch_notice_attachment_group_no", return_value="group-1")
+    @patch("backend.services.notice_file_view_backend.requests.post")
+    def test_resolve_notice_viewer_url_uses_short_viewer_timeout(
+        self,
+        post,
+        _fetch_notice_attachment_group_no,
+        _load_notice_viewer_url_from_cache,
+    ) -> None:
+        post.return_value.json.return_value = {
+            "result": {
+                "viewUrlPath": "https://www.g2b.go.kr/SynapDocViewServer/viewer/doc.html?key=short-timeout"
+            }
+        }
+        post.return_value.raise_for_status.return_value = None
+
+        viewer_url = resolve_notice_viewer_url(
+            bid_no="R26BK01434430",
+            bid_ord="000",
+            attachment_url=(
+                "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do"
+                "?bidPbancNo=R26BK01434430&bidPbancOrd=000&fileSeq=1&fileType="
+            ),
+        )
+
+        self.assertIn("short-timeout", viewer_url)
+        self.assertLessEqual(post.call_args.kwargs["timeout"], 5)
 
 
 if __name__ == "__main__":

@@ -91,6 +91,37 @@ def download_tracker_entry_summaries(
     )
 
 
+@router.post("/api/tracker-entry-summaries/download-local")
+def save_tracker_entry_summaries_to_downloads(
+    request: Request,
+    format: str = Query(default="xlsx"),
+    q: str = "",
+    region: str = "",
+    notice_year: str = "",
+    exclude_auxiliary_titles: bool = False,
+    edited_only: bool = False,
+    blank_progress_note: bool = False,
+    source_run_id: UUID | None = None,
+    source_tracker_run_id: UUID | None = None,
+    sheet_name: str = "",
+    section_name: str = "",
+) -> dict[str, object]:
+    return tracker_export_handlers.save_tracker_entry_summaries_to_downloads(
+        request=request,
+        format=format,
+        q=q,
+        region=region,
+        notice_year=notice_year,
+        exclude_auxiliary_titles=exclude_auxiliary_titles,
+        edited_only=edited_only,
+        blank_progress_note=blank_progress_note,
+        source_run_id=source_run_id,
+        source_tracker_run_id=source_tracker_run_id,
+        sheet_name=sheet_name,
+        section_name=section_name,
+    )
+
+
 @router.post(
     "/api/tracker-entry-summaries/download-jobs",
     status_code=status.HTTP_202_ACCEPTED,
@@ -217,8 +248,28 @@ def get_tracker_entry(request: Request, entry_id: UUID) -> TrackerEntryItem:
     "/api/tracker-entries/{entry_id}/notice-file-view",
     responses={404: {"model": ErrorResponse}},
 )
-def view_tracker_entry_notice_file(entry_id: UUID):
-    return tracker_read_handlers.view_tracker_entry_notice_file(entry_id)
+def view_tracker_entry_notice_file(
+    entry_id: UUID,
+    embed: bool = Query(default=False),
+    desktop: bool = Query(default=False),
+):
+    return tracker_read_handlers.view_tracker_entry_notice_file(entry_id, embed=embed, desktop=desktop)
+
+
+@router.post(
+    "/api/tracker-entries/{entry_id}/notice-file-open-external",
+    responses={404: {"model": ErrorResponse}},
+)
+def open_tracker_entry_notice_file_external(request: Request, entry_id: UUID):
+    return tracker_read_handlers.open_tracker_entry_notice_file_external(entry_id, base_url=str(request.base_url))
+
+
+@router.post(
+    "/api/tracker-entries/{entry_id}/notice-file-warm",
+    responses={404: {"model": ErrorResponse}},
+)
+def warm_tracker_entry_notice_file(entry_id: UUID):
+    return tracker_read_handlers.warm_tracker_entry_notice_file(entry_id)
 
 
 @router.get(

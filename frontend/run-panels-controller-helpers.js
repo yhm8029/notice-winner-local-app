@@ -1,3 +1,5 @@
+import { createRunProgressOverlayController } from "./run-progress-overlay-runtime.js?v=20260604a";
+
 export function createRunPanelsFormHelpers(deps = {}) {
   const state = deps.state;
   const dom = deps.dom;
@@ -12,6 +14,10 @@ export function createRunPanelsFormHelpers(deps = {}) {
   const syncUrlState = deps.syncUrlState || (() => {});
   const loadRunPresets = deps.loadRunPresets || (async () => {});
   const selectRun = deps.selectRun || (async () => {});
+  const runProgressOverlay = deps.runProgressOverlay || createRunProgressOverlayController({
+    document,
+    window: deps.window || globalThis.window || globalThis,
+  });
 
   function syntheticDebugEnabled() {
     return Boolean((state.dashboard || {}).synthetic_debug_enabled);
@@ -71,24 +77,36 @@ export function createRunPanelsFormHelpers(deps = {}) {
   async function createWinnerRun({ collectModeOverride = "", submitButton = null, busyLabel = "" } = {}) {
     const payload = buildRunPayload({ collectModeOverride });
     const button = submitButton || dom.submitRunButton;
-    const originalLabel = button.textContent || "???덈뺄 ??戮곗굚";
-    setBusy(button, true, busyLabel || "???덈뺄 ??戮곗굚 繞?..");
+    const originalLabel = button.textContent || "실행 시작";
+    let buttonReleased = false;
+    function releaseButton() {
+      if (!buttonReleased) {
+        setBusy(button, false, originalLabel);
+        buttonReleased = true;
+      }
+    }
+    setBusy(button, true, busyLabel || "실행 시작 중...");
+    runProgressOverlay.start?.();
     try {
       const response = await api("/api/runs", {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      flash(`???덈뺄 ?繹먮굞夷? ${response.id}`);
+      runProgressOverlay.update?.("실행 작업이 등록되었습니다. 진행 상황을 확인하고 있습니다.");
+      flash(`실행을 시작했습니다: ${response.id}`);
       state.selectedTrackerRunId = null;
       state.selectedEntryId = null;
       state.runFilters.page = 1;
       syncUrlState();
+      releaseButton();
+      runProgressOverlay.watch?.(response.id, { api });
       await loadRuns({});
       await selectRun(response.id);
     } catch (err) {
+      runProgressOverlay.fail?.(err.message || "실행에 실패했습니다.");
       flash(err.message, "error");
     } finally {
-      setBusy(button, false, originalLabel);
+      releaseButton();
     }
   }
 

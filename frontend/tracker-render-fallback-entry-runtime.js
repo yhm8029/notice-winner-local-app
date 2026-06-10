@@ -381,7 +381,6 @@
       }
     }
 
-    prefetchTrackerEntryDetails(displayEntries);
   }
 
   globalObject.SPMSTrackerRenderFallbackEntryRuntime = {

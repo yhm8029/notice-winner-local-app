@@ -61,6 +61,14 @@ class SqliteLocalDataRepositoryTests(unittest.TestCase):
         factory.reset_backfill_conflict_repository()
         self._tmp.cleanup()
 
+    def test_local_rows_store_enables_wal_and_long_busy_timeout(self) -> None:
+        with self.store._connection() as conn:
+            journal_mode = str(conn.execute("PRAGMA journal_mode").fetchone()[0]).lower()
+            busy_timeout = int(conn.execute("PRAGMA busy_timeout").fetchone()[0])
+
+        self.assertEqual(journal_mode, "wal")
+        self.assertGreaterEqual(busy_timeout, 30000)
+
     def test_factory_supports_sqlite_for_all_local_data_repositories(self) -> None:
         with patch.dict(os.environ, self.env, clear=False):
             backend_summary = factory.describe_repository_backends()

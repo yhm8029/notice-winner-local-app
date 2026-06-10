@@ -127,6 +127,29 @@ python -m venv .venv
 
 - open `http://127.0.0.1:8000/app/` for the built-in frontend console
 
+## Desktop WebView App
+
+The local app can also run as a Windows desktop window through `pywebview`.
+
+```powershell
+python -m pip install -r backend\requirements.txt -r requirements-desktop.txt
+python -m desktop.launcher
+```
+
+Build a folder-style Windows executable:
+
+```powershell
+.\scripts\build_desktop_exe.ps1 -InstallDependencies -IncludeLocalData
+```
+
+For a usable local distribution, pass the real SQLite DB and local `.env` explicitly:
+
+```powershell
+.\scripts\build_desktop_exe.ps1 -InstallDependencies -IncludeLocalData -LocalSqlitePath "C:\Users\user\notice-winner-local-app\data\local.sqlite3" -EnvPath "C:\path\to\.env"
+```
+
+See `docs/DESKTOP_WEBVIEW_APP_KR.md` for runtime paths and distribution notes.
+
 ## Local Conversion Backup Inventory
 
 Before converting the hosted app to local SQLite/storage, create a cloud data inventory.

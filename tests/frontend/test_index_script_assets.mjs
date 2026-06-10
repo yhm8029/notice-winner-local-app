@@ -133,7 +133,7 @@ test("bootstrap and organization admin runtimes expose required bridge APIs", ()
 test("tracker render controller is cache busted for selection guard fixes", () => {
   const html = readHtmlSource();
 
-  assert.match(html, /\/tracker-render-controller\.js\?v=20260602h/);
+  assert.match(html, /\/tracker-render-controller\.js\?v=20260604b/);
   assert.match(html, /\/tracker-controller-diagnostics-runtime\.js\?v=20260602f/);
 });
 
@@ -141,7 +141,7 @@ test("tracker entry card runtimes are cache busted for hidden sales chrome", () 
   const html = readHtmlSource();
 
   assert.match(html, /\/tracker-entry-runtime\.js\?v=20260602d/);
-  assert.match(html, /\/tracker-render-fallback-entry-runtime\.js\?v=20260602d/);
+  assert.match(html, /\/tracker-render-fallback-entry-runtime\.js\?v=20260604a/);
 });
 
 test("app runtime body is cache busted for auth submit guard fixes", () => {
@@ -156,17 +156,17 @@ test("index.html cache busts local console chrome runtimes", () => {
   const html = readHtmlSource();
   const appRuntimeBodySource = fs.readFileSync(path.resolve(__dirname, "../../frontend/app-runtime-body.js"), "utf8");
 
-  assert.match(html, /\/styles\.css\?v=20260602d/);
+  assert.match(html, /\/styles\.css\?v=20260604b/);
   assert.match(html, /\/app-shell-runtime\.js\?v=20260602g/);
   assert.match(html, /\/app-event-bindings\.js\?v=20260602i/);
   assert.match(html, /\/download-controller\.js\?v=20260602g/);
-  assert.match(html, /\/tracker-controller-entries-runtime\.js\?v=20260602g/);
+  assert.match(html, /\/tracker-controller-entries-runtime\.js\?v=20260604c/);
   assert.match(html, /\/tracker-controller\.js\?v=20260602g/);
   assert.match(html, /\/app-bootstrap-bridge\.js\?v=20260602g/);
   assert.match(html, /\/ui-mode-controller\.js\?v=20260602c/);
   assert.match(html, /\/runtime-enhancements\.js\?v=20260602e/);
   assert.match(html, /\/sales-panel-controller\.js\?v=20260602c/);
-  assert.match(html, /\/run-panels-controller\.js\?v=20260602h/);
+  assert.match(html, /\/run-panels-controller\.js\?v=20260604a/);
   assert.match(html, /\/auth-controller\.js\?v=20260602c/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-runtime\.js\?v=20260602b/);
   assert.match(appRuntimeBodySource, /\/app\/app-runtime-body-shell-runtime\.js\?v=20260602g/);
@@ -237,7 +237,7 @@ test("project tracker create form hides fixed crawler parameters", () => {
   assert.doesNotMatch(html, /name="demand_org" type="text"/);
   assert.doesNotMatch(html, /name="rows_per_page" type="number"/);
   assert.doesNotMatch(html, /name="max_pages" type="number"/);
-  assert.match(controllerSource, /run-panels-controller-helpers\.js\?v=20260602h/);
+  assert.match(controllerSource, /run-panels-controller-helpers\.js\?v=20260604a/);
   assert.match(helpersSource, /contract_date_hint:\s*""/);
   assert.match(helpersSource, /bid_no:\s*""/);
   assert.match(helpersSource, /demand_org:\s*""/);

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import os
 import time
 from datetime import datetime
 from io import BytesIO
@@ -31,6 +32,30 @@ PROJECT_STATUS_FILE_TIMEZONE = ZoneInfo("Asia/Seoul")
 def _project_status_file_timestamp(*, include_microseconds: bool = False) -> str:
     fmt = "%Y%m%d_%H%M%S_%f" if include_microseconds else "%Y%m%d_%H%M%S"
     return datetime.now(PROJECT_STATUS_FILE_TIMEZONE).strftime(fmt)
+
+
+def _spms_xlsx_file_name() -> str:
+    return f"SPMS_{datetime.now(PROJECT_STATUS_FILE_TIMEZONE).strftime('%Y%m%d')}.xlsx"
+
+
+def _spms_downloads_dir() -> Path:
+    configured = str(os.getenv("SPMS_DOWNLOADS_DIR") or "").strip()
+    if configured:
+        return Path(configured).expanduser()
+    return Path.home() / "Downloads"
+
+
+def _unique_download_path(download_dir: Path, file_name: str) -> Path:
+    target = download_dir / file_name
+    if not target.exists():
+        return target
+    stem = target.stem
+    suffix = target.suffix
+    for index in range(1, 1000):
+        candidate = download_dir / f"{stem} ({index}){suffix}"
+        if not candidate.exists():
+            return candidate
+    return download_dir / f"{stem}_{_project_status_file_timestamp(include_microseconds=True)}{suffix}"
 
 
 def _filter_rows_by_notice_year(rows: list[dict[str, object]], notice_year: str) -> list[dict[str, object]]:
@@ -133,16 +158,34 @@ def _list_tracker_entries_for_export(
     section_name: str,
     notice_year: str = "",
 ) -> list[dict[str, object]]:
-    rows = support._list_tracker_entries_for_export(
-        q=q,
-        region=region,
-        exclude_auxiliary_titles=exclude_auxiliary_titles,
-        edited_only=edited_only,
+    if support._is_global_tracker_scope(
         source_run_id=source_run_id,
         source_tracker_run_id=source_tracker_run_id,
         sheet_name=sheet_name,
         section_name=section_name,
-    )
+    ):
+        rows = support._collapse_tracker_rows_by_project(
+            support._load_all_tracker_entries_for_global_summary()
+        )
+        rows = support._filter_tracker_rows_for_global_scope(
+            rows,
+            q=q,
+            region=region,
+            exclude_auxiliary_titles=exclude_auxiliary_titles,
+            edited_only=edited_only,
+        )
+        rows = support._normalize_tracker_rows_for_presentation(rows)
+    else:
+        rows = support._load_all_tracker_entries_for_export(
+            q=q,
+            region=region,
+            exclude_auxiliary_titles=exclude_auxiliary_titles,
+            edited_only=edited_only,
+            source_run_id=source_run_id,
+            source_tracker_run_id=source_tracker_run_id,
+            sheet_name=sheet_name,
+            section_name=section_name,
+        )
     return _filter_rows_by_notice_year(rows, notice_year)
 
 
@@ -284,7 +327,7 @@ def _run_tracker_download_job(job_id: UUID) -> None:
             if blank_progress_note:
                 rows = [{**item, "progress_note": ""} for item in rows]
             row_count = len(rows)
-            workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows)
+            workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows, selected_regions=region)
 
         output_path = Path(str(row["output_path"]))
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -420,44 +463,22 @@ def download_tracker_entry_summaries(
         headers = {"Content-Disposition": f'attachment; filename="{file_name}"'}
         return StreamingResponse(payload, media_type="text/csv; charset=utf-8", headers=headers)
 
-    if not normalize_tracker_notice_year(notice_year) and support._can_cache_tracker_export_workbook(
-        format=normalized_format,
+    rows = _list_tracker_entries_for_export(
         q=q,
         region=region,
+        notice_year=notice_year,
+        exclude_auxiliary_titles=exclude_auxiliary_titles,
         edited_only=edited_only,
         source_run_id=source_run_id,
         source_tracker_run_id=source_tracker_run_id,
         sheet_name=sheet_name,
         section_name=section_name,
-    ):
-        workbook_bytes = support._get_or_build_cached_tracker_export_workbook_bytes(
-            q=q,
-            region=region,
-            exclude_auxiliary_titles=exclude_auxiliary_titles,
-            edited_only=edited_only,
-            blank_progress_note=blank_progress_note,
-            source_run_id=source_run_id,
-            source_tracker_run_id=source_tracker_run_id,
-            sheet_name=sheet_name,
-            section_name=section_name,
-        )
-    else:
-        rows = _list_tracker_entries_for_export(
-            q=q,
-            region=region,
-            notice_year=notice_year,
-            exclude_auxiliary_titles=exclude_auxiliary_titles,
-            edited_only=edited_only,
-            source_run_id=source_run_id,
-            source_tracker_run_id=source_tracker_run_id,
-            sheet_name=sheet_name,
-            section_name=section_name,
-        )
-        if blank_progress_note:
-            rows = [{**row, "progress_note": ""} for row in rows]
-        workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows)
+    )
+    if blank_progress_note:
+        rows = [{**row, "progress_note": ""} for row in rows]
+    workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows, selected_regions=region)
     payload = BytesIO(workbook_bytes)
-    file_name = f"project_status_{timestamp}.xlsx"
+    file_name = _spms_xlsx_file_name()
     support._record_download_audit_log(
         actor=actor,
         download_scope="global",
@@ -471,6 +492,58 @@ def download_tracker_entry_summaries(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers=headers,
     )
+
+
+def save_tracker_entry_summaries_to_downloads(
+    request: Request,
+    format: str = Query(default="xlsx"),
+    q: str = "",
+    region: str = "",
+    notice_year: str = "",
+    exclude_auxiliary_titles: bool = False,
+    edited_only: bool = False,
+    blank_progress_note: bool = False,
+    source_run_id: UUID | None = None,
+    source_tracker_run_id: UUID | None = None,
+    sheet_name: str = "",
+    section_name: str = "",
+) -> dict[str, object]:
+    normalized_format = str(format or "xlsx").strip().lower()
+    if normalized_format != "xlsx":
+        support._bad_request("local save format must be xlsx")
+
+    actor = support._resolve_sales_actor(request)
+    rows = _list_tracker_entries_for_export(
+        q=q,
+        region=region,
+        notice_year=notice_year,
+        exclude_auxiliary_titles=exclude_auxiliary_titles,
+        edited_only=edited_only,
+        source_run_id=source_run_id,
+        source_tracker_run_id=source_tracker_run_id,
+        sheet_name=sheet_name,
+        section_name=section_name,
+    )
+    if blank_progress_note:
+        rows = [{**row, "progress_note": ""} for row in rows]
+    workbook_bytes = support.build_tracking_download_workbook_bytes(rows=rows, selected_regions=region)
+    file_name = _spms_xlsx_file_name()
+    download_dir = _spms_downloads_dir()
+    download_dir.mkdir(parents=True, exist_ok=True)
+    output_path = _unique_download_path(download_dir, file_name)
+    output_path.write_bytes(workbook_bytes)
+    support._record_download_audit_log(
+        actor=actor,
+        download_scope="global",
+        download_format="xlsx",
+        source_page="tracker_entries",
+        file_name=output_path.name,
+    )
+    return {
+        "file_name": output_path.name,
+        "path": str(output_path),
+        "row_count": len(rows),
+    }
 
 
 def create_tracker_entry_summary_download_job(
@@ -517,7 +590,7 @@ def create_tracker_entry_summary_download_job(
             "sheet_name": payload.sheet_name,
             "section_name": payload.section_name,
             "output_path": str(support._tracker_download_job_output_path(job_id)),
-            "file_name": f"project_status_{_project_status_file_timestamp()}.xlsx",
+            "file_name": _spms_xlsx_file_name(),
             "created_at": support._utc_now(),
             "started_at": None,
             "finished_at": None,
@@ -555,7 +628,7 @@ def download_tracker_entry_summary_download_job_file(request: Request, job_id: U
     if not output_path.exists():
         support._not_found(f"tracker download file not found: {job_id}")
     actor = support._resolve_sales_actor(request)
-    file_name = f"project_status_{_project_status_file_timestamp()}.xlsx"
+    file_name = _spms_xlsx_file_name()
     support._record_download_audit_log(
         actor=actor,
         download_scope="global",

@@ -48,7 +48,7 @@ function createController(overrides = {}) {
     selectedEntryLoadingId: null,
     selectedEntryError: "",
     uiMode: "admin",
-    trackerFilters: { page: 1, pageSize: 10, q: "", region: "", editedOnly: false },
+    trackerFilters: { page: 1, pageSize: 10, q: "", region: "", noticeYear: "", editedOnly: false },
     trackerEntriesTotal: 0,
     trackerEntriesRequest: null,
     trackerEntriesRequestKey: "",
@@ -67,6 +67,7 @@ function createController(overrides = {}) {
     trackerQuery: { value: "" },
     trackerEditedOnly: null,
     trackerPageSize: { value: "10" },
+    trackerNoticeYear: { value: "" },
     trackerContext: { textContent: "" },
     ...overrides.dom,
   };
@@ -610,6 +611,7 @@ test("tracker controller loadTrackerEntries still uses out-of-range handler deps
   controller.loadTrackerChangeEventUnreadCount = async () => {};
   controller.loadTrackerChangeEvents = async () => {};
   controller.prefetchVisibleProjectRelatedNotices = () => {};
+  controller.warmVisibleTrackerEntryNoticeFiles = () => {};
 
   await controller.loadTrackerEntries();
 
@@ -627,6 +629,73 @@ test("tracker controller loadTrackerEntries still uses out-of-range handler deps
   assert.equal(state.trackerFilters.page, 2);
   assert.equal(state.trackerEntriesTotal, 11);
   assert.deepEqual(JSON.parse(JSON.stringify(state.trackerEntries)), [{ id: "entry-1" }]);
+});
+
+test("tracker controller sends notice year and region filters together", async () => {
+  const apiCalls = [];
+  const { controller, state, dom } = createController({
+    api: async (url) => {
+      apiCalls.push(url);
+      return { items: [], total: 0 };
+    },
+    TRACKER_REGION_OPTIONS: [{ value: "서울", label: "서울" }],
+  });
+  state.trackerFilters.region = "서울";
+  dom.trackerNoticeYear.value = "2025";
+  controller.loadTrackerChangeEventUnreadCount = async () => {};
+  controller.loadTrackerChangeEvents = async () => {};
+  controller.prefetchVisibleProjectRelatedNotices = () => {};
+
+  await controller.loadTrackerEntries({ forceRefresh: true });
+
+  assert.deepEqual(apiCalls, [
+    "/api/tracker-entry-summaries?page=1&page_size=10&source_tracker_run_id=run-1&region=%EC%84%9C%EC%9A%B8&notice_year=2025",
+  ]);
+  assert.equal(state.trackerFilters.region, "서울");
+  assert.equal(state.trackerFilters.noticeYear, "2025");
+});
+
+test("tracker controller does not prewarm notice viewers after loading entries", async () => {
+  const apiCalls = [];
+  let changeUnreadLoads = 0;
+  let changeEventLoads = 0;
+  let relatedPrefetchLoads = 0;
+  const { controller } = createController({
+    api: async (url, options = {}) => {
+      apiCalls.push([url, options.method || "GET"]);
+      if (String(url).startsWith("/api/tracker-entry-summaries?")) {
+        return {
+          items: [
+            { id: "entry-1", project_name: "One" },
+            { id: "entry-2", project_name: "Two" },
+          ],
+          total: 2,
+        };
+      }
+      throw new Error(`unexpected url: ${url}`);
+    },
+    TRACKER_NOTICE_WARM_LIMIT: 10,
+  });
+  controller.loadTrackerChangeEventUnreadCount = async () => {
+    changeUnreadLoads += 1;
+  };
+  controller.loadTrackerChangeEvents = async () => {
+    changeEventLoads += 1;
+  };
+  controller.prefetchVisibleProjectRelatedNotices = () => {
+    relatedPrefetchLoads += 1;
+  };
+
+  await controller.loadTrackerEntries({ forceRefresh: true });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.deepEqual(apiCalls, [
+    ["/api/tracker-entry-summaries?page=1&page_size=10&source_tracker_run_id=run-1", "GET"],
+  ]);
+  assert.equal(changeUnreadLoads, 0);
+  assert.equal(changeEventLoads, 0);
+  assert.equal(relatedPrefetchLoads, 0);
 });
 
 test("tracker controller keeps selected entry detail state when loading from cache", async () => {

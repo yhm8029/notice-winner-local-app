@@ -30,9 +30,13 @@ def load_notice_seed_row_by_bid(*, bid_no: str, bid_ord: str = "000") -> dict[st
 
 
 def _load_notice_view_helpers(*, load_notice_seed_row_by_bid_fn=load_notice_seed_row_by_bid):
+    from backend.services.notice_file_view_backend import build_desktop_notice_loading_html
     from backend.services.notice_file_view_backend import build_notice_file_fallback_html
+    from backend.services.notice_file_view_backend import build_synap_viewer_embed_html
     from backend.services.notice_file_view_backend import download_notice_attachment
     from backend.services.notice_file_view_backend import infer_notice_attachment_suffix
+    from backend.services.notice_file_view_backend import load_cached_notice_viewer_url_by_bid
+    from backend.services.notice_file_view_backend import open_external_browser_url
     from backend.services.notice_file_view_backend import render_hwp_notice_html
     from backend.services.notice_file_view_backend import resolve_notice_viewer_url
     from backend.services.notice_file_view_backend import select_primary_notice_attachment
@@ -40,10 +44,14 @@ def _load_notice_view_helpers(*, load_notice_seed_row_by_bid_fn=load_notice_seed
 
     return {
         "build_notice_view_payload": build_notice_view_payload,
+        "build_desktop_notice_loading_html": build_desktop_notice_loading_html,
         "build_notice_file_fallback_html": build_notice_file_fallback_html,
+        "build_synap_viewer_embed_html": build_synap_viewer_embed_html,
         "download_notice_attachment": download_notice_attachment,
         "infer_notice_attachment_suffix": infer_notice_attachment_suffix,
+        "load_cached_notice_viewer_url_by_bid": load_cached_notice_viewer_url_by_bid,
         "load_notice_seed_row_by_bid": load_notice_seed_row_by_bid_fn,
+        "open_external_browser_url": open_external_browser_url,
         "render_hwp_notice_html": render_hwp_notice_html,
         "resolve_notice_viewer_url": resolve_notice_viewer_url,
         "select_primary_notice_attachment": select_primary_notice_attachment,
@@ -60,10 +68,14 @@ def queue_related_notice_precompute_for_run(run_id: UUID, *, project_key: str = 
     return _load_related_notice_precompute_helper()(run_id, project_key=project_key)
 
 
-def build_tracking_download_workbook_bytes(*, rows: list[dict[str, Any]]) -> bytes:
+def build_tracking_download_workbook_bytes(
+    *,
+    rows: list[dict[str, Any]],
+    selected_regions: Any = None,
+) -> bytes:
     from backend.services.artifact_files import build_tracking_download_workbook_bytes as impl
 
-    return impl(rows=rows)
+    return impl(rows=rows, selected_regions=selected_regions)
 
 
 def _load_artifact_file_helpers(

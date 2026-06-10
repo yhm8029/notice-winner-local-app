@@ -102,7 +102,6 @@ def build_output_row(
                 contract_hit_note,
                 attachment_note,
                 synap_note,
-                f"llm_corrected={','.join(llm_corrected_fields)}" if llm_corrected_fields else "",
                 (
                     join_non_empty_fn(
                         [

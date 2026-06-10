@@ -145,9 +145,6 @@
           if (globalScope) {
             void deps.warmTrackerEntriesDownload?.();
           }
-          void controller.loadTrackerChangeEventUnreadCount({ silent: true });
-          void controller.loadTrackerChangeEvents({ silent: true });
-          controller.prefetchVisibleProjectRelatedNotices(deps.state.trackerEntries);
           if (deps.state.uiMode === "admin") {
             void deps.loadVisibleSalesClaims?.({ silent: true });
           }

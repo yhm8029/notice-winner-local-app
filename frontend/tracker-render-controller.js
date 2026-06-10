@@ -43,6 +43,17 @@ export function createTrackerRenderController(deps = {}) {
     return Boolean(selection && (!selection.isCollapsed || String(selection.toString?.() || "").trim()));
   }
 
+  function setNoticeViewButtonBusy(button, busy) {
+    if (!button) {
+      return;
+    }
+    if (!button.dataset.originalLabel) {
+      button.dataset.originalLabel = String(button.textContent || "공고문 보기").trim() || "공고문 보기";
+    }
+    button.disabled = Boolean(busy);
+    button.textContent = busy ? "공고문 여는 중..." : button.dataset.originalLabel;
+  }
+
   function renderTrackerEntries(entries, { refreshSelectedEntry = true } = {}) {
     const displayEntries = state.uiMode === "user"
       ? entries.filter((entry) => !getSalesClaimForProject(String(entry.project_id || "").trim()))
@@ -156,7 +167,10 @@ export function createTrackerRenderController(deps = {}) {
         if (!entryId) {
           return;
         }
-        void openTrackerEntryNoticeViewer(entryId, entries);
+        setNoticeViewButtonBusy(button, true);
+        void Promise.resolve()
+          .then(() => openTrackerEntryNoticeViewer(entryId, entries))
+          .finally(() => setNoticeViewButtonBusy(button, false));
       });
     }
     bindRelatedNoticeViewerButtons(dom.trackerEntriesList);
@@ -269,7 +283,6 @@ export function createTrackerRenderController(deps = {}) {
         });
       }
     }
-    prefetchTrackerEntryDetails(displayEntries);
   }
 
 

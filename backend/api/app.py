@@ -145,20 +145,28 @@ def _load_run_execution_helpers():
 
 
 def _load_notice_view_helpers():
+    from backend.services.notice_file_view_backend import build_desktop_notice_loading_html
     from backend.services.notice_file_view_backend import build_notice_file_fallback_html
+    from backend.services.notice_file_view_backend import build_synap_viewer_embed_html
     from backend.services.notice_file_view_backend import download_notice_attachment
     from backend.services.notice_file_view_backend import infer_notice_attachment_suffix
+    from backend.services.notice_file_view_backend import load_cached_notice_viewer_url_by_bid
+    from backend.services.notice_file_view_backend import open_external_browser_url
     from backend.services.notice_file_view_backend import render_hwp_notice_html
     from backend.services.notice_file_view_backend import resolve_notice_viewer_url
     from backend.services.notice_file_view_backend import select_primary_notice_attachment
     from backend.services.notice_view_backend import build_notice_view_payload
 
     return {
+        "build_desktop_notice_loading_html": build_desktop_notice_loading_html,
         "build_notice_file_fallback_html": build_notice_file_fallback_html,
+        "build_synap_viewer_embed_html": build_synap_viewer_embed_html,
         "build_notice_view_payload": build_notice_view_payload,
         "download_notice_attachment": download_notice_attachment,
         "infer_notice_attachment_suffix": infer_notice_attachment_suffix,
+        "load_cached_notice_viewer_url_by_bid": load_cached_notice_viewer_url_by_bid,
         "load_notice_seed_row_by_bid": load_notice_seed_row_by_bid,
+        "open_external_browser_url": open_external_browser_url,
         "render_hwp_notice_html": render_hwp_notice_html,
         "resolve_notice_viewer_url": resolve_notice_viewer_url,
         "select_primary_notice_attachment": select_primary_notice_attachment,
@@ -193,8 +201,11 @@ def resolve_artifact_path(storage_path: str):
     return _load_artifact_file_helpers()["resolve_artifact_path"](storage_path)
 
 
-def build_tracking_download_workbook_bytes(*, rows):
-    return _load_artifact_file_helpers()["build_tracking_download_workbook_bytes"](rows=rows)
+def build_tracking_download_workbook_bytes(*, rows, selected_regions=None):
+    return _load_artifact_file_helpers()["build_tracking_download_workbook_bytes"](
+        rows=rows,
+        selected_regions=selected_regions,
+    )
 
 
 def _tracker_download_job_output_path(job_id: UUID) -> Path:
@@ -248,6 +259,11 @@ async def enforce_phase2_auth(request: Request, call_next):
 @app.exception_handler(ApiError)
 def handle_api_error(_request: Request, exc: ApiError) -> JSONResponse:
     return app_http_support.handle_api_error(_request, exc)
+
+
+@app.exception_handler(Exception)
+def handle_unhandled_error(_request: Request, exc: Exception) -> JSONResponse:
+    return app_http_support.handle_unhandled_error(_request, exc)
 
 
 @app.get("/health")

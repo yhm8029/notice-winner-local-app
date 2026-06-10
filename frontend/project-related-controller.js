@@ -162,18 +162,85 @@ export function createProjectRelatedController(deps = {}) {
     }
   }
 
+  function createNoticeViewerFrame({ title = "공고문", url = "" } = {}) {
+    const doc = window?.document || null;
+    if (!doc?.body || typeof doc.createElement !== "function") {
+      if (url && window?.location) {
+        if (typeof window.location.assign === "function") {
+          window.location.assign(url);
+        } else {
+          window.location.href = url;
+        }
+      }
+      return null;
+    }
+    doc.getElementById?.("notice-viewer-overlay")?.remove?.();
+    const overlay = doc.createElement("div");
+    overlay.id = "notice-viewer-overlay";
+    overlay.className = "notice-viewer-overlay";
+    const panel = doc.createElement("section");
+    panel.className = "notice-viewer-overlay-panel";
+    const header = doc.createElement("header");
+    header.className = "notice-viewer-overlay-header";
+    const heading = doc.createElement("strong");
+    heading.className = "notice-viewer-overlay-title";
+    heading.textContent = String(title || "공고문");
+    const closeButton = doc.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "notice-viewer-overlay-close";
+    closeButton.setAttribute("aria-label", "닫기");
+    closeButton.textContent = "×";
+    const iframe = doc.createElement("iframe");
+    iframe.className = "notice-viewer-overlay-frame";
+    iframe.setAttribute("title", String(title || "공고문"));
+    if (url) {
+      iframe.src = url;
+    }
+    const viewerWindow = {
+      closed: false,
+      location: {
+        href: "",
+        replace(nextUrl) {
+          iframe.src = nextUrl;
+          this.href = nextUrl;
+        },
+      },
+      document: {
+        _buffer: "",
+        open() {
+          this._buffer = "";
+        },
+        write(markup) {
+          this._buffer += String(markup || "");
+        },
+        close() {
+          iframe.srcdoc = this._buffer;
+        },
+      },
+      close() {
+        this.closed = true;
+        overlay.remove?.();
+      },
+    };
+    closeButton.addEventListener("click", () => viewerWindow.close());
+    header.append(heading, closeButton);
+    panel.append(header, iframe);
+    overlay.appendChild(panel);
+    doc.body.appendChild(overlay);
+    return viewerWindow;
+  }
+
   function openNoticeWindow(url) {
-    const popup = window.open("", "_blank", "width=1400,height=920");
-    if (!popup) {
+    if (!url) {
       flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
       return null;
     }
-    try {
-      popup.location.replace(url);
-    } catch (_err) {
-      popup.location.href = url;
+    if (typeof window?.location?.assign === "function") {
+      window.location.assign(url);
+    } else if (window?.location) {
+      window.location.href = url;
     }
-    return popup;
+    return window;
   }
 
   async function openRelatedNoticeViewer(item) {
@@ -183,7 +250,7 @@ export function createProjectRelatedController(deps = {}) {
       flash("공고문 URL이 없습니다.", "warn");
       return;
     }
-    const viewerWindow = window.open("", "_blank", "width=1280,height=900");
+    const viewerWindow = createNoticeViewerFrame({ title: item?.project_name || "공고문" });
     if (!viewerWindow) {
       flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
       return;
@@ -236,16 +303,21 @@ export function createProjectRelatedController(deps = {}) {
     if (!entryId) {
       return;
     }
-    openNoticeWindow(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-view`);
+    try {
+      const payload = await api(`/api/tracker-entries/${encodeURIComponent(entryId)}/notice-file-open-external`, {
+        method: "POST",
+        timeoutMs: 45000,
+      });
+      if (!payload?.opened) {
+        flash("공고문을 외부 브라우저로 열지 못했습니다.", "warn");
+      }
+    } catch (err) {
+      flash(err?.message || "공고문을 외부 브라우저로 열지 못했습니다.", "warn");
+    }
   }
 
   async function openProjectNoticeViewer(project) {
-    const directNoticeUrl = buildProjectNoticeUrl(project);
-    if (directNoticeUrl) {
-      openNoticeWindow(directNoticeUrl);
-      return;
-    }
-    const viewerWindow = window.open("", "_blank", "width=1280,height=900");
+    const viewerWindow = createNoticeViewerFrame({ title: project?.project_name || "공고문" });
     if (!viewerWindow) {
       flash("팝업이 차단되어 공고문을 열 수 없습니다.", "warn");
       return;
@@ -255,6 +327,9 @@ export function createProjectRelatedController(deps = {}) {
       body: '<p class="notice-viewer-state">공고문을 불러오는 중입니다.</p>',
     });
     try {
+      if (!project?.id) {
+        throw new Error("project id is required");
+      }
       const payload = await api(`/api/projects/${encodeURIComponent(project.id)}/notice-view`, { timeoutMs: 45000 });
       renderNoticeViewerPayload(viewerWindow, payload, project?.project_name || "공고문");
     } catch (err) {

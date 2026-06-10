@@ -56,7 +56,7 @@ TRACKER_REGION_ALIASES: dict[str, tuple[str, ...]] = {
     "경남": ("경남", "경상남도"),
     "제주": ("제주", "제주도", "제주특별자치도"),
 }
-TRACKER_REGION_TOKEN_ONLY_CANONICALS = frozenset({"광주", "대구"})
+TRACKER_REGION_TOKEN_ONLY_CANONICALS = frozenset(TRACKER_REGION_ALIASES.keys())
 TRACKER_USER_HIDDEN_TITLE_KEYWORDS = (
     "\ub300\ud589\uc6a9\uc5ed",
     "\uad00\ub9ac\uc6a9\uc5ed",

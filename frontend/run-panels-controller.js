@@ -2,7 +2,7 @@ import {
   createRunPanelsArtifactHelpers,
   createRunPanelsExecutionHelpers,
   createRunPanelsFormHelpers,
-} from "./run-panels-controller-helpers.js?v=20260602h";
+} from "./run-panels-controller-helpers.js?v=20260604a";
 
 export function createRunPanelsController(deps = {}) {
   const state = deps.state;
